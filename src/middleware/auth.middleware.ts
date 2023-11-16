@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { ResOp } from '../common/class/res.class'
-import { ErrorCodeMap } from 'src/service/contants/error-code.contants'
+import { ErrorCodeMap } from '@/service/contants/error-code.contants'
 /**
  * @description 判断请求头有无带有authorization,无则拦截
  * @description 如果不需要就去app.module中间件中配置路由

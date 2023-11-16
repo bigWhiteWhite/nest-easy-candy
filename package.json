@@ -6,15 +6,15 @@
 	"private": true,
 	"license": "UNLICENSED",
 	"scripts": {
-		"start:dev": "cross-env NODE_ENV=dev nest start -w admin --watch",
-		"start:test": "cross-env NODE_ENV=test nest start -w admin  --watch",
-		"start:prod": "cross-env NODE_ENV=prod nest start -w admin  --watch",
-		"debug": "cross-env NODE_ENV=development nest start --debug  --watch -w admin",
-		"format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+		"start:dev": "cross-env NODE_ENV=dev nest start --watch",
+		"start:test": "cross-env NODE_ENV=test nest start --watch",
+		"start:prod": "cross-env NODE_ENV=prod nest start --watch",
+		"debug": "cross-env NODE_ENV=development nest start --debug  --watch",
+		"format": "prettier --write \"src/**/*.ts\" \"config/**/*.ts\" \"libs/**/*.ts\"",
+		"lint": "eslint \"{src,config,libs,test}/**/*.ts\" --fix",
 		"clean:dist": "rimraf dist",
 		"clean:lib": "rimraf node_modules",
-		"build:prod": "nest build admin",
+		"build:prod": "nest build",
 		"node:prod": "node dist/main",
 		"test": "jest",
 		"test:watch": "jest --watch",
@@ -114,7 +114,6 @@
 		"coverageDirectory": "./coverage",
 		"testEnvironment": "node",
 		"roots": [
-			"<rootDir>/apps/",
 			"<rootDir>/libs/"
 		],
 		"moduleNameMapper": {

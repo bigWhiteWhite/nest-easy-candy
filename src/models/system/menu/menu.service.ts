@@ -9,10 +9,10 @@ import {
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { isEmpty, uniq, filter, uniqBy } from 'lodash'
-import { PageList } from 'src/common/dto/page.dto'
-import { ApiException } from 'src/service/exceptions/api.exception'
-import { UtilService } from 'src/shared/tools/util.service'
-import { WSService } from 'src/shared/websocket/ws.service'
+import { PageList } from '@/common/dto/page.dto'
+import { ApiException } from '@/service/exceptions/api.exception'
+import { UtilService } from '@/shared/tools/util.service'
+import { WSService } from '@/shared/websocket/ws.service'
 @Injectable()
 export class MenuService {
 	constructor(

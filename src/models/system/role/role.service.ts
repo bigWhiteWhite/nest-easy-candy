@@ -8,9 +8,9 @@ import { MenuService } from '../menu/menu.service'
 import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
 import { Role } from '@app/db/modules/system/sys-role.model'
 import { System } from '@app/db/modules/system/sys-system.model'
-import { ApiException } from 'src/service/exceptions/api.exception'
-import { UtilService } from 'src/shared/tools/util.service'
-import { WSService } from 'src/shared/websocket/ws.service'
+import { ApiException } from '@/service/exceptions/api.exception'
+import { UtilService } from '@/shared/tools/util.service'
+import { WSService } from '@/shared/websocket/ws.service'
 
 @Injectable()
 export class RoleService {

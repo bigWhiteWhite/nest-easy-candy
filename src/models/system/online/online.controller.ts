@@ -2,8 +2,8 @@ import { Controller, Get, Param } from '@nestjs/common'
 import { OnlineService } from './online.service'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AdminUser } from '../system.interface'
-import { UserInfo } from 'src/service/decorators/user-uid.decorator'
-import { ApiException } from 'src/service/exceptions/api.exception'
+import { UserInfo } from '@/service/decorators/user-uid.decorator'
+import { ApiException } from '@/service/exceptions/api.exception'
 
 @Controller('admin/online')
 @ApiTags('在线用户模块')

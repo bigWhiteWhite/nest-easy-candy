@@ -11,9 +11,9 @@ import {
 import { isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
-import { PageList } from 'src/common/dto/page.dto'
-import { ApiException } from 'src/service/exceptions/api.exception'
-import { WSService } from 'src/shared/websocket/ws.service'
+import { PageList } from '@/common/dto/page.dto'
+import { ApiException } from '@/service/exceptions/api.exception'
+import { WSService } from '@/shared/websocket/ws.service'
 
 @Injectable()
 export class AdminSystemService {

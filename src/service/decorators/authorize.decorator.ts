@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common'
-import { AUTHORIZE_KEY_METADATA } from 'src/admin.constant'
+import { AUTHORIZE_KEY_METADATA } from '@/admin.constant'
 
 /**
  * 开放授权Api装饰器，使用该注解则无需校验Token及权限

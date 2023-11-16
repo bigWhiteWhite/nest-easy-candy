@@ -5,7 +5,7 @@ import { RedisModule } from './redis/redis.module'
 import { RedisService } from './redis/redis.service'
 import { UtilService } from './tools/util.service'
 import { WSModule } from './websocket/ws.module'
-
+console.log('3')
 // ?使用了@Global()意味着其中定义的提供者（服务）将在整个 Nest.js 应用程序中可用
 const providers = [UtilService, RedisService]
 @Global() // 全局共享模块

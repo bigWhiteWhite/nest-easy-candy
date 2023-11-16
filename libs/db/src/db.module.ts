@@ -5,6 +5,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import Configuration from 'config'
 import { SystemModules } from './modules/system/index.model'
 
+console.log(
+	'🚀 ~ file: db.module.ts:17 ~ process.env.NODE_ENV:',
+	process.env.NODE_ENV
+)
 @Global() // 标记为全局使用
 @Module({
 	imports: [
@@ -12,7 +16,7 @@ import { SystemModules } from './modules/system/index.model'
 			isGlobal: true,
 			load: [Configuration],
 			// 后面的环境变量无法覆盖前面的环境变量
-			envFilePath: ['.env', `.env.${process.env.NODE_ENV}`]
+			envFilePath: [`.env.${process.env.NODE_ENV}`, '.env']
 		}),
 		// 添加环境变量时，环境变量加载需要时间，有可能出现读取不到process.env.DB，使用异步加载解决
 		TypegooseModule.forRootAsync({

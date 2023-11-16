@@ -7,13 +7,13 @@ import {
 } from '@nestjs/common'
 import { MulterModule } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
-import { CommonModule } from 'libs/common/src'
 import { InitMiddleware } from './middleware/init.middleware'
 import { AuthMiddleware } from './middleware/auth.middleware'
 import { AuthGuard } from './guards/auth.guard'
 import { APP_GUARD, APP_PIPE } from '@nestjs/core'
-import { SharedModule } from './shared/shared.module'
+import { CommonModule } from '@app/common/index' // 模块的导入顺序会影响执行顺序,例如commonModule写在后面，前面的模块获取process.env会缺失
 import { indexModule } from './models/index.module'
+import { SharedModule } from './shared/shared.module'
 import { ValidationPipe } from './service/pipes/validation.pipe'
 import { AdminController } from './admin.controller'
 @Module({

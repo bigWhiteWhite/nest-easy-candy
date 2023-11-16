@@ -1,4 +1,3 @@
-// src/interceptor/transform.interceptor.ts
 import {
 	CallHandler,
 	ExecutionContext,
@@ -8,7 +7,7 @@ import {
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { ADMIN_USER } from '../../admin.constant'
-import { Logger } from 'src/shared/logger'
+import { Logger } from '@/shared/logger'
 /**
  * @description 添加日志, 出参信息-查看返回数据
  */

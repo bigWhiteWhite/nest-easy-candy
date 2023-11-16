@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { UserService } from '../user/user.service'
 import { LogService } from '../log/log.service'
-import { EVENT_KICK } from 'src/shared/websocket/ws.event'
-import { WSGateway } from 'src/shared/websocket/ws.gateway'
-import { WSService } from 'src/shared/websocket/ws.service'
+import { EVENT_KICK } from '@/shared/websocket/ws.event'
+import { WSGateway } from '@/shared/websocket/ws.gateway'
+import { WSService } from '@/shared/websocket/ws.service'
 
 @Injectable()
 export class OnlineService {

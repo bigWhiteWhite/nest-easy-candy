@@ -26,12 +26,12 @@ import { RoleService } from '../role/role.service'
 import { MenuService } from '../menu/menu.service'
 import { AdminUser } from '../system.interface'
 import { LogService } from '../log/log.service'
-import { USER_INIT_PASSWORD } from 'src/admin.constant'
-import { ApiException } from 'src/service/exceptions/api.exception'
-import { RedisService } from 'src/shared/redis/redis.service'
-import { UtilService } from 'src/shared/tools/util.service'
-import { EVENT_UPDATE_MENU, EVENT_KICK } from 'src/shared/websocket/ws.event'
-import { WSService } from 'src/shared/websocket/ws.service'
+import { USER_INIT_PASSWORD } from '@/admin.constant'
+import { ApiException } from '@/service/exceptions/api.exception'
+import { RedisService } from '@/shared/redis/redis.service'
+import { UtilService } from '@/shared/tools/util.service'
+import { EVENT_UPDATE_MENU, EVENT_KICK } from '@/shared/websocket/ws.event'
+import { WSService } from '@/shared/websocket/ws.service'
 
 @Injectable()
 export class UserService {

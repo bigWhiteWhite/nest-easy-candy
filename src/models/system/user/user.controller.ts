@@ -35,12 +35,12 @@ import {
 import { ImageCaptcha } from './user.class'
 import { QueryUser, UserSysInfo } from './dto/user-query.dto'
 import { AdminUser } from '../system.interface'
-import { ADMIN_PREFIX } from 'src/admin.constant'
-import { PageDto } from 'src/common/dto/page.dto'
-import { Authorize } from 'src/service/decorators/authorize.decorator'
-import { UserInfo } from 'src/service/decorators/user-uid.decorator'
-import { DesensitizeInterceptor } from 'src/service/interceptors/desensitize.interceptor'
-import { UtilService } from 'src/shared/tools/util.service'
+import { ADMIN_PREFIX } from '@/admin.constant'
+import { PageDto } from '@/common/dto/page.dto'
+import { Authorize } from '@/service/decorators/authorize.decorator'
+import { UserInfo } from '@/service/decorators/user-uid.decorator'
+import { DesensitizeInterceptor } from '@/service/interceptors/desensitize.interceptor'
+import { UtilService } from '@/shared/tools/util.service'
 @ApiSecurity(ADMIN_PREFIX)
 @Controller('admin/user')
 @ApiTags('登录注册')

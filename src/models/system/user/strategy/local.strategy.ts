@@ -4,7 +4,7 @@ import { compareSync } from 'bcryptjs'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { User } from '@app/db/modules/system/sys-user.model'
 import { InjectModel } from 'nestjs-typegoose'
-import { ApiException } from 'src/service/exceptions/api.exception'
+import { ApiException } from '@/service/exceptions/api.exception'
 
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	// 本地策略,local为策略名,在auth.model引入以后，然后在控制器里面指明使用local策略就可以了

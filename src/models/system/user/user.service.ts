@@ -157,7 +157,7 @@ export class UserService {
 			})
 			.lean()
 		if (isEmpty(user)) {
-			throw new ApiException(10017)
+			throw new ApiException(10009)
 		}
 		const userSysMenuId = [] as Array<UserSysMenuId>
 		await Promise.all(
@@ -302,12 +302,12 @@ export class UserService {
 				})
 				.select('+password')
 			if (isEmpty(user)) {
-				throw new ApiException(10017)
+				throw new ApiException(10009)
 			}
 			// 验证旧密码
 			const isValid = await compareSync(originPassword, user.password)
 			if (!isValid) {
-				throw new ApiException(10011)
+				throw new ApiException(10006)
 			}
 			await this.userModel.findByIdAndUpdate(_id, {
 				password: newPassword

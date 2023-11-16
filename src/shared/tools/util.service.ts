@@ -13,14 +13,6 @@ export class UtilService {
 	 * @params updateData 更新数据
 	 */
 	compareData(oldData: any, updateData: any): boolean {
-		console.log(
-			'🚀 ~ file: util.service.ts:16 ~ UtilService ~ compareData ~ updateData:',
-			updateData
-		)
-		console.log(
-			'🚀 ~ file: util.service.ts:16 ~ UtilService ~ compareData ~ oldData:',
-			oldData
-		)
 		return isEqual(oldData, updateData)
 	}
 
@@ -55,7 +47,7 @@ export class UtilService {
 		try {
 			return Types.ObjectId(id)
 		} catch (e) {
-			throw new ApiException(10007)
+			throw new ApiException(10004)
 		}
 	}
 

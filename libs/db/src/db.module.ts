@@ -5,10 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import Configuration from 'config'
 import { SystemModules } from './modules/system/index.model'
 
-console.log(
-	'🚀 ~ file: db.module.ts:17 ~ process.env.NODE_ENV:',
-	process.env.NODE_ENV
-)
 @Global() // 标记为全局使用
 @Module({
 	imports: [

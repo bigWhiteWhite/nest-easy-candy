@@ -18,7 +18,6 @@ export class WSGuard implements CanActivate {
 			this.authService.checkAdminAuthToken(token)
 			return true
 		} catch (e) {
-			console.log('🚀 ~ file: ws.guard.ts:21 ~ WSGuard ~ e:', e)
 			// close
 			client.disconnect()
 			// 无法通过token校验

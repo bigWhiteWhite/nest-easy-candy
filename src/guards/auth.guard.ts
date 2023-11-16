@@ -56,7 +56,7 @@ export class AuthGuard implements CanActivate {
 				return true
 			}
 		} catch (e) {
-			// Token validation failed. You can log the error here if needed.
+			throw new ApiException(10005)
 		}
 		return false
 	}

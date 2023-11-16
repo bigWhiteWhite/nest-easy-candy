@@ -20,7 +20,7 @@ export class OnlineController {
 	@Get('kick/:id')
 	kick(@Param('id') id: string, @UserInfo() user: AdminUser) {
 		if (id === user._id) {
-			throw new ApiException(10012)
+			throw new ApiException(10007)
 		}
 		return this.onlineService.kick(user, id)
 	}

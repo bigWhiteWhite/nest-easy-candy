@@ -23,7 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 		// .select('+password') // 指明要返回password字段
 		const user = await this.userModel.findOne({ account }).select('+password')
 		if (!user) {
-			throw new ApiException(10017)
+			throw new ApiException(10009)
 		}
 		if (!compareSync(password, user.password)) {
 			throw new ApiException(10003)

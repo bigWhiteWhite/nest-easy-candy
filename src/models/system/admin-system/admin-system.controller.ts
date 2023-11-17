@@ -16,7 +16,7 @@ import {
 	SystemInfoDto,
 	UpdateSystemDto
 } from './dto/admin-systen.dto'
-import { PageDto, PageList } from '@/common/dto/page.dto'
+import { PageDto, PageList } from '@/common/class/res.class'
 
 @Controller('admin/admin-system')
 @ApiTags('管理系统值')

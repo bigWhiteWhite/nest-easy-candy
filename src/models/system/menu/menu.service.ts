@@ -9,7 +9,7 @@ import {
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { isEmpty, uniq, filter, uniqBy } from 'lodash'
-import { PageList } from '@/common/dto/page.dto'
+import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
 import { WSService } from '@/shared/websocket/ws.service'

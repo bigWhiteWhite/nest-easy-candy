@@ -11,7 +11,7 @@ import {
 import { isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
-import { PageList } from '@/common/dto/page.dto'
+import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
 

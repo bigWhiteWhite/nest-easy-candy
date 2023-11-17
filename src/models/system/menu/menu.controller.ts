@@ -10,7 +10,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { MenuService } from './menu.service'
 import { CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
-import { PageDto, PageList } from '@/common/dto/page.dto'
+import { PageDto, PageList } from '@/common/class/res.class'
 
 @Controller('admin/menu')
 @ApiTags('菜单模块')

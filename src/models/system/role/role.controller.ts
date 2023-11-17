@@ -10,7 +10,7 @@ import {
 import { RoleService } from './role.service'
 import { CreateRoleDto, QueryRole } from './dto/create-role.dto'
 import { ApiOperation } from '@nestjs/swagger'
-import { PageDto } from '@/common/dto/page.dto'
+import { PageDto } from '@/common/class/res.class'
 
 @Controller('admin/role')
 export class RoleController {

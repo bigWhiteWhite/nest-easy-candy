@@ -6,7 +6,7 @@ import { InjectModel } from 'nestjs-typegoose'
 import { UAParser } from 'ua-parser-js'
 import { LoginInfo } from './class/log.class'
 import { AdminUser } from '../system.interface'
-import { PageList } from '@/common/dto/page.dto'
+import { PageList } from '@/common/class/res.class'
 
 @Injectable()
 export class LogService {

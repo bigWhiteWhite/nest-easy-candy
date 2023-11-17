@@ -1,3 +1,133 @@
+## Typescript
+
+### extends和implements的区别
+
+总结：
+
+- 都可以实现 **类与类** 之间的关联
+- 对于抽象类中的抽象方法都必须要实现
+
+下面罗列它俩的不同点
+
+- extends可以实现 **接口与接口**，**接口与类** 的继承，而implements不能实现接口与接口，接口与类的实现
+- implements可以实现 **类实现接口**，而extends不能实现类继承接口
+- 使用implements时，**需要定义或实现所有属性和方法，而extends只需要重新定义或者实现方法即可**，对于属性来说，是可以直接继承，无需单独定义
+
+**extends**翻译过来就是 **继承，扩展** 的意思
+
+- **类只能继承类**
+
+- 从父类或者接口继承所有的属性和方法，不可以重写属性，但可以重写方法
+
+- 接口可以接口，也可以继承类(定义类时，其实是同时定义了一个类和类对应的类型接口，因此才可以实现接口继承类，**本质上是接口继承接口**)
+
+- 非抽象类继承抽象类，非抽象类需要实现抽象类中的抽象方法，但对于属性，非抽象类可以直接继承，不用单独定义
+
+  - 抽象类和抽象方法都是使用 **abstract** 关键字来标识，抽象方法定义在抽象类中，并且必须被实现。无法通过 **new** 创建抽象类的实例
+
+  - ```ts
+    abstract class AbstractParent {
+        abstract abstractFunc():string
+    }
+    
+    class child extends AbstractParent {
+        abstractFunc():string {
+            return ''
+        }
+    }
+    ```
+
+**implements**翻译过来是 **实现** 的意思
+
+- **implements本质上是用来实现接口(给类加类型定义)的**
+
+- 一个新的类，从父类或者接口实现所有的属性和方法，同时可以重写属性和方法，包含一些新的功能
+
+- **类实现类**
+
+  - **非抽象类实现非抽象类**：实现类里面所有的属性和方法都要在目标类里重新定义和实现
+  - **非抽象类实现抽象类**：抽象类里的所有属性和方法都需要在非抽象类里定义和实现
+  - **抽象类实现抽象类**：实现类里面所有的属性都要在目标类里重新定义，所有方法需要被实现或者使用 **abstract** 定义为抽象方法
+  - **抽象类实现非抽象类**：非抽象类里面所有的属性都要在抽象类里重新定义，所有方法需要被实现或者使用 **abstract** 定义为抽象方法
+
+- **类实现接口**
+
+  - **抽象类实现接口**：接口所有属性都要重新定义，接口所有方法需要实现或者使用 **abstract** 定义为抽象方法
+  - **非抽象类实现接口**：接口所有属性都要重新定义，接口所有方法需要实现
+
+- **接口实现接口**：接口不能实现接口
+
+- **接口实现类**：接口不能实现类
+
+  - ```ts
+     abstract class AbstractParent {
+         name:string
+         abstract abstractFunc():string
+     }
+     class parent {
+         name:string
+         func():string{
+             return ''
+         }
+     }
+    interface IExample {
+        name:string
+        age:number
+        IExampleFunc():string
+    }
+    
+    // 非抽象类实现抽象类
+    class child1 implements AbstractParent {
+        name:string
+        abstractFunc():string {
+            return ''
+        }
+    }
+    // 非抽象类实现非抽象类
+    class child2 implements parent {
+        name:string
+        func():string {
+            return ''
+        }
+    }
+    // 抽象类实现非抽象类
+    abstract class child3 implements parent {
+        name:string
+        abstract func():string
+        func3Real():string {
+            return ''
+        }
+    }
+    // 抽象类实现抽象类
+    abstract class child4 implements AbstractParent {
+        name:string
+        abstract abstractFunc():string
+        func4Real():string {
+            return ''
+        }
+    }
+    // 抽象类实现接口
+    abstract class child5 implements IExample {
+        name:string
+        age:number
+        abstract IExampleFunc():string
+        func5Real():string {
+            return ''
+        }
+    }
+    // 非抽象类实现接口
+    class child6 implements IExample {
+        name:string
+        age:number
+        IExampleFunc():string {
+            return ''
+        }
+        func6Real():string {
+            return ''
+        }
+    }
+    ```
+
 ## 模块导入
 
 ### system.module

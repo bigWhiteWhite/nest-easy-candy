@@ -5,7 +5,6 @@ import { MenuModule } from './menu/menu.module'
 import { RoleModule } from './role/role.module'
 import { OnlineModule } from './online/online.module'
 import { LogModule } from './log/log.module'
-// 在这里providers的服务只能在system文件夹里面使用
 @Module({
 	imports: [
 		UserModule,

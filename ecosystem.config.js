@@ -33,17 +33,5 @@ module.exports = {
 				NODE_ENV: 'prod'
 			}
 		}
-	],
-
-	deploy: {
-		production: {
-			user: 'root',
-			host: '39.108.99.86',
-			ref: 'origin/master',
-			repo: 'git@github.com:repo.git',
-			path: '/var/www/AnJiaMallServer',
-			'post-deploy':
-				'npm install && npm run build && pm2 reload ecosystem.config.js --env production'
-		}
-	}
+	]
 }

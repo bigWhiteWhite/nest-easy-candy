@@ -1,0 +1,67 @@
+version: "3.0"
+
+services:
+  mongo:
+    image: mongo:5.0
+    container_name: nest-easy-candy-mongo # 容器名称
+    restart: always # 自动重启
+    ports:
+    - 27017:27017
+    env_file:
+      - .env
+      - .env.test
+      - .env.prod
+    expose:
+    - 27017
+    networks:
+    - nest-candy-net
+
+  # docker容器启动的redis默认是没有redis.conf的配置文件，所以用docker启动redis之前，需要先去官网下载redis.conf的配置文件
+  redis:  # 服务名称
+    image: redis:alpine # 使用官方镜像
+    container_name: nest-easy-candy-redis # 容器名称
+    restart: always # 自动重启
+    volumes:
+      - ./deploy/redis/db:/data # 把持久化数据挂载到宿主机
+      - ./deploy/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf  # 把redis的配置文件挂载到宿主机
+      - ./deploy/redis/logs:/logs # 用来存放日志
+    env_file:
+      - .env
+      - .env.test
+      - .env.prod
+    ports:
+      - '${REDIS_PORT}:6379'  # 本机端口:容器端口 - '${REDIS_PORT}:6379'
+    environment:
+      TZ=Asia/GuangZhou # 解决容器 时区的问题
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+    networks:
+      - nest-candy-net
+
+  nest-easy-candy-server: # nestjs服务
+    build: # 从当前路径构建镜像,根据Dockerfile构建镜像
+      context: .
+      dockerfile: Dockerfile
+    image: nest-easy-candy-server
+    container_name: nest-easy-candy-server
+    restart: always
+    env_file:
+      - .env
+      - .env.test
+      - .env.prod
+    ports:
+      - '${ADMIN_PORT}:7001'  # 本机端口:容器端口 - '${ADMIN_PORT}:7001'
+      - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
+    # 当前服务启动之前先要把depends_on指定的服务启动起来才行
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - nest-candy-net
+
+# 声明一下网桥  my-server。
+# 重要：将所有服务都挂载在同一网桥即可通过容器名来互相通信了
+# 如nestjs连接mongo和redis，可以通过容器名来互相通信
+networks:
+  nest-candy-net:
+    name: nest-candy-net

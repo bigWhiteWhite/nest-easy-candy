@@ -32,7 +32,7 @@ services:
     ports:
       - '${REDIS_PORT}:6379'  # 本机端口:容器端口 - '${REDIS_PORT}:6379'
     environment:
-      TZ=Asia/GuangZhou # 解决容器 时区的问题
+      - TZ=Asia/GuangZhou # 解决容器 时区的问题
     command: >
       --requirepass ${REDIS_PASSWORD}
     networks:

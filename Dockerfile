@@ -20,13 +20,13 @@ RUN echo 'Asia/GuangZhou' > /etc/timezone
 
 # install & build
 COPY ./ ./
-RUN pnpm install
-RUN pnpm build
+RUN yarn install
+RUN yarn build
 # clean dev dep
-RUN pnpm install --production
-RUN pnpm cache clean
+RUN yarn install --production
+RUN yarn cache clean
 
-RUN pnpm global add pm2
+RUN yarn global add pm2
 
 # httpserver set port
 EXPOSE 7001

@@ -1,12 +1,7 @@
 /**
  * @description 用于入参校验
  */
-import {
-	ArgumentMetadata,
-	Injectable,
-	PipeTransform,
-	BadRequestException
-} from '@nestjs/common'
+import { ArgumentMetadata, Injectable, PipeTransform, BadRequestException } from '@nestjs/common'
 import { ValidationError, validate } from 'class-validator'
 import { plainToClass } from 'class-transformer'
 import { Logger } from '../../shared/logger'
@@ -17,10 +12,7 @@ export class ValidationPipe implements PipeTransform {
 		if (validationError.constraints) {
 			// 如果当前 validationError 包含 constraints，返回它
 			return Object.values(validationError.constraints)[0]
-		} else if (
-			validationError.children &&
-			validationError.children.length > 0
-		) {
+		} else if (validationError.children && validationError.children.length > 0) {
 			// 如果有子级 validationError，则递归查找子级
 			for (const child of validationError.children) {
 				const childConstraints = this.findConstraints(child)

@@ -8,9 +8,7 @@ import { ApiException } from '@/service/exceptions/api.exception'
 
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	// 本地策略,local为策略名,在auth.model引入以后，然后在控制器里面指明使用local策略就可以了
-	constructor(
-		@InjectModel(User) private userModel: ReturnModelType<typeof User>
-	) {
+	constructor(@InjectModel(User) private userModel: ReturnModelType<typeof User>) {
 		super({
 			usernameField: 'account',
 			passwordField: 'password'

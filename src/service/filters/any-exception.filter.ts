@@ -1,13 +1,7 @@
 /**
  * @description 捕获所有异常
  */
-import {
-	ExceptionFilter,
-	Catch,
-	ArgumentsHost,
-	HttpException,
-	HttpStatus
-} from '@nestjs/common'
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
 import { ResOp } from '../../common/class/res.class'
 import { Logger } from '../../shared/logger'
 import { ApiException } from '../exceptions/api.exception'
@@ -19,16 +13,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
 		const response = ctx.getResponse()
 		const request = ctx.getRequest()
 
-		const status =
-			exception instanceof HttpException
-				? exception.getStatus()
-				: HttpStatus.INTERNAL_SERVER_ERROR
+		const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR
 		// set json response
 		response.header('Content-Type', 'application/json; charset=utf-8')
-		const code =
-			exception instanceof ApiException
-				? (exception as ApiException).getErrorCode()
-				: status
+		const code = exception instanceof ApiException ? (exception as ApiException).getErrorCode() : status
 
 		const logFormat = `
 		<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

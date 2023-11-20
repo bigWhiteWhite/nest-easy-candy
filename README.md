@@ -1,6 +1,6 @@
 ## Typescript
 
-### extends和implements的区别
+### extends 和 implements 的区别
 
 总结：
 
@@ -9,9 +9,9 @@
 
 下面罗列它俩的不同点
 
-- extends可以实现 **接口与接口**，**接口与类** 的继承，而implements不能实现接口与接口，接口与类的实现
-- implements可以实现 **类实现接口**，而extends不能实现类继承接口
-- 使用implements时，**需要定义或实现所有属性和方法，而extends只需要重新定义或者实现方法即可**，对于属性来说，是可以直接继承，无需单独定义
+- extends 可以实现 **接口与接口**，**接口与类** 的继承，而 implements 不能实现接口与接口，接口与类的实现
+- implements 可以实现 **类实现接口**，而 extends 不能实现类继承接口
+- 使用 implements 时，**需要定义或实现所有属性和方法，而 extends 只需要重新定义或者实现方法即可**，对于属性来说，是可以直接继承，无需单独定义
 
 **extends**翻译过来就是 **继承，扩展** 的意思
 
@@ -27,19 +27,19 @@
 
   - ```ts
     abstract class AbstractParent {
-        abstract abstractFunc():string
+    	abstract abstractFunc(): string
     }
-    
+
     class child extends AbstractParent {
-        abstractFunc():string {
-            return ''
-        }
+    	abstractFunc(): string {
+    		return ''
+    	}
     }
     ```
 
 **implements**翻译过来是 **实现** 的意思
 
-- **implements本质上是用来实现接口(给类加类型定义)的**
+- **implements 本质上是用来实现接口(给类加类型定义)的**
 
 - 一个新的类，从父类或者接口实现所有的属性和方法，同时可以重写属性和方法，包含一些新的功能
 
@@ -60,71 +60,71 @@
 - **接口实现类**：接口不能实现类
 
   - ```ts
-     abstract class AbstractParent {
-         name:string
-         abstract abstractFunc():string
-     }
-     class parent {
-         name:string
-         func():string{
-             return ''
-         }
-     }
-    interface IExample {
-        name:string
-        age:number
-        IExampleFunc():string
+    abstract class AbstractParent {
+    	name: string
+    	abstract abstractFunc(): string
     }
-    
+    class parent {
+    	name: string
+    	func(): string {
+    		return ''
+    	}
+    }
+    interface IExample {
+    	name: string
+    	age: number
+    	IExampleFunc(): string
+    }
+
     // 非抽象类实现抽象类
     class child1 implements AbstractParent {
-        name:string
-        abstractFunc():string {
-            return ''
-        }
+    	name: string
+    	abstractFunc(): string {
+    		return ''
+    	}
     }
     // 非抽象类实现非抽象类
     class child2 implements parent {
-        name:string
-        func():string {
-            return ''
-        }
+    	name: string
+    	func(): string {
+    		return ''
+    	}
     }
     // 抽象类实现非抽象类
     abstract class child3 implements parent {
-        name:string
-        abstract func():string
-        func3Real():string {
-            return ''
-        }
+    	name: string
+    	abstract func(): string
+    	func3Real(): string {
+    		return ''
+    	}
     }
     // 抽象类实现抽象类
     abstract class child4 implements AbstractParent {
-        name:string
-        abstract abstractFunc():string
-        func4Real():string {
-            return ''
-        }
+    	name: string
+    	abstract abstractFunc(): string
+    	func4Real(): string {
+    		return ''
+    	}
     }
     // 抽象类实现接口
     abstract class child5 implements IExample {
-        name:string
-        age:number
-        abstract IExampleFunc():string
-        func5Real():string {
-            return ''
-        }
+    	name: string
+    	age: number
+    	abstract IExampleFunc(): string
+    	func5Real(): string {
+    		return ''
+    	}
     }
     // 非抽象类实现接口
     class child6 implements IExample {
-        name:string
-        age:number
-        IExampleFunc():string {
-            return ''
-        }
-        func6Real():string {
-            return ''
-        }
+    	name: string
+    	age: number
+    	IExampleFunc(): string {
+    		return ''
+    	}
+    	func6Real(): string {
+    		return ''
+    	}
     }
     ```
 
@@ -132,7 +132,7 @@
 
 ### system.module
 
-导入以后也相当于注册了这些模块的服务，可以引入上一级，但是不代表这些局部模块之间就可以互相引用了，这里只是一个聚合出口，可以让admin.module同时注册
+导入以后也相当于注册了这些模块的服务，可以引入上一级，但是不代表这些局部模块之间就可以互相引用了，这里只是一个聚合出口，可以让 admin.module 同时注册
 
 ```ts
 import { Module } from '@nestjs/common'
@@ -157,7 +157,7 @@ private userService: UserService
 
 ### 局部模块
 
-局部模块的服务如果想要被其他模块引入使用，需要在模块中使用**exports属性**明确导出服务。同时引入其他模块的局部模块也需要明确在**providers**中注入其他模块的服务
+局部模块的服务如果想要被其他模块引入使用，需要在模块中使用**exports 属性**明确导出服务。同时引入其他模块的局部模块也需要明确在**providers**中注入其他模块的服务
 
 ```ts
 import { Module } from '@nestjs/common'
@@ -211,7 +211,7 @@ const providers = [UtilService, RedisService]
 			}),
 			inject: [ConfigService]
 		}),
-        // 不会声明为全局模块
+		// 不会声明为全局模块
 		WSModule
 	],
 	providers,
@@ -227,57 +227,57 @@ export class SharedModule {}
 ```ts
 // compare-data.middleware.ts
 
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Injectable, NestMiddleware } from '@nestjs/common'
+import { Request, Response, NextFunction } from 'express'
 
 @Injectable()
 export class CompareDataMiddleware implements NestMiddleware {
-  constructor(private readonly mongodbData: any) {}
+	constructor(private readonly mongodbData: any) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
-    try {
-      // 比较传入的数据和传递进来的 MongoDB 数据是否相同
-      const dataMatches = this.compareData(req.body.data, this.mongodbData);
+	use(req: Request, res: Response, next: NextFunction) {
+		try {
+			// 比较传入的数据和传递进来的 MongoDB 数据是否相同
+			const dataMatches = this.compareData(req.body.data, this.mongodbData)
 
-      if (!dataMatches) {
-        // 如果数据不匹配，返回错误响应
-        return res.status(400).json({ message: 'Data does not match.' });
-      }
+			if (!dataMatches) {
+				// 如果数据不匹配，返回错误响应
+				return res.status(400).json({ message: 'Data does not match.' })
+			}
 
-      // 如果数据匹配，继续执行下一个中间件或路由处理
-      next();
-    } catch (error) {
-      // 处理错误，例如数据比较错误
-      console.error('Error comparing data:', error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  }
+			// 如果数据匹配，继续执行下一个中间件或路由处理
+			next()
+		} catch (error) {
+			// 处理错误，例如数据比较错误
+			console.error('Error comparing data:', error)
+			res.status(500).json({ message: 'Internal server error' })
+		}
+	}
 
-  private compareData(incomingData: any, mongodbData: any): boolean {
-    // 在这里实现数据比较逻辑
-    // 你需要根据你的数据结构和业务逻辑来定义比较规则
-    // 这里只是一个简单的示例，你可能需要根据实际情况进行修改
-    return JSON.stringify(incomingData) === JSON.stringify(mongodbData);
-  }
+	private compareData(incomingData: any, mongodbData: any): boolean {
+		// 在这里实现数据比较逻辑
+		// 你需要根据你的数据结构和业务逻辑来定义比较规则
+		// 这里只是一个简单的示例，你可能需要根据实际情况进行修改
+		return JSON.stringify(incomingData) === JSON.stringify(mongodbData)
+	}
 }
 ```
 
 ```ts
 // role.controller.ts
 
-import { Controller, Patch, Body, Param, UseMiddleware } from '@nestjs/common';
-import { CompareDataMiddleware } from './path-to-your-middleware/compare-data.middleware'; // 替换为实际的中间件路径
+import { Controller, Patch, Body, Param, UseMiddleware } from '@nestjs/common'
+import { CompareDataMiddleware } from './path-to-your-middleware/compare-data.middleware' // 替换为实际的中间件路径
 
 @Controller('role')
 export class RoleController {
-  @Patch(':id')
-  @UseMiddleware(new CompareDataMiddleware(/* MongoDB 数据 */))
-  updateRole(@Param('id') id: string, @Body() data: any) {
-    // 在这里处理更新角色的逻辑
-    // 注意：CompareDataMiddleware 将在这里自动比较数据
+	@Patch(':id')
+	@UseMiddleware(new CompareDataMiddleware(/* MongoDB 数据 */))
+	updateRole(@Param('id') id: string, @Body() data: any) {
+		// 在这里处理更新角色的逻辑
+		// 注意：CompareDataMiddleware 将在这里自动比较数据
 
-    return { message: 'Role updated successfully.' };
-  }
+		return { message: 'Role updated successfully.' }
+	}
 }
 ```
 
@@ -287,42 +287,42 @@ export class RoleController {
 
 ```ts
 // compare-data.pipe.ts
-import { Injectable, PipeTransform, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { Injectable, PipeTransform, ArgumentMetadata, BadRequestException } from '@nestjs/common'
 
 @Injectable()
 export class CompareDataPipe implements PipeTransform {
-  constructor(private readonly mongodbData: any) {}
+	constructor(private readonly mongodbData: any) {}
 
-  async transform(value: any, metadata: ArgumentMetadata) {
-    if (metadata.type === 'body' && metadata.metatype === Object) {
-      try {
-        // 比较传入的数据和传递进来的 MongoDB 数据是否相同
-        const dataMatches = this.compareData(value.data, this.mongodbData);
+	async transform(value: any, metadata: ArgumentMetadata) {
+		if (metadata.type === 'body' && metadata.metatype === Object) {
+			try {
+				// 比较传入的数据和传递进来的 MongoDB 数据是否相同
+				const dataMatches = this.compareData(value.data, this.mongodbData)
 
-        if (!dataMatches) {
-          // 如果数据不匹配，抛出 BadRequestException
-          throw new BadRequestException('Data does not match.');
-        }
+				if (!dataMatches) {
+					// 如果数据不匹配，抛出 BadRequestException
+					throw new BadRequestException('Data does not match.')
+				}
 
-        // 如果数据匹配，返回原始数据
-        return value;
-      } catch (error) {
-        // 处理错误，例如数据比较错误
-        console.error('Error comparing data:', error);
-        throw new BadRequestException('Internal server error');
-      }
-    }
+				// 如果数据匹配，返回原始数据
+				return value
+			} catch (error) {
+				// 处理错误，例如数据比较错误
+				console.error('Error comparing data:', error)
+				throw new BadRequestException('Internal server error')
+			}
+		}
 
-    // 如果不是预期的元数据类型，返回原始值
-    return value;
-  }
+		// 如果不是预期的元数据类型，返回原始值
+		return value
+	}
 
-  private compareData(incomingData: any, mongodbData: any): boolean {
-    // 在这里实现数据比较逻辑
-    // 你需要根据你的数据结构和业务逻辑来定义比较规则
-    // 这里只是一个简单的示例，你可能需要根据实际情况进行修改
-    return JSON.stringify(incomingData) === JSON.stringify(mongodbData);
-  }
+	private compareData(incomingData: any, mongodbData: any): boolean {
+		// 在这里实现数据比较逻辑
+		// 你需要根据你的数据结构和业务逻辑来定义比较规则
+		// 这里只是一个简单的示例，你可能需要根据实际情况进行修改
+		return JSON.stringify(incomingData) === JSON.stringify(mongodbData)
+	}
 }
 ```
 
@@ -331,24 +331,24 @@ export class CompareDataPipe implements PipeTransform {
 ```ts
 // role.controller.ts
 
-import { Controller, Patch, Body, Param } from '@nestjs/common';
-import { CompareDataPipe } from './path-to-your-pipe/compare-data.pipe'; // 替换为实际的管道路径
+import { Controller, Patch, Body, Param } from '@nestjs/common'
+import { CompareDataPipe } from './path-to-your-pipe/compare-data.pipe' // 替换为实际的管道路径
 
 @Controller('role')
 export class RoleController {
-  @Patch(':id')
-  updateRole(@Param('id') id: string, @Body(new CompareDataPipe(/* MongoDB 数据 */)) data: any) {
-    // 在这里处理更新角色的逻辑
-    // 注意：CompareDataPipe 将在这里自动比较数据
+	@Patch(':id')
+	updateRole(@Param('id') id: string, @Body(new CompareDataPipe(/* MongoDB 数据 */)) data: any) {
+		// 在这里处理更新角色的逻辑
+		// 注意：CompareDataPipe 将在这里自动比较数据
 
-    return { message: 'Role updated successfully.' };
-  }
+		return { message: 'Role updated successfully.' }
+	}
 }
 ```
 
 在这个示例中，`CompareDataPipe` 的构造函数接受 MongoDB 数据作为参数。在 `updateRole` 方法中，通过使用 `@Body(new CompareDataPipe(/* MongoDB 数据 */))` 将 MongoDB 数据传递给管道。这样，你就可以在管道中比较传入的数据和 MongoDB 数据，而无需在管道内部引入 MongoDB 模型。
 
-## WebSocket 
+## WebSocket
 
 WebSocket 是一种网络通信协议，它允许在客户端和服务器之间建立持久、全双工的通信通道。WebSocket 的作用是**提供实时、低延迟的双向通信**，使服务器能够主动向客户端推送数据，而不需要客户端不断地发起请求。
 
@@ -371,6 +371,7 @@ WebSocket 的出现填补了这一缺陷，它提供了一种更高效、实时�
 ### WebSocket 与 HTTP 长轮询的比较：
 
 - **WebSocket**：
+
   - 全双工通信，客户端和服务器可以同时发送和接收数据。
   - 延迟低，因为连接保持打开状态，减少了连接和断开的开销。
   - 支持服务器主动推送数据。

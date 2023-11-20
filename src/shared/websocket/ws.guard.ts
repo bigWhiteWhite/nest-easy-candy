@@ -8,9 +8,7 @@ import { SocketException } from '../../service/exceptions/socket.exception'
 export class WSGuard implements CanActivate {
 	constructor(private authService: AuthService) {}
 
-	canActivate(
-		context: ExecutionContext
-	): boolean | Promise<boolean> | Observable<boolean> {
+	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
 		const client = context.switchToWs().getClient<Socket>()
 		const token = client?.handshake?.query?.token
 		try {

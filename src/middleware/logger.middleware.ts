@@ -16,9 +16,7 @@ export class LoggerMiddleware implements NestMiddleware {
     Status code: ${code}
     Parmas: ${JSON.stringify(req.params)}
     Query: ${JSON.stringify(req.query)}
-    Body: ${JSON.stringify(
-			req.body
-		)} \n  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Body: ${JSON.stringify(req.body)} \n  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   `
 		// 根据状态码，进行日志类型区分
 		if (code >= 500) {
@@ -44,9 +42,7 @@ export function logger(req: Request, res: Response, next: () => any) {
     Status code: ${code}
     Parmas: ${JSON.stringify(req.params)}
     Query: ${JSON.stringify(req.query)}
-    Body: ${JSON.stringify(
-			req.body
-		)} \n  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Body: ${JSON.stringify(req.body)} \n  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   `
 	// 根据状态码，进行日志类型区分
 	if (code >= 500) {

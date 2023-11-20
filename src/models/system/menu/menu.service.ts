@@ -1,11 +1,6 @@
 import { Menus } from '@app/db/modules/system/sys-menus.model'
 import { Injectable } from '@nestjs/common'
-import {
-	ChildrenMenuDto,
-	CreateMenuDto,
-	QueryMenu,
-	UpdateMenuDto
-} from './dto/menu.dto'
+import { ChildrenMenuDto, CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { isEmpty, uniq, filter, uniqBy } from 'lodash'
@@ -25,10 +20,7 @@ export class MenuService {
 	/**
 	 * @description 获取所有菜单及所拥有的菜单
 	 */
-	async listMenu(
-		pagination,
-		query: QueryMenu
-	): Promise<PageList<UpdateMenuDto>> {
+	async listMenu(pagination, query: QueryMenu): Promise<PageList<UpdateMenuDto>> {
 		try {
 			const { name, onlyParent = false } = query
 			const filter = {
@@ -158,8 +150,7 @@ export class MenuService {
 		if (children && children.length !== 0) {
 			children.map((item, index) => {
 				if (item._id.toString() === item.parentId) throw new ApiException(10304)
-				const c =
-					filter(list, (o) => o.parentId === item._id.toString()) || false
+				const c = filter(list, (o) => o.parentId === item._id.toString()) || false
 				if (c && c.length !== 0) {
 					children[index].children = c
 					this.toggleChildren(children[index]?.children, list)
@@ -173,9 +164,7 @@ export class MenuService {
 	 * @deprecated 从所有菜单中找到传入menuIds的父级菜单
 	 * @param menus 未过滤前的路由列表，menus里面的_id是字符串
 	 */
-	async findParentIds(
-		menus: Array<UpdateMenuDto>
-	): Promise<Array<UpdateMenuDto>> {
+	async findParentIds(menus: Array<UpdateMenuDto>): Promise<Array<UpdateMenuDto>> {
 		const parentMenus = []
 		const findParent = async (menu: UpdateMenuDto) => {
 			// 没有parentId，直接返回一级路由
@@ -208,10 +197,7 @@ export class MenuService {
 	 * @param list 未过滤前的路由列表,里面的_id是ObjectId
 	 * @param onlyParent 只需要父级,还是全部菜单都找一遍children
 	 */
-	async toggleRouterList(
-		list: Array<UpdateMenuDto>,
-		onlyParent = true
-	): Promise<Array<UpdateMenuDto>> {
+	async toggleRouterList(list: Array<UpdateMenuDto>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		const sortList = uniqBy(
 			list.map((_) => ({ ..._, _id: _._id.toString() })),
 			'_id'
@@ -221,25 +207,15 @@ export class MenuService {
 			// const parent = sortList.filter(
 			// 	(item) => !item.parentId
 			// ) as Array<UpdateMenuDto>
-			const parent = (await this.findParentIds(
-				sortList
-			)) as Array<UpdateMenuDto>
+			const parent = (await this.findParentIds(sortList)) as Array<UpdateMenuDto>
 			return parent.map((_) => {
-				const children =
-					filter(
-						sortList,
-						(o: any) => o.parentId?.toString() === _._id.toString()
-					) || []
+				const children = filter(sortList, (o: any) => o.parentId?.toString() === _._id.toString()) || []
 				this.toggleChildren(children, sortList)
 				return { ..._, children }
 			})
 		} else {
 			return sortList.map((_) => {
-				const children =
-					filter(
-						sortList,
-						(o: any) => o.parentId.toString() === _._id.toString()
-					) || []
+				const children = filter(sortList, (o: any) => o.parentId.toString() === _._id.toString()) || []
 				this.toggleChildren(children, sortList)
 				return { ..._, children }
 			})
@@ -264,9 +240,7 @@ export class MenuService {
 	 * @description 判断菜单列表是否存在于菜单表中
 	 * @return 返回菜单和菜单ids
 	 */
-	async getMenus(
-		menuIdArray: Array<string>
-	): Promise<{ menus?: Array<CreateMenuDto>; menuIds?: Array<string> }> {
+	async getMenus(menuIdArray: Array<string>): Promise<{ menus?: Array<CreateMenuDto>; menuIds?: Array<string> }> {
 		const uniqMenuIds = uniq(menuIdArray)
 		const menus: any = await this.menusModel
 			.find({
@@ -288,10 +262,7 @@ export class MenuService {
 	 * @param menuIds 指定menuIds
 	 * @param onlyParent 只需要父级,还是全部菜单都找一遍children
 	 */
-	async handleMenus(
-		menuIds: Array<string>,
-		onlyParent = true
-	): Promise<Array<UpdateMenuDto>> {
+	async handleMenus(menuIds: Array<string>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		try {
 			const ids = uniq(menuIds)
 			// const menus = await this.filterValMenus(ids)

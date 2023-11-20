@@ -6,13 +6,6 @@ import { RoleModule } from './role/role.module'
 import { OnlineModule } from './online/online.module'
 import { LogModule } from './log/log.module'
 @Module({
-	imports: [
-		UserModule,
-		AdminSystemModule,
-		MenuModule,
-		RoleModule,
-		OnlineModule,
-		LogModule
-	]
+	imports: [UserModule, AdminSystemModule, MenuModule, RoleModule, OnlineModule, LogModule]
 })
 export class SystemModule {}

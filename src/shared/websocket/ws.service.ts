@@ -18,9 +18,7 @@ export class WSService {
 	/**
 	 * 根据_id查找socketid
 	 */
-	async findSocketIdByUid(
-		_id: string
-	): Promise<RemoteSocket<unknown, unknown>> {
+	async findSocketIdByUid(_id: string): Promise<RemoteSocket<unknown, unknown>> {
 		const onlineSockets = await this.getOnlineSockets()
 		const socket = onlineSockets.find((socket) => {
 			const token = socket.handshake.query?.token as string
@@ -33,9 +31,7 @@ export class WSService {
 	/**
 	 * 根据uid数组过滤出socketid
 	 */
-	async filterSocketIdByUidArr(
-		_ids: string[]
-	): Promise<RemoteSocket<unknown, unknown>[]> {
+	async filterSocketIdByUidArr(_ids: string[]): Promise<RemoteSocket<unknown, unknown>[]> {
 		const onlineSockets = await this.getOnlineSockets()
 		const sockets = onlineSockets.filter((socket) => {
 			const token = socket.handshake.query?.token as string

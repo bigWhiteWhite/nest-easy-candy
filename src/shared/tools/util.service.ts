@@ -75,10 +75,7 @@ export class UtilService {
 	/**
 	 * 生成一个随机的值
 	 */
-	public generateRandomValue(
-		length: number,
-		placeholder = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
-	): string {
+	public generateRandomValue(length: number, placeholder = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'): string {
 		const customNanoid = customAlphabet(placeholder, length)
 		return customNanoid()
 	}

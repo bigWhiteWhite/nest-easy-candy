@@ -22,9 +22,7 @@ import { AdminUser } from '../../models/system/system.interface'
 		origin: '*'
 	}
 })
-export class WSGateway
-	implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
-{
+export class WSGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
 	// 原生特定库的服务器实例
 	@WebSocketServer()
 	private wss: Server
@@ -46,9 +44,7 @@ export class WSGateway
 	 */
 	async handleConnection(client: Socket): Promise<void> {
 		try {
-			const user: AdminUser = this.authService.checkAdminAuthToken(
-				client.handshake?.query?.token
-			)
+			const user: AdminUser = this.authService.checkAdminAuthToken(client.handshake?.query?.token)
 			this.authService.joinRoom(client, user)
 		} catch (e) {
 			client.disconnect()

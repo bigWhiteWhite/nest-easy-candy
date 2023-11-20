@@ -1,12 +1,4 @@
-import {
-	Body,
-	Controller,
-	Post,
-	Get,
-	Patch,
-	Delete,
-	Param
-} from '@nestjs/common'
+import { Body, Controller, Post, Get, Patch, Delete, Param } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { MenuService } from './menu.service'
 import { CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
@@ -25,9 +17,7 @@ export class MenuController {
 
 	@Post('list')
 	@ApiOperation({ summary: '获取所有菜单' })
-	async findAll(
-		@Body() body: PageDto & QueryMenu
-	): Promise<PageList<UpdateMenuDto>> {
+	async findAll(@Body() body: PageDto & QueryMenu): Promise<PageList<UpdateMenuDto>> {
 		const { pagination, ..._ } = body
 		return await this.menuService.listMenu(pagination, _)
 	}
@@ -40,10 +30,7 @@ export class MenuController {
 
 	@Patch(':id')
 	@ApiOperation({ summary: '编辑菜单' })
-	async update(
-		@Body() body: CreateMenuDto,
-		@Param('id') id: string
-	): Promise<void> {
+	async update(@Body() body: CreateMenuDto, @Param('id') id: string): Promise<void> {
 		await this.menuService.updateMenu(body, id)
 	}
 

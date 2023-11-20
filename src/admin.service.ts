@@ -1,17 +1,10 @@
 import { User } from '@app/db/modules/system/sys-user.model'
-import {
-	Global,
-	Injectable,
-	InternalServerErrorException
-} from '@nestjs/common'
+import { Global, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { Types, PopulateOptions, MongooseQueryOptions } from 'mongoose'
 import { InjectModel } from 'nestjs-typegoose'
 
-export type OrderType<T> = Record<
-	keyof T,
-	'asc' | 'desc' | 'ascending' | 'descending' | 1 | -1
->
+export type OrderType<T> = Record<keyof T, 'asc' | 'desc' | 'ascending' | 'descending' | 1 | -1>
 type ModelName = 'noteGroupModel' | 'noteModel' | any
 interface Paginator {
 	pageSize: number
@@ -35,10 +28,7 @@ export class AdminService {
 	 * @param {(PopulateOptions | PopulateOptions[] | null)} populates
 	 * @returns {DocumentQuery<D, DocumentType<T>, {}>}
 	 */
-	private populates(
-		docsQuery: any,
-		populates: PopulateOptions | PopulateOptions[] | null
-	) {
+	private populates(docsQuery: any, populates: PopulateOptions | PopulateOptions[] | null) {
 		if (populates) {
 			;[].concat(populates).forEach((item: PopulateOptions) => {
 				docsQuery.populate(item)
@@ -177,14 +167,7 @@ export class AdminService {
 			const { _id, ...other } = condition
 			if (_id) {
 				// 获取分页数据
-				result.list.push(
-					await this.findByIdAsync(
-						modelName,
-						condition._id,
-						projection,
-						options
-					)
-				)
+				result.list.push(await this.findByIdAsync(modelName, condition._id, projection, options))
 				// 获取总条数
 				result.total = await this.count(modelName, condition)
 			} else {
@@ -221,14 +204,9 @@ export class AdminService {
 			[key: string]: any
 		} = {}
 	) {
-		return this[modelName].findOne(
-			conditions,
-			projection || {},
-			options,
-			(e) => {
-				AdminService.throwMongoError(e)
-			}
-		)
+		return this[modelName].findOne(conditions, projection || {}, options, (e) => {
+			AdminService.throwMongoError(e)
+		})
 	}
 
 	public findOneAsync(
@@ -243,12 +221,7 @@ export class AdminService {
 	) {
 		try {
 			const { populates = null, ...option } = options
-			const docsQuery = this.findOne(
-				modelName,
-				conditions,
-				projection || {},
-				option
-			)
+			const docsQuery = this.findOne(modelName, conditions, projection || {}, option)
 			return this.populates(docsQuery, populates).exec()
 		} catch (e) {
 			AdminService.throwMongoError(e)
@@ -276,11 +249,7 @@ export class AdminService {
 			[key: string]: any
 		} = {}
 	) {
-		return this[modelName].findById(
-			AdminService.toObjectId(id),
-			projection,
-			options
-		)
+		return this[modelName].findById(AdminService.toObjectId(id), projection, options)
 	}
 
 	public findByIdAsync(
@@ -338,11 +307,7 @@ export class AdminService {
 	 * @param {MongooseQueryOptions} options
 	 * @returns {QueryItem<T>}
 	 */
-	public delete(
-		modelName: ModelName,
-		conditions: any,
-		options?: MongooseQueryOptions
-	) {
+	public delete(modelName: ModelName, conditions: any, options?: MongooseQueryOptions) {
 		return this[modelName].findOneAndDelete(conditions, options)
 	}
 
@@ -360,22 +325,11 @@ export class AdminService {
 	 * @param {MongooseQueryOptions} options
 	 * @returns {Query<FindAndModifyWriteOpResultObject<DocumentType<T>>>}
 	 */
-	public deleteById(
-		modelName: ModelName,
-		id: string,
-		options?: MongooseQueryOptions
-	) {
-		return this[modelName].findByIdAndDelete(
-			AdminService.toObjectId(id),
-			options
-		)
+	public deleteById(modelName: ModelName, id: string, options?: MongooseQueryOptions) {
+		return this[modelName].findByIdAndDelete(AdminService.toObjectId(id), options)
 	}
 
-	public async deleteByIdAsync(
-		modelName: ModelName,
-		id: string,
-		options?: MongooseQueryOptions
-	) {
+	public async deleteByIdAsync(modelName: ModelName, id: string, options?: MongooseQueryOptions) {
 		try {
 			return await this.deleteById(modelName, id, options).exec()
 		} catch (e) {
@@ -390,25 +344,11 @@ export class AdminService {
 	 * @param {MongooseQueryOptions} [options={ new: true }]
 	 * @returns {QueryItem<T>}
 	 */
-	public update(
-		modelName: ModelName,
-		id: string,
-		update: any,
-		options: MongooseQueryOptions
-	) {
-		return this[modelName].findByIdAndUpdate(
-			AdminService.toObjectId(id),
-			update,
-			options
-		)
+	public update(modelName: ModelName, id: string, update: any, options: MongooseQueryOptions) {
+		return this[modelName].findByIdAndUpdate(AdminService.toObjectId(id), update, options)
 	}
 
-	async updateAsync(
-		modelName: ModelName,
-		id: string,
-		update: any,
-		options: MongooseQueryOptions
-	) {
+	async updateAsync(modelName: ModelName, id: string, update: any, options: MongooseQueryOptions) {
 		try {
 			await this.update(modelName, id, update, options).exec()
 		} catch (e) {

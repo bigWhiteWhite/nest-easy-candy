@@ -10,16 +10,10 @@ import { TRANSFORM_KEEP_KEY_METADATA } from '../../admin.constant'
  */
 export class ApiTransformInterceptor implements NestInterceptor {
 	constructor(private readonly reflector: Reflector) {}
-	intercept(
-		context: ExecutionContext,
-		next: CallHandler<any>
-	): Observable<any> {
+	intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> {
 		return next.handle().pipe(
 			map((data) => {
-				const keep = this.reflector.get<boolean>(
-					TRANSFORM_KEEP_KEY_METADATA,
-					context.getHandler()
-				)
+				const keep = this.reflector.get<boolean>(TRANSFORM_KEEP_KEY_METADATA, context.getHandler())
 				if (keep) {
 					return data
 				} else {

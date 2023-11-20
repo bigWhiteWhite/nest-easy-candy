@@ -1,16 +1,7 @@
 import { Types } from 'mongoose'
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import {
-	IsString,
-	IsNotEmpty,
-	MinLength,
-	IsOptional,
-	IsNumber,
-	IsBoolean,
-	ValidateNested,
-	IsArray
-} from 'class-validator'
+import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, IsArray } from 'class-validator'
 export class Meta {
 	@ApiProperty({ description: '菜单标题' })
 	@IsString()
@@ -18,8 +9,7 @@ export class Meta {
 	readonly title: string
 
 	@ApiProperty({
-		description:
-			'1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
+		description: '1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
 	})
 	@IsBoolean()
 	@IsOptional()

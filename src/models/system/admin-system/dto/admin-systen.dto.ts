@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-	IsString,
-	IsNotEmpty,
-	MinLength,
-	IsArray,
-	IsOptional,
-	ArrayNotEmpty
-} from 'class-validator'
+import { IsString, IsNotEmpty, MinLength, IsArray, IsOptional, ArrayNotEmpty } from 'class-validator'
 import { UpdateMenuDto } from '../../menu/dto/menu.dto'
 
 export class CreateSystemDto {

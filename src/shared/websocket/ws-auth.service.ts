@@ -36,9 +36,7 @@ export class AuthService {
 	 */
 	async joinRoom(client: Socket, user: AdminUser) {
 		try {
-			const { userSystemMenus, username, roles } = await this.userService.info(
-				user._id
-			)
+			const { userSystemMenus, username, roles } = await this.userService.info(user._id)
 			const systemNames = userSystemMenus.map((system) => system.systemName)
 			systemNames.forEach((name) => {
 				console.log(`${username}加入系统sys:${name}房间`)

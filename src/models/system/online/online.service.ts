@@ -38,9 +38,7 @@ export class OnlineService {
 		const socket = await this.wsService.findSocketIdByUid(id)
 		if (socket) {
 			// socket emit event
-			this.wsGateway.socketServer
-				.to(socket.id)
-				.emit(EVENT_KICK, { operater: user.username })
+			this.wsGateway.socketServer.to(socket.id).emit(EVENT_KICK, { operater: user.username })
 			// close socket
 			socket.disconnect()
 		}

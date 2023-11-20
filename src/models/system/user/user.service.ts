@@ -2,12 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { User } from '@app/db/modules/system/sys-user.model'
 import { InjectModel } from 'nestjs-typegoose'
 import { ReturnModelType } from '@typegoose/typegoose'
-import {
-	DeleteAuthDto,
-	EditAuthDto,
-	ImageCaptchaDto,
-	RegisterAuthDto
-} from './dto/user.dto'
+import { DeleteAuthDto, EditAuthDto, ImageCaptchaDto, RegisterAuthDto } from './dto/user.dto'
 import { faker } from '@faker-js/faker'
 import { JwtService } from '@nestjs/jwt'
 import { isEmpty, union } from 'lodash'
@@ -16,12 +11,7 @@ import * as svgCaptcha from 'svg-captcha'
 import { Types } from 'mongoose'
 import { compareSync } from 'bcryptjs'
 import { ConfigService } from '@nestjs/config'
-import {
-	QueryUser,
-	UserSysInfo,
-	UserSysMenuId,
-	UserSystemMenus
-} from './dto/user-query.dto'
+import { QueryUser, UserSysInfo, UserSysMenuId, UserSystemMenus } from './dto/user-query.dto'
 import { RoleService } from '../role/role.service'
 import { MenuService } from '../menu/menu.service'
 import { AdminUser } from '../system.interface'
@@ -210,15 +200,11 @@ export class UserService {
 			charPreset: '1234567890abcdefg'
 		})
 		const result = {
-			validCode: `data:image/svg+xml;base64,${Buffer.from(svg.data).toString(
-				'base64'
-			)}`,
+			validCode: `data:image/svg+xml;base64,${Buffer.from(svg.data).toString('base64')}`,
 			validId: this.utilService.generateUUID() // this.utils.generateUUID()
 		}
 		// 5分钟过期时间
-		await this.redisService
-			.getRedis()
-			.set(`admin:captcha:code:${result.validId}`, svg.text, 'EX', 60 * 5)
+		await this.redisService.getRedis().set(`admin:captcha:code:${result.validId}`, svg.text, 'EX', 60 * 5)
 		return result
 	}
 
@@ -226,9 +212,7 @@ export class UserService {
 	 * 校验验证码
 	 */
 	async checkImgCaptcha(validId: string, validCode: string): Promise<void> {
-		const result = await this.redisService
-			.getRedis()
-			.get(`admin:captcha:code:${validId}`)
+		const result = await this.redisService.getRedis().get(`admin:captcha:code:${validId}`)
 		if (isEmpty(result) || validCode.toLowerCase() !== result.toLowerCase()) {
 			throw new ApiException(10002)
 		}
@@ -242,9 +226,7 @@ export class UserService {
 	async login(user: AdminUser, ip: string, ua: string) {
 		const oldToken = await this.getRedisTokenById(user._id)
 		// 每次登录都将密码版本设置为1
-		await this.redisService
-			.getRedis()
-			.set(`admin:passwordVersion:${user._id}`, 1)
+		await this.redisService.getRedis().set(`admin:passwordVersion:${user._id}`, 1)
 		// 目前是多点登录
 		if (oldToken) return oldToken
 		else {
@@ -256,14 +238,7 @@ export class UserService {
 				status: user.status
 			})
 			// Token设置过期时间 48小时， 需要同步更改jwtService的过期时间
-			await this.redisService
-				.getRedis()
-				.set(
-					`admin:token:${user._id}`,
-					jwtSign,
-					'EX',
-					this.configService.get('jwtExpires')
-				)
+			await this.redisService.getRedis().set(`admin:token:${user._id}`, jwtSign, 'EX', this.configService.get('jwtExpires'))
 			// 设置用户所有的权限
 			// await this.redisService
 			// 	.getRedis()
@@ -324,9 +299,7 @@ export class UserService {
 	async upgradePasswordV(_id: string): Promise<void> {
 		const v = await this.getRedisPasswordVersionById(_id)
 		if (!isEmpty(v)) {
-			await this.redisService
-				.getRedis()
-				.set(`admin:passwordVersion:${_id}`, this.utilService.generateUUID())
+			await this.redisService.getRedis().set(`admin:passwordVersion:${_id}`, this.utilService.generateUUID())
 		}
 	}
 

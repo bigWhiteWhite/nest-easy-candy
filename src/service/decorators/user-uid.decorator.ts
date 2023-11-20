@@ -8,15 +8,13 @@ import { AdminUser } from '../../models/system/system.interface'
  * @params 第一个参数为装饰器传进来的参数
  * @param 第二个参数为请求上下文对象
  * */
-export const UserInfo = createParamDecorator(
-	(data: string, ctx: ExecutionContext) => {
-		const request = ctx.switchToHttp().getRequest<Request>()
-		// auth guard will mount this
-		const user = request.user || (request[ADMIN_USER] as AdminUser)
-		if (data) {
-			return user?.[data]
-		} else {
-			return user
-		}
+export const UserInfo = createParamDecorator((data: string, ctx: ExecutionContext) => {
+	const request = ctx.switchToHttp().getRequest<Request>()
+	// auth guard will mount this
+	const user = request.user || (request[ADMIN_USER] as AdminUser)
+	if (data) {
+		return user?.[data]
+	} else {
+		return user
 	}
-)
+})

@@ -57,12 +57,8 @@ Log4js.addLayout('Awesome-nest', (logConfig: any) => {
 		const messageOutput: string = messageList.join(' ')
 		const positionOutput: string = position ? ` [${position}]` : ''
 		const typeOutput = `[${logConfig.type}] ${logEvent.pid.toString()}   - `
-		const dateOutput = `${dayjs(logEvent.startTime).format(
-			'YYYY-MM-DD HH:mm:ss'
-		)}`
-		const moduleOutput: string = moduleName
-			? `[${moduleName}] `
-			: '[LoggerService] '
+		const dateOutput = `${dayjs(logEvent.startTime).format('YYYY-MM-DD HH:mm:ss')}`
+		const moduleOutput: string = moduleName ? `[${moduleName}] ` : '[LoggerService] '
 		let levelOutput = `[${logEvent.level}] ${messageOutput}`
 
 		// 根据日志级别，用不同颜色区分
@@ -87,9 +83,7 @@ Log4js.addLayout('Awesome-nest', (logConfig: any) => {
 				break
 		}
 
-		return `${Chalk.green(typeOutput)}${dateOutput}  ${Chalk.yellow(
-			moduleOutput
-		)}${levelOutput}${positionOutput}`
+		return `${Chalk.green(typeOutput)}${dateOutput}  ${Chalk.yellow(moduleOutput)}${levelOutput}${positionOutput}`
 	}
 })
 

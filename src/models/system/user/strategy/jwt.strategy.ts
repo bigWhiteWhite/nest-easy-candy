@@ -5,9 +5,7 @@ import { ReturnModelType } from '@typegoose/typegoose'
 import { User } from '@app/db/modules/system/sys-user.model'
 import configuration from 'config'
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-	constructor(
-		@InjectModel(User) private userModel: ReturnModelType<typeof User>
-	) {
+	constructor(@InjectModel(User) private userModel: ReturnModelType<typeof User>) {
 		super({
 			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // 从请求头中取出token
 			secretOrKey: configuration()?.jwt.secret // 环境变量中的SECRET解析token

@@ -6,6 +6,56 @@
 2. [前言 - Docker — 从入门到实践 (gitbook.io)](https://yeasy.gitbook.io/docker_practice/)
 3. [Docker化一个前端基础开发环境：简洁高效的选择 - 掘金 (juejin.cn)](https://juejin.cn/post/7264403008163201081?searchId=2023081817551184D71DDBF183A7BC83DA)
 
+示例
+
+```dockerfile
+# FROM 表示设置要制作的镜像基于哪个镜像，FROM指令必须是整个Dockerfile的第一个指令，如果指定的镜像不存在默认会自动从Docker Hub上下载。
+# 指定我们的基础镜像是node，latest表示版本是最新, 如果要求空间极致，可以选择lts-alpine
+# 使用 as 来为某一阶段命名
+FROM node:16 as builder
+
+# WORKDIR指令用于设置Dockerfile中的RUN、CMD和ENTRYPOINT指令执行命令的工作目录(默认为/目录)，该指令在Dockerfile文件中可以出现多次，
+# 如果使用相对路径则为相对于WORKDIR上一次的值，
+# 例如WORKDIR /data，WORKDIR logs，RUN pwd最终输出的当前目录是/data/logs。
+# 设置了 Docker 容器中的工作目录为 /nest-easy-candy。
+WORKDIR /nest-easy-candy
+
+# set timezone - 设置容器的时区
+RUN ln -sf /usr/share/zoneinfo/Asia/GuangZhou /etc/localtime
+RUN echo 'Asia/GuangZhou' > /etc/timezone
+
+# mirror acceleration
+# RUN npm config set registry https://registry.npmmirror.com
+# RUN pnpm config set registry https://registry.npmmirror.com
+# RUN npm config rm proxy && npm config rm https-proxy
+
+# 将当前目录下的所有文件复制到容器的工作目录中，然后运行 yarn install 安装应用程序的依赖。
+# 第一个'./'代表源路径,第二个'./'代表源路径目标路径 - 这个命令将当前构建上下文中的所有文件复制到容器的工作目录中
+# 使用相对路径可以成功，是因为前面指定了工作目录 - WORKDIR /nest-easy-candy
+COPY ./ ./
+# Node.js 默认提供 npm 包管理器，Corepack 为您提供 Yarn 和 pnpm，而无需安装它们。
+RUN corepack enable
+# install & build
+RUN pnpm install \
+  && pnpm build \
+  # clean dev dep - 清理开发依赖,在生产环境中安装依赖，并清理掉开发依赖。
+  && pnpm install --production \
+  && pnpm cache clean
+# 全局安装 PM2 - 在容器中全局安装 PM2 进程管理工具。
+RUN pnpm global add pm2
+
+# 暴露端口 - httpserver set port
+EXPOSE 7001
+# 暴露端口 - websokcet set port
+EXPOSE 7002
+
+# 容器启动时执行的命令，类似npm run start
+# CMD ["pnpm", "start:prod"]
+CMD ["pm2-runtime", "ecosystem.config.js"]
+```
+
+
+
 ## WSL2.0使用任意Linux发行版
 
 **参考博客**

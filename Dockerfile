@@ -15,14 +15,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 # 拷贝源代码
 COPY ./ ./
 
-# 阶段2 - 构建
-RUN pnpm build
+# 构建
+RUN pnpm build \
+  # clean dev dep - 清理开发依赖,在生产环境中安装依赖，并清理掉开发依赖。
+  && pnpm install --production \
+  && pnpm cache clean
 
-# clean dev dep - 清理开发依赖,在生产环境中安装依赖，并清理掉开发依赖。
-RUN pnpm install --production
-RUN pnpm cache clean
-
-# 阶段3 - 构建
+# 下载pm2
 RUN pnpm global add pm2
 
 # 暴露端口 - httpserver set port

@@ -1,10 +1,16 @@
+# 构建变量
+ARG NODE_VERSION=18-alpine
+
 # 阶段 1 - 安装依赖
-FROM node:16 as builder
+FROM node:${NODE_VERSION} as builder
 WORKDIR /nest-easy-candy
+
+# 环境变量
+ENV LOCALTIME='Asia/GuangZhou'
 
 # set timezone - 设置容器的时区
 RUN ln -sf /usr/share/zoneinfo/Asia/GuangZhou /etc/localtime
-RUN echo 'Asia/GuangZhou' > /etc/timezone
+RUN echo ${LOCALTIME} > /etc/timezone
 
 RUN corepack enable
 
@@ -13,7 +19,7 @@ COPY package.json pnpm-lock.yaml /nest-easy-candy/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 
 # 拷贝源代码
-COPY ./ ./
+COPY ["./", "./"]
 
 # 构建
 RUN pnpm build \

@@ -6,11 +6,4 @@ import { System } from './sys-system.model'
 import { LoginLog } from './sys-login-log.model'
 import { TypegooseModule } from 'nestjs-typegoose'
 
-export const SystemModules = TypegooseModule.forFeature([
-	User,
-	Role,
-	System,
-	Menus,
-	RoleSystemMenus,
-	LoginLog
-])
+export const SystemModules = TypegooseModule.forFeature([User, Role, System, Menus, RoleSystemMenus, LoginLog])

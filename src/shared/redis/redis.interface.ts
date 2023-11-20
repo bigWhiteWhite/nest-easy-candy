@@ -33,14 +33,7 @@ export interface RedisModuleOptions extends RedisOptions {
 	onClientReady?(client: Redis): void
 }
 
-export interface RedisModuleAsyncOptions
-	extends Pick<ModuleMetadata, 'imports'> {
-	useFactory?: (
-		...args: any[]
-	) =>
-		| RedisModuleOptions
-		| RedisModuleOptions[]
-		| Promise<RedisModuleOptions>
-		| Promise<RedisModuleOptions[]>
+export interface RedisModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+	useFactory?: (...args: any[]) => RedisModuleOptions | RedisModuleOptions[] | Promise<RedisModuleOptions> | Promise<RedisModuleOptions[]>
 	inject?: any[]
 }

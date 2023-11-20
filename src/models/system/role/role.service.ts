@@ -107,10 +107,7 @@ export class RoleService {
 			const systems = []
 			await Promise.all(
 				systemMenusIds.map(async (item) => {
-					const info = await this.adminSystemService.infoSystem(
-						item.systemId,
-						true
-					)
+					const info = await this.adminSystemService.infoSystem(item.systemId, true)
 					if (info) {
 						const { menus, menuIds: sysMenuIds, ...system } = info
 						// 存在于系统中的菜单才是角色的有效的菜单
@@ -171,32 +168,28 @@ export class RoleService {
 		}
 	}
 
-	async checkSystemMenu(
-		roleBody: CreateRoleDto
-	): Promise<Array<SystemMenusIdsType>> {
+	async checkSystemMenu(roleBody: CreateRoleDto): Promise<Array<SystemMenusIdsType>> {
 		try {
 			const systemMenusIds = []
 			await Promise.all(
-				unionBy(roleBody.systemMenusIds, 'systemId').map(
-					async (item: SystemMenusIdsType) => {
-						// 判断系统是否存在
-						const exists = await this.systemModel.findOne({
-							_id: this.utilService.toObjectId(item.systemId)
-						})
-						if (!exists) {
-							throw new ApiException(10201)
-						}
-						const { menuIds } = await this.menuService.getMenus(
-							// 判断菜单是否存在
-							item.menuIds
-						)
-						systemMenusIds.push({
-							systemId: item.systemId,
-							systemName: item.systemName,
-							menuIds
-						})
+				unionBy(roleBody.systemMenusIds, 'systemId').map(async (item: SystemMenusIdsType) => {
+					// 判断系统是否存在
+					const exists = await this.systemModel.findOne({
+						_id: this.utilService.toObjectId(item.systemId)
+					})
+					if (!exists) {
+						throw new ApiException(10201)
 					}
-				)
+					const { menuIds } = await this.menuService.getMenus(
+						// 判断菜单是否存在
+						item.menuIds
+					)
+					systemMenusIds.push({
+						systemId: item.systemId,
+						systemName: item.systemName,
+						menuIds
+					})
+				})
 			)
 			return systemMenusIds
 		} catch (error) {

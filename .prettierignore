@@ -1,0 +1,11 @@
+/dist/*
+.local
+.output.js
+.gitlab-ci.yml
+/node_modules/**
+
+**/*.yml
+**/*.svg
+**/*.sh
+
+/public/*

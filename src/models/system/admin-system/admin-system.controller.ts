@@ -1,21 +1,7 @@
-import {
-	Body,
-	Controller,
-	Post,
-	Get,
-	Patch,
-	Delete,
-	Param
-} from '@nestjs/common'
+import { Body, Controller, Post, Get, Patch, Delete, Param } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AdminSystemService } from './admin-system.service'
-import {
-	CreateSystemDto,
-	QuerySystem,
-	SystemIds,
-	SystemInfoDto,
-	UpdateSystemDto
-} from './dto/admin-systen.dto'
+import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, UpdateSystemDto } from './dto/admin-systen.dto'
 import { PageDto, PageList } from '@/common/class/res.class'
 
 @Controller('admin/admin-system')
@@ -25,9 +11,7 @@ export class AdminSystemController {
 
 	@Post('list')
 	@ApiOperation({ summary: '获取所有系统及其拥有的菜单' })
-	async findAll(
-		@Body() body: PageDto & QuerySystem
-	): Promise<PageList<CreateSystemDto>> {
+	async findAll(@Body() body: PageDto & QuerySystem): Promise<PageList<CreateSystemDto>> {
 		const { pagination, ..._ } = body
 		return await this.adminSystemService.listSystem(pagination, _)
 	}
@@ -58,10 +42,7 @@ export class AdminSystemController {
 
 	@Patch(':id')
 	@ApiOperation({ summary: '编辑系统' })
-	async edit(
-		@Body() body: UpdateSystemDto,
-		@Param('id') id: string
-	): Promise<void> {
+	async edit(@Body() body: UpdateSystemDto, @Param('id') id: string): Promise<void> {
 		await this.adminSystemService.updateSystem(body, id)
 	}
 

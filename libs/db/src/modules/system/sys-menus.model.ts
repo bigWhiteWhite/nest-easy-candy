@@ -9,8 +9,7 @@ class Meta {
 	title: string
 
 	@ApiProperty({
-		description:
-			'1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
+		description: '1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
 	})
 	@prop({
 		default: false
@@ -32,8 +31,7 @@ class Meta {
 	isHide: boolean
 
 	@ApiProperty({
-		description:
-			'菜单是否固定（固定在 tagsView 中，不可进行关闭），右键菜单无 `关闭` 项'
+		description: '菜单是否固定（固定在 tagsView 中，不可进行关闭），右键菜单无 `关闭` 项'
 	})
 	@prop({
 		default: false

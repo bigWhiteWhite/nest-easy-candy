@@ -11,18 +11,11 @@ import { AdminUser } from '../models/system/system.interface'
 // 注册身份验证守卫
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(
-		private reflector: Reflector,
-		private jwtService: JwtService,
-		private userService: UserService
-	) {}
+	constructor(private reflector: Reflector, private jwtService: JwtService, private userService: UserService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		// 检测是否是开放类型的，例如获取验证码类型的接口不需要校验，可以加入@Authorize可自动放过
-		const authorize = this.reflector.get<boolean>(
-			AUTHORIZE_KEY_METADATA,
-			context.getHandler()
-		)
+		const authorize = this.reflector.get<boolean>(AUTHORIZE_KEY_METADATA, context.getHandler())
 		if (authorize) {
 			return true
 		}
@@ -33,9 +26,7 @@ export class AuthGuard implements CanActivate {
 			throw new ApiException(11001)
 		}
 		// 校验用户密码版本
-		const pv = await this.userService.getRedisPasswordVersionById(
-			request[ADMIN_USER]._id
-		)
+		const pv = await this.userService.getRedisPasswordVersionById(request[ADMIN_USER]._id)
 		if (pv !== `${request[ADMIN_USER].pv}`) {
 			// 密码版本不一致，登录期间已更改过密码
 			throw new ApiException(11004)

@@ -1,12 +1,4 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Response,
-	UploadedFile,
-	UploadedFiles,
-	UseInterceptors
-} from '@nestjs/common'
+import { Controller, Get, Post, Response, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 // import { createWriteStream } from 'fs'
 // import { join } from 'path'

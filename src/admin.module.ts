@@ -1,10 +1,5 @@
 import dayjs = require('dayjs')
-import {
-	MiddlewareConsumer,
-	Module,
-	NestModule,
-	RequestMethod
-} from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
 import { CommonModule } from '@app/common/index' // 模块的导入顺序会影响执行顺序,例如commonModule写在后面，前面的模块获取process.env会缺失
 import { MulterModule } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'

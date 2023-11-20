@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import {
-	CreateSystemDto,
-	QuerySystem,
-	SystemIds,
-	SystemInfoDto,
-	UpdateSystemDto
-} from './dto/admin-systen.dto'
+import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, UpdateSystemDto } from './dto/admin-systen.dto'
 import { isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
@@ -27,10 +21,7 @@ export class AdminSystemService {
 	/**
 	 * @description 获取所有系统
 	 */
-	async listSystem(
-		pagination,
-		query: QuerySystem
-	): Promise<PageList<CreateSystemDto>> {
+	async listSystem(pagination, query: QuerySystem): Promise<PageList<CreateSystemDto>> {
 		try {
 			const { systemName, systemValue } = query
 			const filter = {} as any

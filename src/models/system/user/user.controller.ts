@@ -1,37 +1,10 @@
-import {
-	Body,
-	Controller,
-	Get,
-	Post,
-	Delete,
-	Patch,
-	UseGuards,
-	Query,
-	UseInterceptors,
-	Param,
-	Req,
-	Headers
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Delete, Patch, UseGuards, Query, UseInterceptors, Param, Req, Headers } from '@nestjs/common'
 import { Request } from 'express'
 import { UserService } from './user.service'
-import {
-	ApiBody,
-	ApiOperation,
-	ApiTags,
-	ApiBearerAuth,
-	ApiSecurity,
-	ApiOkResponse
-} from '@nestjs/swagger'
+import { ApiBody, ApiOperation, ApiTags, ApiBearerAuth, ApiSecurity, ApiOkResponse } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { User } from '@app/db/modules/system/sys-user.model'
-import {
-	DeleteAuthDto,
-	EditAuthDto,
-	ImageCaptchaDto,
-	RegisterAuthDto,
-	LoginUserDto,
-	UpdatePasswordDto
-} from './dto/user.dto'
+import { DeleteAuthDto, EditAuthDto, ImageCaptchaDto, RegisterAuthDto, LoginUserDto, UpdatePasswordDto } from './dto/user.dto'
 import { ImageCaptcha } from './user.class'
 import { QueryUser, UserSysInfo } from './dto/user-query.dto'
 import { AdminUser } from '../system.interface'
@@ -45,10 +18,7 @@ import { PageDto } from '@/common/class/res.class'
 @Controller('admin/user')
 @ApiTags('登录注册')
 export class AuthController {
-	constructor(
-		private userService: UserService,
-		private utilService: UtilService
-	) {}
+	constructor(private userService: UserService, private utilService: UtilService) {}
 
 	@Post('generate')
 	@ApiOperation({ summary: '批量生产假用户' })
@@ -106,12 +76,7 @@ export class AuthController {
 	@Authorize() // 无需认证token
 	@UseGuards(AuthGuard('local')) // nest守卫使用passport，passport指定使用说明策略
 	// @UserInfo() 从请求参数中获取user
-	async login(
-		@UserInfo() user: AdminUser,
-		@Body() body: LoginUserDto,
-		@Req() req: Request,
-		@Headers('user-agent') ua: string
-	) {
+	async login(@UserInfo() user: AdminUser, @Body() body: LoginUserDto, @Req() req: Request, @Headers('user-agent') ua: string) {
 		// await this.userService.checkImgCaptcha(body.validId, body.validCode)
 		// user是一个参数,要先经过local策略（返回了user对象），然后再经过CurrentUser（得到user对象）
 		const ip = this.utilService.getReqIP(req)
@@ -141,10 +106,7 @@ export class AuthController {
 	@ApiOperation({
 		summary: '更改密码'
 	})
-	async password(
-		@UserInfo('_id') _id: string,
-		@Body() dto: UpdatePasswordDto
-	): Promise<void> {
+	async password(@UserInfo('_id') _id: string, @Body() dto: UpdatePasswordDto): Promise<void> {
 		return await this.userService.updatePassword(_id, dto)
 	}
 

@@ -15,16 +15,7 @@ import { AdminService } from '@/admin.service'
 @Module({
 	imports: [PassportModule],
 	controllers: [AuthController],
-	providers: [
-		LocalStrategy,
-		JwtStrategy,
-		AdminService,
-		RoleService,
-		UserService,
-		AdminSystemService,
-		MenuService,
-		LogService
-	],
+	providers: [LocalStrategy, JwtStrategy, AdminService, RoleService, UserService, AdminSystemService, MenuService, LogService],
 	exports: [UserService]
 })
 export class UserModule {}

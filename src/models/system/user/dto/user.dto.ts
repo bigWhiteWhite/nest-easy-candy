@@ -1,16 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import {
-	ArrayMinSize,
-	ArrayNotEmpty,
-	IsIn,
-	IsInt,
-	IsNumberString,
-	IsOptional,
-	IsString,
-	Matches,
-	MinLength
-} from 'class-validator'
+import { ArrayMinSize, ArrayNotEmpty, IsIn, IsInt, IsNumberString, IsOptional, IsString, Matches, MinLength } from 'class-validator'
 
 export class RegisterAuthDto {
 	@ApiProperty({

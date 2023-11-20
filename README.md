@@ -1,3 +1,51 @@
+## WSL2.0里面使用任意Linux发行版
+
+**参考博客**
+
+1. [如何在WSL上导入任何Linux发行版_wsl 导入-CSDN博客](https://blog.csdn.net/B11050729/article/details/132580410)
+2. [WSL2-win搭建Ubuntu子系统 - luoxian - 博客园 (cnblogs.com)](https://www.cnblogs.com/luoxian1011/p/15861471.html)
+3. [如何在WSL2.0里面使用任意Linux发行版 | DevopsApple (uscwifi.xyz)](https://xyz.uscwifi.xyz/post/OlmHiO2uc/)
+
+网络问题无法在微软商店下载linux发行版，也无法指向wsl --update | wsl --install 等命令下载发行版，只能从外部导入
+
+- [下载发行版地址1](https://dl-cdn.alpinelinux.org/alpine/v3.9/releases/), [下载发行版地址2](https://alpinelinux.org/downloads/)
+- [官方文档导入教程](https://learn.microsoft.com/zh-cn/windows/wsl/use-custom-distro)
+
+- ```bash
+  ## Distro-发行版名称 InstallLocation-下载路径 FileName-文件名
+  wsl --import <Distro> <InstallLocation> <FileName>
+  
+  ## 示例
+  wsl --import Alpine D:\alpine-netboot-3.9.0-x86_64 .\alpine-netboot-3.9.0-x86_64.tar.gz
+  
+  ##列出已安装的 Linux 发行版
+  wsl -l -v
+  ## 启动指定版本
+  wsl -d Alpine3.9.0
+	##检查 WSL 状态
+  wsl --status
+	##进入默认的发行版本，退出执行 exit
+  wsl
+	##终止指定的发行版或阻止其运行,例：wsl --terminate Ubuntu-18.04
+  wsl --terminate
+	##重启wsl服务
+  wsl --shutdown
+  ##设置默认 Linux 发行版
+	wsl --set-default
+  ##将WSL版本设置为1或2
+	wsl --set-version
+  ##设置默认 WSL 版本
+	wsl --set-default-version
+  ##运行特定的Linux发行版
+	wsl --distribution --user
+  ##以特定用户的身份运行
+	wsl -u , wsl --user
+  ##更改发行版的默认用户
+	wsl config --default-user
+  ##注销或卸载 Linux 发行版
+	wsl --unregister
+  ```
+
 ## Typescript
 
 ### extends 和 implements 的区别
@@ -29,7 +77,7 @@
     abstract class AbstractParent {
     	abstract abstractFunc(): string
     }
-
+    
     class child extends AbstractParent {
     	abstractFunc(): string {
     		return ''
@@ -75,7 +123,7 @@
     	age: number
     	IExampleFunc(): string
     }
-
+    
     // 非抽象类实现抽象类
     class child1 implements AbstractParent {
     	name: string

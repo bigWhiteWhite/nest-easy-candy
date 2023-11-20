@@ -54,7 +54,24 @@ EXPOSE 7002
 CMD ["pm2-runtime", "ecosystem.config.js"]
 ```
 
+**docker-compose 和 Dockerfile的关系**
 
+- **Dockerfile:**
+
+  - `Dockerfile` 是一个文本文件，其中包含一系列的指令和配置，用于定义如何构建一个 Docker 镜像。
+
+  - 它包括了从哪个基础镜像开始构建、如何设置工作目录、如何复制文件到容器内、如何运行命令等步骤。
+
+  - 通过执行 `docker build` 命令，可以根据 `Dockerfile` 构建一个可执行的 Docker 镜像。
+  - Dockerfile也可以被docker-compose中的服务使用
+
+- **docker-compose:**
+
+  - `docker-compose` 是一个工具，允许你通过一个单独的 YAML 文件来定义和管理多个 Docker 容器的配置。
+  - 它允许你定义应用程序的服务、网络、卷等信息，并通过执行 `docker-compose` 命令来启动、停止、构建整个应用程序的多个容器。
+  - `docker-compose.yml` 文件中描述了应用程序的整个架构，包括每个服务的镜像、端口映射、环境变量等配置。
+
+在项目中同时使用这两个概念。`Dockerfile` 用于定义单个容器的构建规则，而 `docker-compose` 用于管理整个应用程序由多个容器组成的场景。在使用 `docker-compose up` 命令时，它会查找当前目录下的 `docker-compose.yml` 文件，并基于其中的配置启动相关的服务。
 
 ## WSL2.0使用任意Linux发行版
 

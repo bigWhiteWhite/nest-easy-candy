@@ -6,6 +6,11 @@
 2. [前言 - Docker — 从入门到实践 (gitbook.io)](https://yeasy.gitbook.io/docker_practice/)
 3. [Docker化一个前端基础开发环境：简洁高效的选择 - 掘金 (juejin.cn)](https://juejin.cn/post/7264403008163201081?searchId=2023081817551184D71DDBF183A7BC83DA)
 
+**常用命令**
+
+- docker inspect 查看信息(环境变量)
+- docker-compose --env-file 环境变量文件 up
+
 示例
 
 ```dockerfile

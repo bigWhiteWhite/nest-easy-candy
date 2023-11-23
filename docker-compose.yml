@@ -25,22 +25,21 @@ services:
       - ./deploy/redis/db:/data # 把持久化数据挂载到宿主机
       - ./deploy/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf  # 把redis的配置文件挂载到宿主机
       - ./deploy/redis/logs:/logs # 用来存放日志
-    env_file:
+    env_file: # docker-compose --env-file .env.test up
       - .env
       - .env.test
       - .env.prod
+    # environment: 设置环境变量 - 优先级比env_file高
     ports:
       - '${REDIS_PORT}:6379'  # 本机端口:容器端口 - '${REDIS_PORT}:6379'
-    environment:
-      - TZ=Asia/GuangZhou # 解决容器 时区的问题
     command: >
       --requirepass ${REDIS_PASSWORD}
     networks:
       - nest-candy-net
 
   nest-easy-candy-server: # nestjs服务
-    build: # 从当前路径构建镜像,根据Dockerfile构建镜像
-      context: .
+    build:
+      context: . # 从当前路径构建镜像,根据Dockerfile构建镜像
       dockerfile: Dockerfile
     image: nest-easy-candy-server
     container_name: nest-easy-candy-server

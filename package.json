@@ -18,6 +18,7 @@
 		"lint": "eslint \"{src,config,libs,test}/**/*.ts\" --fix",
 		"clean:dist": "rimraf dist",
 		"clean:lib": "rimraf node_modules",
+		"clean:log": "rimraf logs",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
@@ -122,5 +123,8 @@
 			"^@app/db(|/.*)$": "<rootDir>/libs/db/src/$1",
 			"^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
 		}
+	},
+	"engines": {
+		"node": ">=16"
 	}
 }

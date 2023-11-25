@@ -14,7 +14,10 @@
 		"pm2:dev": "pm2 start ecosystem.config.js --env dev",
 		"pm2:test": "pm2 start ecosystem.config.js --env test",
 		"pm2:prod": "pm2 start ecosystem.config.js --env prod",
+		"prettier": "prettier --write \"src/**/*.ts\" \"config/**/*.ts\" \"libs/**/*.ts\"",
+		"lint": "eslint \"{src,config,libs,test}/**/*.ts\" --fix",
 		"clean:dist": "rimraf dist",
+		"clean:lib": "rimraf node_modules",
 		"clean:log": "rimraf logs",
 		"test": "jest",
 		"test:watch": "jest --watch",
@@ -40,10 +43,12 @@
 		"class-validator": "^0.13.2",
 		"cookie-parser": "^1.4.6",
 		"crypto-js": "^4.1.1",
+		"dayjs": "^1.11.5",
 		"ejs": "^3.1.8",
 		"express": "^4.18.2",
 		"express-session": "^1.17.3",
 		"ioredis": "^5.3.2",
+		"lodash": "^4.17.21",
 		"log4js": "^6.7.1",
 		"mongoose": "5.13.14",
 		"multer": "1.4.5-lts.1",
@@ -94,30 +99,6 @@
 		"ts-node": "^10.0.0",
 		"tsconfig-paths": "4.0.0",
 		"typescript": "^4.3.5"
-	},
-	"jest": {
-		"moduleFileExtensions": [
-			"js",
-			"json",
-			"ts"
-		],
-		"rootDir": ".",
-		"testRegex": ".*\\.spec\\.ts$",
-		"transform": {
-			"^.+\\.(t|j)s$": "ts-jest"
-		},
-		"collectCoverageFrom": [
-			"**/*.(t|j)s"
-		],
-		"coverageDirectory": "./coverage",
-		"testEnvironment": "node",
-		"roots": [
-			"<rootDir>/libs/"
-		],
-		"moduleNameMapper": {
-			"^@app/db(|/.*)$": "<rootDir>/libs/db/src/$1",
-			"^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
-		}
 	},
 	"engines": {
 		"node": ">=16"

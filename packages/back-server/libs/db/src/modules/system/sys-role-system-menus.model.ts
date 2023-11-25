@@ -3,13 +3,6 @@ import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { Role } from './sys-role.model'
 
 export class SystemMenusIds {
-	@ApiProperty({ description: '菜单IDs' })
-	@prop({
-		required: true,
-		type: () => Array<string>
-	})
-	menuIds: Array<string>
-
 	@ApiProperty({ description: '系统ID' })
 	@prop({
 		required: true,
@@ -17,6 +10,13 @@ export class SystemMenusIds {
 		type: () => String
 	})
 	systemId: string
+
+	@ApiProperty({ description: '菜单IDs' })
+	@prop({
+		required: true
+		// type: () => Array<string>
+	})
+	menuIds: Array<string>
 }
 /**
  * @description 角色和系统值关联表
@@ -36,7 +36,8 @@ export class RoleSystemMenus {
 	// @ApiProperty({ description: '角色拥有的所有系统id' })
 	// @prop({ required: true, type: () => Array<string> })
 	// systemIds: string[]
+	// , type: () => Array<SystemMenusIds>
 	@ApiProperty({ description: '角色拥有的所有系统及对应系统下所拥有的菜单id' })
-	@prop({ required: true, type: () => Array<SystemMenusIds> })
+	@prop({ required: true })
 	systemMenusIds?: SystemMenusIds[]
 }

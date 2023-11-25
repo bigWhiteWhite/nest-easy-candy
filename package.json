@@ -4,6 +4,7 @@
   "author": "zhongYi",
   "description": "monorepo",
   "scripts": {
+    "start:dev": "pnpm -F back-server start:dev",
 		"prettier": "prettier --write \"packages/*/src/**/*.ts\" \"packages/*/config/**/*.ts\" \"packages/*/libs/**/*.ts\"",
 		"lint": "eslint \"packages/*/{src,config,libs}/**/*.{vue,ts,js}\" --fix",
 		"clean:lib": "rimraf node_modules"

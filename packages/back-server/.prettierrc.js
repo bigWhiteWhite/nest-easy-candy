@@ -17,8 +17,8 @@ module.exports = {
 	trailingComma: 'none',
 	// 在对象文字中的括号之间打印空格
 	bracketSpacing: true,
-	// 开始标签的右尖括号是否跟随在最后一行属性末尾，默认false
-	bracketSameLine: false,
+	// jsx 标签的反尖括号需要换行
+	jsxBracketSameLine: false,
 	// 在单独的箭头函数参数周围包括括号 always：(x) => x \ avoid：x => x
 	arrowParens: 'always',
 	// 这两个选项可用于格式化以给定字符偏移量（分别包括和不包括）开始和结束的代码

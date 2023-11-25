@@ -1,0 +1,27 @@
+{
+  "name": "nest-easy-candy",
+  "version": "1.0.0",
+  "author": "zhongYi",
+  "description": "monorepo",
+  "scripts": {
+  },
+	"dependencies": {
+		"dayjs": "^1.11.3",
+		"lodash": "^4.17.21",
+		"qs": "^6.11.0"
+  },
+	"devDependencies": {
+    "@types/jest": "27.5.0",
+		"@types/lodash": "^4.14.190",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+		"@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.16.0",
+		"eslint-config-prettier": "^8.5.0",
+    "eslint-define-config": "^1.5.0",
+		"eslint-plugin-jest": "^26.4.6",
+		"eslint-plugin-prettier": "^4.0.0",
+		"jest": "^27.2.5",
+		"prettier": "^2.6.2",
+		"typescript": "^5.1.6"
+  }
+}

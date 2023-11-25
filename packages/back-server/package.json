@@ -14,7 +14,6 @@
 		"pm2:dev": "pm2 start ecosystem.config.js --env dev",
 		"pm2:test": "pm2 start ecosystem.config.js --env test",
 		"pm2:prod": "pm2 start ecosystem.config.js --env prod",
-		"prettier": "prettier --write \"src/**/*.ts\" \"config/**/*.ts\" \"libs/**/*.ts\"",
 		"lint": "eslint \"{src,config,libs,test}/**/*.ts\" --fix",
 		"clean:dist": "rimraf dist",
 		"clean:lib": "rimraf node_modules",

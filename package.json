@@ -4,6 +4,7 @@
   "author": "zhongYi",
   "description": "monorepo",
   "scripts": {
+		"prettier": "prettier --write \"packages/*/src/**/*.ts\" \"packages/*/config/**/*.ts\" \"packages/*/libs/**/*.ts\""
   },
 	"dependencies": {
 		"dayjs": "^1.11.3",

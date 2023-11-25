@@ -21,12 +21,13 @@ WORKDIR /nest-easy-candy
 RUN pnpm add pm2 --global
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run -r build
-RUN pnpm deploy --filter=back-server --prod /back-server
-# RUN pnpm deploy --filter=front-server --prod /front-server
+RUN pnpm deploy --filter=back-server --prod /packages/back-server
+RUN pnpm deploy --filter=front-server --prod /packages/front-server
 
 # 启动后端服务
 FROM builder AS back-server
-WORKDIR /back-server
+COPY --from=build /packages/back-server /packages/back-server
+WORKDIR /packages/back-server
 # 暴露端口 - httpserver set port
 EXPOSE 7001
 # 暴露端口 - websokcet set port
@@ -34,5 +35,8 @@ EXPOSE 7002
 CMD ["pm2-runtime", "ecosystem.config.js"]
 
 # 启动前端服务
-# FROM base AS front-server
-# WORKDIR /front-server
+FROM base AS front-server
+COPY --from=build /packages/front-server /packages/front-server
+WORKDIR /front-server
+EXPOSE 4033
+CMD [ "pnpm", "start" ]

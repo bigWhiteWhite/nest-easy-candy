@@ -3,6 +3,13 @@ import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { Role } from './sys-role.model'
 
 export class SystemMenusIds {
+	@ApiProperty({ description: '菜单IDs' })
+	@prop({
+		required: true,
+		type: () => Array<string>
+	})
+	menuIds: Array<string>
+
 	@ApiProperty({ description: '系统ID' })
 	@prop({
 		required: true,
@@ -10,13 +17,6 @@ export class SystemMenusIds {
 		type: () => String
 	})
 	systemId: string
-
-	@ApiProperty({ description: '菜单IDs' })
-	@prop({
-		required: true,
-		type: () => Array<string>
-	})
-	menuIds: Array<string>
 }
 /**
  * @description 角色和系统值关联表

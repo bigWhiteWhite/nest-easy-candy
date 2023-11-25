@@ -1,5 +1,3 @@
-const { off } = require('process')
-
 module.exports = {
 	root: true,
 	env: {
@@ -19,6 +17,7 @@ module.exports = {
 		'plugin:vue/essential',
 		'eslint:recommended',
 		'prettier',
+		'plugin:@typescript-eslint/recommended',
 		'plugin:prettier/recommended',
 		'plugin:jest/recommended'
 	],

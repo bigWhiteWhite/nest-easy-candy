@@ -1,0 +1,16 @@
+@import './app.less';
+@import './dark.less';
+@import './element.less';
+@import './media/index.less';
+@import './transition.less';
+
+.hasStart {
+	// 表单必须输入的星号
+	.el-form-item__label {
+		&::before {
+			content: '*';
+			color: var(--el-color-danger);
+			margin-right: 4px;
+		}
+	}
+}

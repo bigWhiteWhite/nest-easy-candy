@@ -1,0 +1,107 @@
+import React from 'react';
+import { message } from 'antd';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
+// import styles from './index.less';
+
+// 引入codemirror核心css,js文件（经试验css必须有，js文件还没发现它的用处）
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/lib/codemirror.js'
+
+// 代码模式（因为我需要 yaml 语言 大家可以自行引入 javascript java c++ sql 等 参考官网）
+import 'codemirror/mode/yaml/yaml';
+// import "codemirror/mode/clike/clike"; // clike 是包含 java c++ 等模式的
+// import "codemirror/mode/css/css
+// ...
+
+// 引入 ambiance 主题
+import 'codemirror/theme/ambiance.css';
+
+//ctrl+空格代码提示补全
+import 'codemirror/addon/hint/show-hint.css';
+import 'codemirror/addon/hint/show-hint';
+import 'codemirror/addon/hint/anyword-hint.js';
+//代码高亮
+import 'codemirror/addon/selection/active-line';
+//折叠代码
+import 'codemirror/addon/fold/foldgutter.css';
+import 'codemirror/addon/fold/foldcode.js';
+import 'codemirror/addon/fold/foldgutter.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
+import 'codemirror/addon/edit/closebrackets';
+
+
+// 引入 yamljs 先安装 npm i yamljs
+const getYAMLJS = require('yamljs');
+
+class CodeMirrorBox extends React.Component {
+
+  changeCode = (CodeMirror, changeObj, value) => {
+    if (!value) return;
+    // 获取 CodeMirror.doc.getValue()
+    // 赋值 CodeMirror.doc.setValue(value) // 会触发 onChange 事件，小心进入无线递归。
+    const { onChange } = this.props;
+    let obj = null;
+    try { // 校验文件是否为 yaml
+      obj = getYAMLJS.parse(value);
+      onChange && onChange(obj, true); // 引用父级通过自定义的onChange()函数接收需要的数据
+    } catch {
+      message.error("请使用 yaml 文件")
+      CodeMirror.doc.setValue("")
+    }
+  };
+
+  render() {
+    return (
+      <CodeMirror
+        // value="请上传yaml文件"
+        options={{
+          // smartIndent:true,  //自动缩进
+          // styleActiveLine:true,//光标代码高亮
+          // autofocus:true,//自动获取焦点
+          // readOnly: true, // 只读
+          // matchBrackets: true,  //括号匹配，光标旁边的括号都高亮显示
+          // autoCloseBrackets: true, //键入时将自动关闭()[]{}''""
+          lineNumbers: true, // 显示行号
+          theme: 'ambiance', // 设置主题
+          mode: {
+            name: 'text/x-yaml', // "text/css" ...
+            // name: "javascript", // 没错，需要先引入 javascript
+            // json: true
+          },
+
+          // (以下三行)设置支持代码折叠
+          // lineWrapping:true,
+          // foldGutter:true,
+          // gutters:['CodeMirror-linenumbers','CodeMirror-foldgutter'],
+
+          // 还不清楚是什么
+          // extraKeys: {
+          //   "Ctrl": "autocomplete",
+          //   "Ctrl-S": function (editor) {
+          //     that.codeSave(editor)
+          //   },
+          //   "Ctrl-Z": function (editor) {
+          //     editor.undo();
+          //   },//undo
+          //   "F8": function (editor) {
+          //     editor.redo();
+          //   },//Redo
+          // }
+        }}
+        onChange={this.changeCode}
+
+      // 在失去焦点的时候触发，这个时候放数据最好
+      // onBlur={this.codeOnBlur}
+
+      // 这个有必要加上，否则在一些情况下，第二次打开就会有问题
+      // onBeforeChange={(editor, data, value) => {
+      //   console.log("onBeforeChange fresh")
+      //   console.log(JSON.stringify(data));
+      // }}
+      />
+    );
+  }
+}
+
+export default CodeMirrorBox;

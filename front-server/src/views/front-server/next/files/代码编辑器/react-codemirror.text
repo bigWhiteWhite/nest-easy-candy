@@ -1,0 +1,39 @@
+import React,{Fragment,useRef}from 'react'
+import CodeMirror from '@uiw/react-codemirror';
+import 'codemirror/addon/display/autorefresh';
+import 'codemirror/addon/comment/comment';
+import 'codemirror/addon/edit/matchbrackets';
+import 'codemirror/keymap/sublime';
+import 'codemirror/keymap/sublime';
+
+const code = 'const a = 0;';
+const CodeEdited = () => {
+    const [value,setValue] = React.useState('react.codemirror2') as any
+    const options={
+        mode: 'xml',
+        theme: 'material',//主题
+        lineNumbers: true,//是否在编辑器左侧显示符号
+        extraKeys:{"Ctrl":"autocomplete"}, //Ctrl + 空格自动提醒配置
+        autofocus:true,//自动获取焦点
+        styleAcitveLine:true,//光标行代码高亮
+        foldGutter:true,
+        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
+    }
+    const code = 'const a = 0;';
+    const onChange = (value)=>{
+        console.log(value);
+    }
+    return (
+        <Fragment>
+            <CodeMirror
+                value={code}
+                options={{
+                    theme: 'monokai',
+                    keyMap: 'sublime',
+                    mode: 'jsx',
+                }}
+            />
+        </Fragment>
+    )
+}
+export default CodeEdited

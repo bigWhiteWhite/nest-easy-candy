@@ -1,0 +1,41 @@
+{
+	"compilerOptions": {
+		"useDefineForClassFields": true,
+		// "importHelpers": true,
+		"experimentalDecorators": true,
+		// 设置为true时，将强制区分大小写。默认为false
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		//字符串类型不能用于索引报错,解决办法
+		// "suppressImplicitAnyIndexErrors": true,
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"baseUrl": "." /* Base directory to resolve non-absolute module names. */,
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		"strict": true,
+		// 允许编译javascript文件
+		"allowJs": true,
+		"noImplicitThis": true,
+		"noImplicitAny": false,
+		"pretty": true,
+		"jsx": "preserve",
+		"jsxFactory": "h",
+		"jsxFragmentFactory": "Fragment",
+		"sourceMap": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true, //跳过 typescript 对第三方依赖的类型检查。
+		"lib": ["esnext", "dom"],
+		"types": ["vite/client"],
+		"plugins": [{ "name": "typescript-plugin-css-modules" }]
+	},
+	// "vueCompilerOptions": {
+	// 	"experimentalDisableTemplateSupport": true // volar的问题先关闭template提示
+	// },
+	"include": ["**/*.ts", "**/*.d.ts", "**/*.tsx", "**/*.vue", "app.d.ts", "env.d.ts", "components.d.ts", "auto-imports.d.ts", "command/**.mjs"],
+	"exclude": ["node_modules", "**/*.spec.ts"],
+	"references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,46 @@
+import React,{Fragment,useRef}from 'react'
+import { Controlled  as CodeMirror} from 'react-codemirror2'
+//import CodeMirror from 'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/lib/codemirror.js';
+require('codemirror/mode/xml/xml');
+require('codemirror/mode/javascript/javascript');
+import 'codemirror/theme/material.css';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/xml/xml.js';
+import 'codemirror/mode/python/python.js';
+import 'codemirror/mode/perl/perl.js';
+import 'codemirror/mode/clike/clike.js';
+
+import 'codemirror/addon/hint/show-hint.css'; // start-ctrl+空格代码提示补全
+import 'codemirror/addon/hint/show-hint.js'; 
+import 'codemirror/addon/hint/anyword-hint.js'; // end 
+const CodeEdited = () => {
+    const [value,setValue] = React.useState('react.codemirror2') as any
+    const options={
+        mode: 'xml',
+        theme: 'material',//主题
+        lineNumbers: true,//是否在编辑器左侧显示符号
+        extraKeys:{"Ctrl":"autocomplete"}, //Ctrl + 空格自动提醒配置
+        autofocus:true,//自动获取焦点
+        styleAcitveLine:true,//光标行代码高亮
+        foldGutter:true,
+        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
+    }
+    const onChange = (value)=>{
+        console.log(value);
+    }
+    return (
+        <Fragment>
+            <CodeMirror
+                value={value}
+                options={options}
+                onBeforeChange={(editor, data, value) => {
+                    setValue({value});
+                }}
+                onChange={onChange}
+            />
+        </Fragment>
+    )
+}
+export default CodeEdited

@@ -1,0 +1,190 @@
+@import './media.less';
+
+/* 页面宽度小于576px
+------------------------------- */
+@media screen and (max-width: @xs) {
+	// MessageBox 弹框
+	.el-message-box {
+		width: 80% !important;
+	}
+	.el-pager,
+	.el-pagination__jump {
+		display: none !important;
+	}
+}
+
+/* 页面宽度小于768px
+------------------------------- */
+@media screen and (max-width: @sm) {
+	// 时间选择器适配
+	.el-date-range-picker {
+		width: 100vw;
+		.el-picker-panel__body {
+			min-width: 100%;
+			.el-date-range-picker__content {
+				.el-date-range-picker__header div {
+					margin-left: 22px;
+					margin-right: 0px;
+				}
+				& + .el-date-range-picker__content {
+					.el-date-range-picker__header div {
+						margin-left: 0px;
+						margin-right: 22px;
+					}
+				}
+			}
+		}
+	}
+
+	.tags-view-form {
+		.tags-view-form-col {
+			margin-bottom: 20px;
+		}
+	}
+
+	.error {
+		.error-flex {
+			flex-direction: column-reverse !important;
+			height: auto !important;
+			width: 100% !important;
+		}
+		.right,
+		.left {
+			flex: unset !important;
+			display: flex !important;
+		}
+		.left-item {
+			margin: auto !important;
+		}
+		.right img {
+			max-width: 450px !important;
+			&:extend(.left-item);
+		}
+	}
+
+	.home-media,
+	.home-media-sm {
+		margin-top: 15px;
+	}
+
+	// Breadcrumb 面包屑
+	.layout-navbars-breadcrumb-hide {
+		display: none;
+	}
+	// 外链视图
+	.layout-view-link {
+		a {
+			max-width: 80%;
+			text-align: center;
+		}
+	}
+	// 菜单搜索
+	.layout-search-dialog {
+		.el-autocomplete {
+			width: 80% !important;
+		}
+	}
+
+	// 滚动条的宽度
+	::-webkit-scrollbar {
+		width: 3px !important;
+		height: 3px !important;
+	}
+	::-webkit-scrollbar-track-piece {
+		background-color: var(--next-bg-main-color);
+	}
+	// 滚动条的设置
+	::-webkit-scrollbar-thumb {
+		background-color: rgba(144, 147, 153, 0.3);
+		background-clip: padding-box;
+		min-height: 28px;
+		border-radius: 5px;
+		transition: 0.3s background-color;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(144, 147, 153, 0.5);
+	}
+	// element plus scrollbar
+	.el-scrollbar__bar.is-vertical {
+		width: 2px !important;
+	}
+	.el-scrollbar__bar.is-horizontal {
+		height: 2px !important;
+	}
+}
+
+/* 页面宽度大于768px
+------------------------------- */
+@media screen and (min-width: 769px) {
+	// 滚动条的宽度
+	::-webkit-scrollbar {
+		width: 7px;
+		height: 7px;
+	}
+	::-webkit-scrollbar-track-piece {
+		background-color: var(--next-bg-main-color);
+	}
+	// 滚动条的设置
+	::-webkit-scrollbar-thumb {
+		background-color: rgba(144, 147, 153, 0.3);
+		background-clip: padding-box;
+		min-height: 28px;
+		border-radius: 5px;
+		transition: 0.3s background-color;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(144, 147, 153, 0.5);
+	}
+}
+
+/* 页面宽度大于768px小于992px
+------------------------------- */
+@media screen and (min-width: @sm) and (max-width: @md) {
+	.error {
+		.error-flex {
+			padding-left: 30px !important;
+		}
+	}
+}
+
+/* 页面宽度小于1200px
+------------------------------- */
+@media screen and (max-width: @lg) {
+	.error {
+		.error-flex {
+			padding: 0 30px;
+		}
+	}
+
+	.home-media-lg {
+		margin-top: 15px;
+	}
+	.home-monitor {
+		.flex-warp-item {
+			width: 33.33% !important;
+		}
+	}
+}
+
+/* 页面宽度小于1000px
+------------------------------- */
+@media screen and (max-width: 1000px) {
+	// 布局配置
+	.layout-drawer-content-flex {
+		position: relative;
+		&::after {
+			content: 'The mobile version does not support switching layouts';
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			z-index: 1;
+			text-align: center;
+			height: 140px;
+			line-height: 140px;
+			background: rgba(255, 255, 255, 0.9);
+			color: #666666;
+		}
+	}
+}

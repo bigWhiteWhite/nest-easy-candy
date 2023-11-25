@@ -1,0 +1,10 @@
+include:
+    project: ops/utils/ci-temaplate
+    file: /jobs-nodejs-nosrv.yml
+variables:
+    KOOK_PROJECT_NAME: front-web-ai_cms_management_singapore
+    ARTIFACT_DIR: mydist
+    BUILD_COMMAND: npm install -g yarn && yarn install && yarn build
+    LANG_VERSION: 16.18.1
+    SERVER_TEST: hw-hk2-12.125-front-webtest1p3.mib_rdev
+    SERVER_PRE: aws-sgp3iw-3.23-collection-prep3.mib_rdev

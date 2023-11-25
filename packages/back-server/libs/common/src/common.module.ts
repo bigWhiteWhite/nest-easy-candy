@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { CommonService } from './common.service'
 import { JwtModule } from '@nestjs/jwt'
 import { DbModule } from '@app/db/index'
+console.log('fff')
 @Global() // 声明为全局模块
 @Module({
 	imports: [

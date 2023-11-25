@@ -5,5 +5,5 @@ import { Menus } from './sys-menus.model'
 import { System } from './sys-system.model'
 import { LoginLog } from './sys-login-log.model'
 import { TypegooseModule } from 'nestjs-typegoose'
-
+console.log('wwwwwwwwww')
 export const SystemModules = TypegooseModule.forFeature([User, Role, System, Menus, RoleSystemMenus, LoginLog])

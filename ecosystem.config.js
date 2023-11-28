@@ -34,5 +34,13 @@ module.exports = {
 				NODE_ENV: 'prod'
 			}
 		}
-	]
+	],
+	deploy: {
+		production: {
+			user: 'root',
+			host: '39.108.99.86',
+			ref: 'origin/master',
+			'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env prod'
+		}
+	}
 }

@@ -4,6 +4,7 @@ import { TypegooseModule } from 'nestjs-typegoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import Configuration from 'config'
 import { SystemModules } from './modules/system/index.model'
+import { getMongoConfig } from 'config/configuration/mongo.config'
 
 @Global() // 标记为全局使用
 @Module({
@@ -17,15 +18,7 @@ import { SystemModules } from './modules/system/index.model'
 		// 添加环境变量时，环境变量加载需要时间，有可能出现读取不到process.env.DB，使用异步加载解决
 		TypegooseModule.forRootAsync({
 			imports: [ConfigModule],
-			useFactory(configService: ConfigService) {
-				return {
-					uri: configService.get<string>('mongo.DBPath'), // 连接数据库地址
-					useNewUrlParser: true,
-					useUnifiedTopology: true, // 设置一个30秒的搜寻服务器的超时时间，就算服务器无法连接，也要等到超时以后才报错
-					useCreateIndex: true,
-					useFindAndModify: false
-				}
-			},
+			useFactory: getMongoConfig,
 			inject: [ConfigService]
 		}),
 		SystemModules // 导入所有的模型

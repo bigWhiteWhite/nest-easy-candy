@@ -95,11 +95,33 @@ use candyAdmin
 db.createUser({
     "user":"candyAdmin",
     "pwd":"candyAdmin",
-    "roles":[{
-        role:"dbAdmin",
-        db:"candyAdmin"
-    }]
+    "roles":[
+        {
+            role:"dbAdmin",
+            db:"candyAdmin",
+        },
+        {
+            role:"readWrite",
+            db:"candyAdmin",
+        },
+    ]
 })
+
+db.updateUser(
+    "candyAdmin",
+    {
+        "roles":[
+            {
+                role:"dbAdmin",
+                db:"candyAdmin",
+            },
+            {
+                role:"readWrite",
+                db:"candyAdmin",
+            },
+        ]
+	}
+)
 ```
 
 ## WSL2.0使用任意Linux发行版

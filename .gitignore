@@ -10,6 +10,10 @@ pnpm-debug.log*
 pnpm-debug.log*
 pnpm-error.log*
 lerna-debug.log*
+deploy
+mongo
+mongodb
+mongodb-data
 
 # OS
 .DS_Store

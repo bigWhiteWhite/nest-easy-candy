@@ -1,14 +1,16 @@
 version: "3.0"
-
+#  uri: 'mongodb://candyAdmin:candyAdmin@127.0.0.1:27017/candyAdmin',
 services:
   mongo:
-    image: mongo
+    image: mongo:lastest
     container_name: nest-easy-candy-mongo # 容器名称
     restart: always # 自动重启
     ports:
     - 27017:27017
     volumes:
-      - ./mongo/data/db
+      - ./mongodb-data:/data/db
+      - ./mongodb/logs:/data/logs # 用来存放日志
+    # environment: 设置环境变量 - 优先级比env_file高
     environment:
       MONGO_INITDB_ROOT_USERNAME: candyAdmin
       MONGO_INITDB_ROOT_PASSWORD: candyAdmin
@@ -34,7 +36,6 @@ services:
       - .env
       - .env.test
       - .env.prod
-    # environment: 设置环境变量 - 优先级比env_file高
     ports:
       - '${REDIS_PORT}:6379'  # 本机端口:容器端口 - '${REDIS_PORT}:6379'
     command: >

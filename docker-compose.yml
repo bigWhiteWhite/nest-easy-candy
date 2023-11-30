@@ -2,7 +2,7 @@ version: "3.0"
 #  uri: 'mongodb://candyAdmin:candyAdmin@127.0.0.1:27017/candyAdmin',
 services:
   mongo:
-    image: mongo:lastest
+    image: mongo:latest
     container_name: nest-easy-candy-mongo # 容器名称
     restart: always # 自动重启
     ports:

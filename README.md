@@ -78,6 +78,30 @@ CMD ["pm2-runtime", "ecosystem.config.js"]
 
 在项目中同时使用这两个概念。`Dockerfile` 用于定义单个容器的构建规则，而 `docker-compose` 用于管理整个应用程序由多个容器组成的场景。在使用 `docker-compose up` 命令时，它会查找当前目录下的 `docker-compose.yml` 文件，并基于其中的配置启动相关的服务。
 
+### mongo
+
+注意点
+
+- 本地连接mongodb的域名(MONGO_HOST)，本地部署是使用自己机器的ip，可以通过ipconfig查询
+- 如果是链接指定数据库，需要去mongo的命令行创建数据库，然后添加用户
+- candyAdmin的账号是给candyAdmin这个数据库的，所有需要去到candyAdmin数据库创建用户
+
+```ts
+// DB=mongodb://candyAdmin:candyAdmin@本机IP:27017/candyAdmin
+show dbs 
+
+use candyAdmin
+
+db.createUser({
+    "user":"candyAdmin",
+    "pwd":"candyAdmin",
+    "roles":[{
+        role:"dbAdmin",
+        db:"candyAdmin"
+    }]
+})
+```
+
 ## WSL2.0使用任意Linux发行版
 
 **参考博客**

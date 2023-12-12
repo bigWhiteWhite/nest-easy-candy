@@ -10,7 +10,8 @@ pnpm-debug.log*
 pnpm-debug.log*
 pnpm-error.log*
 lerna-debug.log*
-deploy
+deploy/redis/*
+deploy/redis/db
 mongo
 mongodb
 mongodb-data

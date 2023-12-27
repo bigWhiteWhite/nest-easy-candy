@@ -5,10 +5,10 @@ import { AdminUser } from '../system.interface'
 import { UserInfo } from '@/service/decorators/user-uid.decorator'
 import { ApiException } from '@/service/exceptions/api.exception'
 
-@Controller('admin/online')
+@Controller('online')
 @ApiTags('在线用户模块')
 export class OnlineController {
-	constructor(private readonly onlineService: OnlineService) {}
+	constructor(private readonly onlineService: OnlineService) { }
 
 	@ApiOperation({ summary: '查询当前在线用户' })
 	@Get('list')

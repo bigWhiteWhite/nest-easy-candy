@@ -4,7 +4,7 @@ import { AdminSystemService } from './admin-system.service'
 import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, UpdateSystemDto } from './dto/admin-systen.dto'
 import { PageDto, PageList } from '@/common/class/res.class'
 
-@Controller('admin/admin-system')
+@Controller('admin-system')
 @ApiTags('管理系统值')
 export class AdminSystemController {
 	constructor(private adminSystemService: AdminSystemService) {}

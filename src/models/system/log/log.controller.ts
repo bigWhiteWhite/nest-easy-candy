@@ -4,7 +4,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { LoginInfo } from './class/log.class'
 import { PageDto, PageList } from '@/common/class/res.class'
 
-@Controller('admin/log')
+@Controller('log')
 @ApiTags('日志模块')
 export class LogController {
 	constructor(private readonly logService: LogService) {}

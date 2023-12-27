@@ -4,10 +4,10 @@ import { MenuService } from './menu.service'
 import { CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
 import { PageDto, PageList } from '@/common/class/res.class'
 
-@Controller('admin/menu')
+@Controller('menu')
 @ApiTags('菜单模块')
 export class MenuController {
-	constructor(private menuService: MenuService) {}
+	constructor(private menuService: MenuService) { }
 
 	@Post()
 	@ApiOperation({ summary: '添加菜单' })

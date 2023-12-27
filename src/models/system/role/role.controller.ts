@@ -4,9 +4,9 @@ import { CreateRoleDto, QueryRole } from './dto/create-role.dto'
 import { ApiOperation } from '@nestjs/swagger'
 import { PageDto } from '@/common/class/res.class'
 
-@Controller('admin/role')
+@Controller('role')
 export class RoleController {
-	constructor(private readonly roleService: RoleService) {}
+	constructor(private readonly roleService: RoleService) { }
 
 	@Post()
 	@ApiOperation({ summary: '添加角色' })

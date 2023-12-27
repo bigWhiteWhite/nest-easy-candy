@@ -15,10 +15,10 @@ import { DesensitizeInterceptor } from '@/service/interceptors/desensitize.inter
 import { UtilService } from '@/shared/tools/util.service'
 import { PageDto } from '@/common/class/res.class'
 @ApiSecurity(ADMIN_PREFIX)
-@Controller('admin/user')
+@Controller('user')
 @ApiTags('登录注册')
 export class AuthController {
-	constructor(private userService: UserService, private utilService: UtilService) {}
+	constructor(private userService: UserService, private utilService: UtilService) { }
 
 	@Post('generate')
 	@ApiOperation({ summary: '批量生产假用户' })

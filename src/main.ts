@@ -17,6 +17,8 @@ import * as express from 'express'
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AdminModule)
 	const configService: ConfigService = app.get(ConfigService)
+	// ? 加统一前缀
+	app.setGlobalPrefix('admin')
 	// 配置静态资源路径: https://docs.nestjs.cn/8/techniques?id=mvc%e6%a8%a1%e5%9e%8b-%e8%a7%86%e5%9b%be%e6%8e%a7%e5%88%b6%e5%99%a8
 	await app.useStaticAssets(join(__dirname, 'public'), {
 		prefix: '/public'

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, IsArray } from 'class-validator'
+import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, IsArray, ValidateIf } from 'class-validator'
 export class Meta {
 	@ApiProperty({ description: '菜单标题' })
 	@IsString()
@@ -59,6 +59,7 @@ export class CreateMenuDto {
 	@ApiProperty({ description: '菜单路径' })
 	@IsString()
 	@MinLength(2)
+	@ValidateIf((obj) => obj.type === 1)
 	@IsNotEmpty()
 	readonly path: string
 

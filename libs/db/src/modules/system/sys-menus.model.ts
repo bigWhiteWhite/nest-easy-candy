@@ -68,7 +68,7 @@ export class Menus {
 
 	@ApiProperty({ description: '菜单路径' })
 	@prop({
-		required: true,
+		default: '',
 		unique: true
 	})
 	path: string

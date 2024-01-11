@@ -2,6 +2,7 @@ import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString } from 'class-validator'
 import { UpdateMenuDto } from '../../menu/dto/menu.dto'
 import { EditAuthDto } from './user.dto'
+import { Types } from 'mongoose'
 
 export class QueryUser {
 	@ApiProperty({ description: '用户名' })
@@ -21,7 +22,7 @@ export class UserSysMenuId {
 
 	@ApiProperty({ description: '系统菜单ids -- 涵盖该系统下的所有菜单' })
 	@IsArray()
-	menuIds?: Array<string>
+	menuIds?: Array<Types.ObjectId>
 }
 
 export class UserSystemMenus extends PartialType(UserSysMenuId) {

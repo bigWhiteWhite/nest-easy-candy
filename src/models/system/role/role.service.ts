@@ -8,6 +8,7 @@ import { MenuService } from '../menu/menu.service'
 import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
 import { Role } from '@app/db/modules/system/sys-role.model'
 import { System } from '@app/db/modules/system/sys-system.model'
+import { User } from '@app/db/modules/system/sys-user.model'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
 import { WSService } from '@/shared/websocket/ws.service'
@@ -21,6 +22,8 @@ export class RoleService {
 		private readonly roleModel: ReturnModelType<typeof Role>,
 		@InjectModel(RoleSystemMenus)
 		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
+		@InjectModel(User)
+		private readonly userModel: ReturnModelType<typeof User>,
 		private readonly adminSystemService: AdminSystemService,
 		private readonly menuService: MenuService,
 		private readonly utilService: UtilService,
@@ -161,6 +164,14 @@ export class RoleService {
 			await this.roleSystemMenus.remove({
 				roleSystemId: id
 			})
+			// 查询对应的用户表，将包含的角色同步删除
+			await this.userModel.updateMany(
+				{
+					roles: { $in: [id] }
+				},
+				{ $pull: { roles: id } },
+				{ multi: true }
+			)
 			// 角色改变，通知重新获取菜单
 			this.wsService.noticeUpdateMenus(2, id)
 		} catch (error) {

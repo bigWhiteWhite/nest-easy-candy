@@ -5,6 +5,7 @@ import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, UpdateSystemDto
 import { isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
+import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
 import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
@@ -14,6 +15,8 @@ export class AdminSystemService {
 	constructor(
 		@InjectModel(System)
 		private readonly systemModel: ReturnModelType<typeof System>,
+		@InjectModel(RoleSystemMenus)
+		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
 		private menuService: MenuService,
 		private wsService: WSService
 	) {}
@@ -170,6 +173,18 @@ export class AdminSystemService {
 			if (isEmpty(system)) {
 				throw new ApiException(10201)
 			}
+			// 查询对应的角色系统表，将系统同步删除
+			await this.roleSystemMenus.updateMany(
+				{
+					systemMenusIds: {
+						$elemMatch: {
+							systemId: id
+						}
+					}
+				},
+				{ $pull: { systemMenusIds: { systemId: id } } },
+				{ multi: true }
+			)
 			this.wsService.noticeUpdateMenus(1, system.systemName)
 		} catch (error) {
 			return Promise.reject(error)

@@ -8,6 +8,12 @@ class Meta {
 	})
 	title: string
 
+	@ApiProperty({ description: '当isLink||isIframe为真,这个是必填' })
+	@prop({
+		default: ''
+	})
+	link: string
+
 	@ApiProperty({
 		description: '1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
 	})
@@ -39,7 +45,7 @@ class Meta {
 	isAffix: boolean
 
 	@ApiProperty({
-		description: '是否内嵌:1、isIframe: true 2、链接地址不为空(meta.isLink)'
+		description: '是否内嵌:1、isIframe: true 2、链接地址不为空(meta.isLink), 3、isLink: true'
 	})
 	@prop({
 		default: false
@@ -119,6 +125,7 @@ export class Menus {
 		default: () => ({
 			title: '',
 			isKeepAlive: true,
+			link: '',
 			isLink: false,
 			isHide: false,
 			isAffix: false,

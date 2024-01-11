@@ -9,6 +9,21 @@ export class Meta {
 	readonly title: string
 
 	@ApiProperty({
+		description: '当isLink||isIframe为真,这个是必填'
+	})
+	@IsString()
+	@ValidateIf((obj) => obj.isLink)
+	@IsNotEmpty()
+	readonly link: string
+
+	@ApiProperty({
+		description: '是否内嵌'
+	})
+	@IsBoolean()
+	@IsOptional()
+	readonly isIframe: boolean
+
+	@ApiProperty({
 		description: '1、isLink: true 2、链接地址不为空(meta.isLink) 3、isIframe: false'
 	})
 	@IsBoolean()
@@ -35,13 +50,6 @@ export class Meta {
 	@IsBoolean()
 	@IsOptional()
 	readonly isAffix: boolean
-
-	@ApiProperty({
-		description: '是否内嵌'
-	})
-	@IsBoolean()
-	@IsOptional()
-	readonly isIframe: boolean
 
 	@ApiProperty({
 		description: '菜单图标'

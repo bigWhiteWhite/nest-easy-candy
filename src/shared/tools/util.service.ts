@@ -43,9 +43,10 @@ export class UtilService {
 	 * @returns {Types.ObjectId}
 	 * @memberof AdminService
 	 */
-	public toObjectId(id: string): Types.ObjectId {
+	public toObjectId(id: string | Types.ObjectId): Types.ObjectId {
 		try {
-			return Types.ObjectId(id)
+			if (id instanceof Types.ObjectId) return id as Types.ObjectId
+			return Types.ObjectId(id as string)
 		} catch (e) {
 			throw new ApiException(10004)
 		}

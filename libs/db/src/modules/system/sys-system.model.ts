@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { modelOptions, prop } from '@typegoose/typegoose'
+import { Menus } from './sys-menus.model'
+import { Types } from 'mongoose'
 /**
  * @description 系统表
  */
@@ -28,7 +30,8 @@ export class System {
 	@ApiProperty({ description: '系统菜单ids -- 涵盖该系统下的所有菜单' })
 	@prop({
 		required: true,
-		type: () => String
+		// ref: Menus,
+		type: () => [Types.ObjectId]
 	})
-	menuIds: Array<string>
+	menuIds: Array<Types.ObjectId>
 }

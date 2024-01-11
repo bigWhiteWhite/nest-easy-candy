@@ -1,4 +1,6 @@
 import { Menus } from '@app/db/modules/system/sys-menus.model'
+import { System } from '@app/db/modules/system/sys-system.model'
+import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
 import { Injectable } from '@nestjs/common'
 import { ChildrenMenuDto, CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
@@ -8,11 +10,16 @@ import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
 import { WSService } from '@/shared/websocket/ws.service'
+import { Types } from 'mongoose'
 @Injectable()
 export class MenuService {
 	constructor(
 		@InjectModel(Menus)
 		private readonly menusModel: ReturnModelType<typeof Menus>,
+		@InjectModel(System)
+		private readonly systemModel: ReturnModelType<typeof System>,
+		@InjectModel(RoleSystemMenus)
+		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
 		private utilService: UtilService,
 		private wsService: WSService
 	) {}
@@ -137,6 +144,26 @@ export class MenuService {
 			await this.menusModel.deleteMany({
 				parentId: { $in: id }
 			})
+			// 查询对应的系统表，将包含的菜单同步删除
+			await this.systemModel.updateMany(
+				{
+					menuIds: { $in: [this.utilService.toObjectId(id)] }
+				},
+				{ $pull: { menuIds: { $in: [this.utilService.toObjectId(id)] } } },
+				{ multi: true }
+			)
+			// 查询对应的角色系统表，将系统同步删除(未完成)
+			await this.roleSystemMenus.updateMany(
+				{
+					systemMenusIds: {
+						$elemMatch: {
+							menuIds: { $in: [this.utilService.toObjectId(id)] }
+						}
+					}
+				},
+				{ $pull: { 'systemMenusIds.$.menuIds': id } },
+				{ multi: true }
+			)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
 			return Promise.reject(error)
@@ -240,7 +267,7 @@ export class MenuService {
 	 * @description 判断菜单列表是否存在于菜单表中
 	 * @return 返回菜单和菜单ids
 	 */
-	async getMenus(menuIdArray: Array<string>): Promise<{ menus?: Array<CreateMenuDto>; menuIds?: Array<string> }> {
+	async getMenus(menuIdArray: Array<Types.ObjectId | string>): Promise<{ menus?: Array<CreateMenuDto>; menuIds?: Array<Types.ObjectId> }> {
 		const uniqMenuIds = uniq(menuIdArray)
 		const menus: any = await this.menusModel
 			.find({
@@ -262,7 +289,7 @@ export class MenuService {
 	 * @param menuIds 指定menuIds
 	 * @param onlyParent 只需要父级,还是全部菜单都找一遍children
 	 */
-	async handleMenus(menuIds: Array<string>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
+	async handleMenus(menuIds: Array<Types.ObjectId>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		try {
 			const ids = uniq(menuIds)
 			// const menus = await this.filterValMenus(ids)

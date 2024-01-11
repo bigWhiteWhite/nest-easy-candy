@@ -7,7 +7,7 @@ import { PageDto, PageList } from '@/common/class/res.class'
 @Controller('menu')
 @ApiTags('菜单模块')
 export class MenuController {
-	constructor(private menuService: MenuService) { }
+	constructor(private menuService: MenuService) {}
 
 	@Post()
 	@ApiOperation({ summary: '添加菜单' })

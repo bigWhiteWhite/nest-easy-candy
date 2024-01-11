@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { Role } from './sys-role.model'
+import { Types } from 'mongoose'
 
 export class SystemMenusIds {
 	@ApiProperty({ description: '系统ID' })
@@ -11,12 +12,20 @@ export class SystemMenusIds {
 	})
 	systemId: string
 
+	@ApiProperty({ description: '系统名称' })
+	@prop({
+		required: true,
+		unique: true,
+		type: () => String
+	})
+	systemName: string
+
 	@ApiProperty({ description: '菜单IDs' })
 	@prop({
 		required: true,
-		type: () => Array<string>
+		type: () => [Types.ObjectId]
 	})
-	menuIds: Array<string>
+	menuIds: Array<Types.ObjectId>
 }
 /**
  * @description 角色和系统值关联表

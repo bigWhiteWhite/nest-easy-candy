@@ -23,9 +23,10 @@ export class SystemMenusIds {
 	@ApiProperty({ description: '菜单IDs' })
 	@prop({
 		required: true,
-		type: () => [Types.ObjectId]
+		type: () => [Types.ObjectId],
+		immutable: true // 这个验证规则会禁止修改
 	})
-	menuIds: Array<Types.ObjectId>
+	menuIds: Array<Types.ObjectId | string>
 }
 /**
  * @description 角色和系统值关联表

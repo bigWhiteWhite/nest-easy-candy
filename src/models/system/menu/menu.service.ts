@@ -72,12 +72,6 @@ export class MenuService {
 	 */
 	async addMenu(body: CreateMenuDto) {
 		try {
-			const exists = await this.menusModel.findOne({
-				path: body.path
-			})
-			if (!isEmpty(exists)) {
-				throw new ApiException(10300)
-			}
 			if (body.parentId) {
 				const pid = await this.menusModel.findOne({
 					_id: this.utilService.toObjectId(body.parentId)
@@ -86,6 +80,7 @@ export class MenuService {
 					throw new ApiException(10303)
 				}
 			}
+			// 已在model中判断path为唯一
 			return await this.menusModel.create(body)
 		} catch (error) {
 			return Promise.reject(error)
@@ -141,6 +136,7 @@ export class MenuService {
 			if (isEmpty(_)) {
 				throw new ApiException(10301)
 			}
+			// 删除所拥有的子菜单
 			await this.menusModel.deleteMany({
 				parentId: { $in: id }
 			})
@@ -152,20 +148,39 @@ export class MenuService {
 				{ $pull: { menuIds: { $in: [this.utilService.toObjectId(id)] } } },
 				{ multi: true }
 			)
-			// 查询对应的角色系统表，将系统同步删除(未完成)
-			await this.roleSystemMenus.updateMany(
-				{
-					systemMenusIds: {
-						$elemMatch: {
-							menuIds: { $in: [this.utilService.toObjectId(id)] }
-						}
+			// 查询对应的角色系统表，将菜单同步删除
+			const systemMenus = await this.roleSystemMenus.find({
+				systemMenusIds: {
+					$elemMatch: {
+						menuIds: { $in: [this.utilService.toObjectId(id)] }
 					}
-				},
-				{ $pull: { 'systemMenusIds.$.menuIds': id } },
-				{ multi: true }
+				}
+			})
+			await Promise.all(
+				systemMenus.map(async (record) => {
+					try {
+						// 找到匹配的 systemMenusIds 子文档
+						const updatedSystemMenusIds = record.systemMenusIds.map((item) => {
+							const menuIds = item.menuIds.map((_) => _.toString())
+							if (menuIds.includes(id)) {
+								// 如果找到匹配的 systemMenu，则删除其中的 menuId
+								const index = menuIds.indexOf(id)
+								if (index !== -1) {
+									item.menuIds.splice(index, 1)
+								}
+							}
+							return item
+						})
+						// 更新数据库中的文档
+						await this.roleSystemMenus.updateOne({ _id: record._id }, { $set: { systemMenusIds: updatedSystemMenusIds } })
+					} catch (error) {
+						return Promise.reject(error)
+					}
+				})
 			)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
+			console.log('🚀 ~ file: menu.service.ts:193 ~ MenuService ~ deleteMenu ~ error:', error)
 			return Promise.reject(error)
 		}
 	}

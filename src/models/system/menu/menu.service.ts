@@ -241,7 +241,7 @@ export class MenuService {
 	 */
 	async toggleRouterList(list: Array<UpdateMenuDto>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		const sortList = uniqBy(
-			list.map((_) => ({ ..._, _id: _._id.toString() })),
+			list.map((_) => ({ ..._, _id: this.utilService.toObjectId(_._id) })),
 			'_id'
 		)
 		if (sortList.length === 0) return []

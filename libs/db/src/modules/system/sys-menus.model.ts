@@ -29,7 +29,7 @@ class Meta {
 	isKeepAlive: boolean
 
 	@ApiProperty({
-		description: '菜单是否在前端隐藏'
+		description: '菜单是否在前端隐藏,常用于详情页'
 	})
 	@prop({
 		default: false

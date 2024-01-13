@@ -1,4 +1,4 @@
-export const ADMIN_USER = 'adminUser'
+export const ADMIN_USER = 'adminUser' // 请求头标识用户字段
 export const AUTHORIZE_KEY_METADATA = 'admin_module:authorize'
 export const USER_INIT_PASSWORD = '123456'
 export const ROOT_ROLE_ID = '1111' // 管理员权限id，可以修改

@@ -134,4 +134,9 @@ export class QueryMenu {
 	@IsBoolean()
 	@IsOptional()
 	readonly onlyParent: boolean
+
+	@ApiProperty({ description: '是否展示按钮菜单' })
+	@IsBoolean()
+	@IsOptional()
+	readonly showBtnMenu: boolean
 }

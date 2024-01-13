@@ -72,12 +72,12 @@ export class Menus {
 	})
 	parentId: string | null
 
-	@ApiProperty({ description: '菜单路径' })
+	@ApiProperty({ description: '路由路径' })
 	@prop({
-		default: '',
-		unique: true
+		unique: true,
+		sparse: true // 稀疏索引，当不传这个字段的时候不检测
 	})
-	path: string
+	path?: string | null
 
 	@ApiProperty({ description: '菜单类型 - 1为菜单, 2为按钮' })
 	@prop({

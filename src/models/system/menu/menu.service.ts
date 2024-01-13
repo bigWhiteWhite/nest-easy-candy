@@ -29,10 +29,13 @@ export class MenuService {
 	 */
 	async listMenu(pagination, query: QueryMenu): Promise<PageList<UpdateMenuDto>> {
 		try {
-			const { name, onlyParent = false } = query
+			const { name, onlyParent = false, showBtnMenu = true } = query
 			const filter = {
 				isEnable: 1
 			} as any
+			if (!showBtnMenu) {
+				filter.type = 1
+			}
 			if (name) {
 				// 模糊查询
 				filter.name = {

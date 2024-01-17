@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common'
 import { ChildrenMenuDto, CreateMenuDto, QueryMenu, UpdateMenuDto } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { isEmpty, uniq, filter, uniqBy } from 'lodash'
+import { isEmpty, uniq, filter, uniqBy, map, keyBy } from 'lodash'
 import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
@@ -44,7 +44,7 @@ export class MenuService {
 				}
 			}
 			const { current = 1, pageSize = 10 } = pagination
-			const menusWithParent = await this.menusModel
+			const list = await this.menusModel
 				.find()
 				// 三级嵌套填充关联文档，如果不够再加
 				.populate({
@@ -56,10 +56,12 @@ export class MenuService {
 						}
 					}
 				})
+				.lean()
 				.exec()
+			const menusWithParent = await this.toggleRouterList(list, onlyParent)
 			const count = await this.menusModel.countDocuments(filter)
 			return {
-				list: menusWithParent,
+				list: list,
 				pagination: {
 					pageSize: pageSize,
 					current: current,
@@ -70,21 +72,29 @@ export class MenuService {
 			return Promise.reject(error)
 		}
 	}
+	/**
+	 * @description 检查菜单是否存在
+	 */
+	async hasMenu(id: string) {
+		if (id) {
+			const menu = await this.menusModel
+				.findOne({
+					_id: this.utilService.toObjectId(id)
+				})
+				.exec()
+			if (isEmpty(menu)) {
+				throw new ApiException(10303)
+			}
+		}
+	}
 
 	/**
 	 * @description 增加菜单
 	 */
 	async addMenu(body: CreateMenuDto) {
 		try {
-			if (body.parentId) {
-				const pid = await this.menusModel.findOne({
-					_id: this.utilService.toObjectId(body.parentId)
-				})
-				if (isEmpty(pid)) {
-					throw new ApiException(10303)
-				}
-			}
 			// 已在model中判断path为唯一
+			this.hasMenu(body.parentMenu)
 			return await this.menusModel.create(body)
 		} catch (error) {
 			return Promise.reject(error)
@@ -96,14 +106,7 @@ export class MenuService {
 	 */
 	async updateMenu(body: CreateMenuDto, id: string) {
 		try {
-			if (body.parentId) {
-				const pid = await this.menusModel.findOne({
-					_id: this.utilService.toObjectId(body.parentId)
-				})
-				if (isEmpty(pid)) {
-					throw new ApiException(10303)
-				}
-			}
+			this.hasMenu(body.parentMenu)
 			await this.menusModel.findByIdAndUpdate(id, body)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
@@ -122,8 +125,8 @@ export class MenuService {
 					isEnable: 1
 				})
 				.sort({ pIndex: 1, cIndex: 1 })
-				.populate('parentId')
-			// .lean()
+				.populate('parentMenu')
+				.exec()
 			if (!isEmpty(menus)) {
 				return menus
 			}
@@ -135,29 +138,29 @@ export class MenuService {
 	/**
 	 * @description 删除 - 如果有子节点，需要将子节点的菜单也删掉
 	 */
-	async deleteMenu(id) {
+	async deleteMenu(id: string) {
 		try {
-			const _ = await this.menusModel.findByIdAndDelete(id)
+			const menuId = this.utilService.toObjectId(id)
+			const _ = await this.menusModel.findByIdAndDelete(menuId)
 			if (isEmpty(_)) {
 				throw new ApiException(10301)
 			}
 			// 删除所拥有的子菜单
 			await this.menusModel.deleteMany({
-				parentId: { $in: id }
+				parentMenu: { $in: id }
 			})
 			// 查询对应的系统表，将包含的菜单同步删除
 			await this.systemModel.updateMany(
 				{
-					menuIds: { $in: [this.utilService.toObjectId(id)] }
+					menuIds: { $in: [menuId] }
 				},
-				{ $pull: { menuIds: { $in: [this.utilService.toObjectId(id)] } } },
-				{ multi: true }
+				{ $pull: { menuIds: { $in: [menuId] } } }
 			)
 			// 查询对应的角色系统表，将菜单同步删除
 			const systemMenus = await this.roleSystemMenus.find({
 				systemMenusIds: {
 					$elemMatch: {
-						menuIds: { $in: [this.utilService.toObjectId(id)] }
+						menuIds: { $in: [menuId] }
 					}
 				}
 			})
@@ -190,13 +193,13 @@ export class MenuService {
 	}
 
 	/**
-	 * @deprecated 循环生成children
+	 * @description 循环生成children
 	 */
 	toggleChildren(children: Array<ChildrenMenuDto>, list: Array<UpdateMenuDto>) {
 		if (children && children.length !== 0) {
 			children.map((item, index) => {
-				if (item._id.toString() === item.parentId) throw new ApiException(10304)
-				const c = filter(list, (o) => o.parentId === item._id.toString()) || false
+				if (item._id.toString() === item.parentMenu) throw new ApiException(10304)
+				const c = filter(list, (o) => o.parentMenu === item._id.toString()) || false
 				if (c && c.length !== 0) {
 					children[index].children = c
 					this.toggleChildren(children[index]?.children, list)
@@ -206,8 +209,8 @@ export class MenuService {
 	}
 
 	/**
-	 * @deprecated 挑选出一级路由
-	 * @deprecated 从所有菜单中找到传入menuIds的父级菜单
+	 * @description 挑选出一级路由
+	 * @description 从所有菜单中找到传入menuIds的父级菜单
 	 * @param menus 未过滤前的路由列表，menus里面的_id是字符串
 	 */
 	// a/b/c 只传了c过来，但是下面的方法找parentId，只能找到a，没有办法回显b
@@ -215,11 +218,11 @@ export class MenuService {
 		const parentMenus = []
 		const findParent = async (menu: UpdateMenuDto) => {
 			// 没有parentId，直接返回一级路由
-			if (!menu.parentId) return parentMenus.push(menu)
-			const parentMenu: UpdateMenuDto = await this.infoMenu(menu.parentId)
+			if (!menu.parentMenu) return parentMenus.push(menu)
+			const parentMenu: UpdateMenuDto = await this.infoMenu(menu.parentMenu)
 			// 判断父级路由存不存在
 			if (parentMenu) {
-				if (parentMenu.parentId) {
+				if (parentMenu.parentMenu) {
 					// 说明还不是第一级路由，继续寻找
 					return findParent(parentMenu)
 				} else {
@@ -240,36 +243,53 @@ export class MenuService {
 	}
 
 	/**
-	 * @deprecated 挑选出一级路由，转换成父子嵌套children的形式
+	 * @description 挑选出一级路由，转换成父子嵌套children的形式
 	 * @param list 未过滤前的路由列表,里面的_id是ObjectId
 	 * @param onlyParent 只需要父级,还是全部菜单都找一遍children
 	 */
 	async toggleRouterList(list: Array<UpdateMenuDto>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
-		const sortList = uniqBy(
-			list,
-			// list.map((_) => ({ ..._, _id: this.utilService.toObjectId(_._id) })),
-			'_id'
-		)
-		if (sortList.length === 0) return []
+		// const map = new Map()
+		// // 将数组中的对象按照 _id 映射到 Map 中
+		// list.forEach((item) => {
+		// 	map.set(item._id, { ...item, children: [] })
+		// })
 		if (onlyParent) {
-			// const parent = sortList.filter(
-			// 	(item) => !item.parentId
-			// ) as Array<UpdateMenuDto>
-			const parent = (await this.findParentIds(sortList)) as Array<UpdateMenuDto>
-			return parent.map((_) => {
-				const children =
-					filter(sortList, (o: any) => {
-						return o.parentId?.toString() === _._id.toString()
-					}) || []
-				this.toggleChildren(children, sortList)
-				return { ..._, children }
-			})
+			// const parent = (await this.findParentIds(sortList)) as Array<UpdateMenuDto>
+			// return parent.map((_) => {
+			// 	const children =
+			// 		filter(sortList, (o: any) => {
+			// 			return o.parentMenu?.toString() === _._id.toString()
+			// 		}) || []
+			// 	this.toggleChildren(children, sortList)
+			// 	return { ..._, children }
+			// })
+			// console.log('🚀 ~ file: menu.service.ts:268 ~ MenuService ~ toggleRouterList ~ map:', map)
+			// 构建嵌套结构
+			const convertArray = (root) => {
+				const indexed = keyBy(root, '_id')
+				const buildTree = (node) => {
+					const child = indexed[node.parentMenu?._id]
+					if (child) {
+						return {
+							...node,
+							children: [buildTree(child)]
+						}
+					} else {
+						return { ...node, children: [] }
+					}
+				}
+				const roots = filter(root, (node) => !node.parentMenu)
+				const result = roots.map((item) => buildTree(item))
+				return result
+			}
+			console.log(convertArray(list))
+			return []
 		} else {
-			return sortList.map((_) => {
-				const children = filter(sortList, (o: any) => o.parentId.toString() === _._id.toString()) || []
-				this.toggleChildren(children, sortList)
-				return { ..._, children }
-			})
+			// return sortList.map((_) => {
+			// 	const children = filter(sortList, (o: any) => o.parentMenu.toString() === _._id.toString()) || []
+			// 	this.toggleChildren(children, sortList)
+			// 	return { ..._, children }
+			// })
 		}
 	}
 

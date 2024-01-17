@@ -53,19 +53,15 @@ export class AdminSystemService {
 						skip: (current - 1) * pageSize
 					}
 				)
-				.lean()
-			const count = await this.systemModel.countDocuments(filter)
-			const list: Array<CreateSystemDto> = await Promise.all(
-				systemList.map(async (system) => {
-					const menus = await this.menuService.handleMenus(system.menuIds, true)
-					return {
-						...system,
-						menus
-					}
+				.populate({
+					path: 'menus'
 				})
-			)
+				.exec()
+			// .lean()
+			const count = await this.systemModel.countDocuments(filter)
+
 			return {
-				list,
+				list: systemList,
 				pagination: {
 					pageSize: pageSize,
 					current: current,
@@ -78,6 +74,7 @@ export class AdminSystemService {
 	}
 
 	/**
+	 * !!!!!!! 没有做校验菜单是否存在
 	 * @description 增加系统 - 还需判断菜单id是否存在于菜单表里面
 	 */
 	async addSystem(body: CreateSystemDto) {
@@ -88,11 +85,7 @@ export class AdminSystemService {
 			if (!isEmpty(exists)) {
 				throw new ApiException(10200)
 			}
-			const { menuIds } = await this.menuService.getMenus(body.menuIds)
-			return await this.systemModel.create({
-				...body,
-				menuIds
-			})
+			return await this.systemModel.create(body)
 		} catch (error) {
 			return Promise.reject(error)
 		}

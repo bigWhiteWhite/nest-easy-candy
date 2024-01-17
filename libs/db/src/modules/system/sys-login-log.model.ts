@@ -22,7 +22,8 @@ export class LoginLog {
 
 	@ApiProperty({ description: '手机号' })
 	@prop({
-		required: false
+		required: false,
+		allowMixed: 0
 	})
 	phone: number | string
 

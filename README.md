@@ -522,6 +522,105 @@ export class RoleController {
 
 在这个示例中，`CompareDataPipe` 的构造函数接受 MongoDB 数据作为参数。在 `updateRole` 方法中，通过使用 `@Body(new CompareDataPipe(/* MongoDB 数据 */))` 将 MongoDB 数据传递给管道。这样，你就可以在管道中比较传入的数据和 MongoDB 数据，而无需在管道内部引入 MongoDB 模型。
 
+## 联合查询
+
+联合查询（Joint Query）通常指的是在数据库中执行涉及**多个表之间关联**的查询操作。这样的查询涉及到在不同的表之间建立关系，然后根据这些关系获取相关联的数据。
+
+在使用 Typegoose 中实现 MongoDB 的联合查询时，我们可以使用 `populate` 方法。`populate` 允许我们在查询时填充关联字段，从而获取相关联的数据。以下是一个使用 Typegoose 的简单示例：
+
+假设你有两个模型类：`System` 和 `Menu`。`System` 类包含一个 `menuIds` 字段，用于存储关联的菜单 ID。首先，你需要定义这两个模型类。
+
+```typescript
+typescriptCopy codeimport { prop, getModelForClass, Ref } from '@typegoose/typegoose';
+
+class Menu {
+  @prop({ required: true })
+  name: string;
+
+  // 其他菜单属性
+}
+
+class System {
+  @prop({ required: true })
+  name: string;
+
+  @prop({ ref: Menu })
+  menuIds: Ref<Menu>[]; // 使用 Ref 类型来表示关联的模型
+}
+
+const MenuModel = getModelForClass(Menu);
+const SystemModel = getModelForClass(System);
+
+export { MenuModel, SystemModel };
+```
+
+在上述代码中，`System` 类中的 `menuIds` 字段使用了 `Ref<Menu>[]` 类型，表示这是一个菜单模型的 ID 数组，并使用 `ref: Menu` 指定关联的模型。
+
+现在，你可以使用 `populate` 方法在查询时填充关联的菜单信息。
+
+```typescript
+typescriptCopy codeconst systemsWithMenus = await SystemModel.find({}).populate('menuIds').exec();
+// console.log(systemsWithMenus);
+```
+
+上述代码中，`populate('menuIds')` 将填充关联的菜单信息到查询结果中的 `menuIds` 字段。这样，你就可以通过 `systemsWithMenus[0].menuIds` 获取与系统关联的菜单信息。
+
+请注意，使用 `populate` 时要确保字段类型正确并且定义了正确的引用关系。根据实际需求调整模型和查询。
+
+### 一对多
+
+`父集下有多个子集，且子集只有一个父集`
+
+```typescript
+// 父集 - NotesGroup
+@arrayProp({ // arrayProp在typegoose的12版本已经删除,直接使用prop就可以
+	ref: 'Note',
+	localField: '_id', // 表示本地键，也就是notesGroupId存储的是NotesGroup的什么字段
+	foreignField: 'notesGroupId' // 外键是什么，也就是note中应该用什么键来关联
+})
+notes: Ref<Note>[] // 变为虚拟字段，然后就可以查出来，数组类型定义
+
+// 子集 - NotesGroup
+@prop({ ref: 'NotesGroup' })
+notesGroupId: Ref<NotesGroup>
+    
+// 聚合查询 -
+const notesGroups = await NotesGroupModel.find({}).populate('notes').exec();
+console.log(notesGroups);
+
+```
+
+## MongoDb
+
+记录一些常用小技巧
+
+### 修改字段名
+
+`记得先不要修改model里面的名称，还是先用menuIds，改完再换`
+
+```ts
+await this.systemModel
+        .updateMany(
+        {},
+        {
+            $rename: { menuIds: 'menus' }
+        }
+    ).exec()
+```
+
+### 批量设置值
+
+```ts
+await this.menusModel
+        .updateMany(
+        { parentMenu: { $in: [''] } }, // 过滤条件
+        {
+            $set: { parentMenu: null }
+        }
+    )
+        .exec()
+```
+
 ## WebSocket
 
 WebSocket 是一种网络通信协议，它允许在客户端和服务器之间建立持久、全双工的通信通道。WebSocket 的作用是**提供实时、低延迟的双向通信**，使服务器能够主动向客户端推送数据，而不需要客户端不断地发起请求。

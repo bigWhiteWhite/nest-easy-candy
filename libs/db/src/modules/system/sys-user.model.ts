@@ -15,7 +15,8 @@ export class User {
 	// 定义字段,描述字段是否是必选等属性
 	@prop({
 		required: true,
-		unique: true
+		unique: true,
+		allowMixed: 0
 	})
 	account: number | string
 
@@ -42,7 +43,8 @@ export class User {
 
 	@ApiProperty({ description: '手机号' })
 	@prop({
-		required: false
+		required: false,
+		allowMixed: 0
 	})
 	phone: number | string
 
@@ -72,6 +74,7 @@ export class User {
 	// 定义字段,描述字段是否是必选等属性
 	@prop({
 		required: true,
+		allowMixed: 0,
 		default: []
 	})
 	roles: Array<string>

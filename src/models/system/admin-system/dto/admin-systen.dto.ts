@@ -20,7 +20,7 @@ export class CreateSystemDto {
 	@IsArray()
 	@ArrayNotEmpty()
 	@IsOptional()
-	readonly menuIds?: Array<Types.ObjectId>
+	readonly menus?: Array<UpdateMenuDto>
 }
 export class UpdateSystemDto {
 	@ApiProperty({ description: '系统名称' })

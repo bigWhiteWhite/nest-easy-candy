@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { modelOptions, prop } from '@typegoose/typegoose'
+import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 
 class Meta {
 	@ApiProperty({ description: '菜单标题' })
@@ -68,13 +68,19 @@ class Meta {
 export class Menus {
 	@ApiProperty({ description: '父级菜单ID' })
 	@prop({
-		required: false
+		required: false,
+		ref: 'Menus',
+		allowMixed: 0,
+		set: (value) => {
+			return value || null
+		}
 	})
-	parentId: string | null
+	parentMenu?: Ref<Menus> | null
 
 	@ApiProperty({ description: '路由路径' })
 	@prop({
 		unique: true,
+		allowMixed: 0,
 		sparse: true // 稀疏索引，当不传这个字段的时候不检测
 	})
 	path?: string | null

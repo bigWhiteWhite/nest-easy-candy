@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Ref, arrayProp, modelOptions, prop } from '@typegoose/typegoose'
+import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { RoleSystemMenus } from './sys-role-system-menus.model'
 
 @modelOptions({
@@ -24,7 +24,7 @@ export class Role {
 	remark: string
 
 	//聚合查询
-	@arrayProp({
+	@prop({
 		ref: 'RoleSystemMenus',
 		localField: '_id', // 表示本地键，也就是Course用哪一个键关联它的儿子
 		foreignField: 'roleSystemId' // 外键是什么，也就是RoleSystemMenus中应该用什么键来关联

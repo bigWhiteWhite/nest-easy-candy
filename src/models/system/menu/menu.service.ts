@@ -44,21 +44,22 @@ export class MenuService {
 				}
 			}
 			const { current = 1, pageSize = 10 } = pagination
-			const list: Array<UpdateMenuDto> = await this.menusModel
-				.find(
-					filter,
-					{},
-					{
-						sort: { updatedAt: -1 },
-						limit: pageSize,
-						skip: (current - 1) * pageSize
+			const menusWithParent = await this.menusModel
+				.find()
+				// 三级嵌套填充关联文档，如果不够再加
+				.populate({
+					path: 'parentMenu',
+					populate: {
+						path: 'parentMenu',
+						populate: {
+							path: 'parentMenu'
+						}
 					}
-				)
-				.lean()
-			const menuList = await this.toggleRouterList(list, onlyParent)
+				})
+				.exec()
 			const count = await this.menusModel.countDocuments(filter)
 			return {
-				list: menuList,
+				list: menusWithParent,
 				pagination: {
 					pageSize: pageSize,
 					current: current,
@@ -121,7 +122,8 @@ export class MenuService {
 					isEnable: 1
 				})
 				.sort({ pIndex: 1, cIndex: 1 })
-				.lean()
+				.populate('parentId')
+			// .lean()
 			if (!isEmpty(menus)) {
 				return menus
 			}

@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { Role } from './sys-role.model'
 import { Types } from 'mongoose'
-
 export class SystemMenusIds {
 	@ApiProperty({ description: '系统ID' })
 	@prop({
@@ -23,6 +22,7 @@ export class SystemMenusIds {
 	@ApiProperty({ description: '菜单IDs' })
 	@prop({
 		required: true,
+		allowMixed: 0,
 		type: () => [Types.ObjectId],
 		immutable: true // 这个验证规则会禁止修改
 	})
@@ -47,6 +47,10 @@ export class RoleSystemMenus {
 	// @prop({ required: true, type: () => Array<string> })
 	// systemIds: string[]
 	@ApiProperty({ description: '角色拥有的所有系统及对应系统下所拥有的菜单id' })
-	@prop({ required: true, type: () => Array<SystemMenusIds> })
+	@prop({
+		required: true,
+		allowMixed: 0,
+		type: () => Array<SystemMenusIds>
+	})
 	systemMenusIds?: SystemMenusIds[]
 }

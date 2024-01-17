@@ -108,25 +108,25 @@ export class RoleService {
 				roleSystemId: role._id
 			})
 			const systems = []
-			await Promise.all(
-				systemMenusIds.map(async (item) => {
-					const info = await this.adminSystemService.infoSystem(item.systemId, true)
-					if (info) {
-						const { menus, menuIds: sysMenuIds, ...system } = info
-						// 存在于系统中的菜单才是角色的有效的菜单
-						const interIds = intersection(
-							sysMenuIds.map((_) => _.toString()),
-							item.menuIds.map((_) => _.toString())
-						)
-						const { menuIds } = await this.menuService.getMenus(interIds)
-						systems.push({
-							system,
-							menuIds, // 拥有的菜单id
-							menus // 系统下的所有菜单
-						})
-					}
-				})
-			)
+			// await Promise.all(
+			// 	systemMenusIds.map(async (item) => {
+			// 		const info = await this.adminSystemService.infoSystem(item.systemId, true)
+			// 		if (info) {
+			// 			const { menus, menuIds: sysMenuIds, ...system } = info
+			// 			// 存在于系统中的菜单才是角色的有效的菜单
+			// 			const interIds = intersection(
+			// 				sysMenuIds.map((_) => _.toString()),
+			// 				item.menuIds.map((_) => _.toString())
+			// 			)
+			// 			const { menuIds } = await this.menuService.getMenus(interIds)
+			// 			systems.push({
+			// 				system,
+			// 				menuIds, // 拥有的菜单id
+			// 				menus // 系统下的所有菜单
+			// 			})
+			// 		}
+			// 	})
+			// )
 			return { ...role, systems }
 		} catch (error) {
 			return Promise.reject(error)
@@ -160,20 +160,20 @@ export class RoleService {
 
 	async remove(id: string) {
 		try {
-			await this.roleModel.findByIdAndRemove(id)
-			await this.roleSystemMenus.remove({
-				roleSystemId: id
-			})
-			// 查询对应的用户表，将包含的角色同步删除
-			await this.userModel.updateMany(
-				{
-					roles: { $in: [id] }
-				},
-				{ $pull: { roles: id } },
-				{ multi: true }
-			)
-			// 角色改变，通知重新获取菜单
-			this.wsService.noticeUpdateMenus(2, id)
+			// await this.roleModel.findByIdAndRemove(id)
+			// await this.roleSystemMenus.remove({
+			// 	roleSystemId: id
+			// })
+			// // 查询对应的用户表，将包含的角色同步删除
+			// await this.userModel.updateMany(
+			// 	{
+			// 		roles: { $in: [id] }
+			// 	},
+			// 	{ $pull: { roles: id } },
+			// 	{ multi: true }
+			// )
+			// // 角色改变，通知重新获取菜单
+			// this.wsService.noticeUpdateMenus(2, id)
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -182,26 +182,26 @@ export class RoleService {
 	async checkSystemMenu(roleBody: CreateRoleDto): Promise<Array<SystemMenusIdsType>> {
 		try {
 			const systemMenusIds = []
-			await Promise.all(
-				unionBy(roleBody.systemMenusIds, 'systemId').map(async (item: SystemMenusIdsType) => {
-					// 判断系统是否存在
-					const exists = await this.systemModel.findOne({
-						_id: this.utilService.toObjectId(item.systemId)
-					})
-					if (!exists) {
-						throw new ApiException(10201)
-					}
-					const { menuIds } = await this.menuService.getMenus(
-						// 判断菜单是否存在
-						item.menuIds
-					)
-					systemMenusIds.push({
-						systemId: item.systemId,
-						systemName: item.systemName,
-						menuIds
-					})
-				})
-			)
+			// await Promise.all(
+			// 	unionBy(roleBody.systemMenusIds, 'systemId').map(async (item: SystemMenusIdsType) => {
+			// 		// 判断系统是否存在
+			// 		const exists = await this.systemModel.findOne({
+			// 			_id: this.utilService.toObjectId(item.systemId)
+			// 		})
+			// 		if (!exists) {
+			// 			throw new ApiException(10201)
+			// 		}
+			// 		const { menuIds } = await this.menuService.getMenus(
+			// 			// 判断菜单是否存在
+			// 			item.menuIds
+			// 		)
+			// 		systemMenusIds.push({
+			// 			systemId: item.systemId,
+			// 			systemName: item.systemName,
+			// 			menuIds
+			// 		})
+			// 	})
+			// )
 			return systemMenusIds
 		} catch (error) {
 			return Promise.reject(error)

@@ -175,10 +175,10 @@ export class UserService {
 		const userSystemMenus: Array<UserSystemMenus> = await Promise.all(
 			userSysMenuId.map(async (sysMenu) => {
 				const { menuIds, ..._ } = sysMenu
-				const menus = await this.menuService.handleMenus(menuIds, true)
+				// const menus = await this.menuService.handleMenus(menuIds, true)
 				return {
 					..._,
-					menus
+					menus: []
 				}
 			})
 		)

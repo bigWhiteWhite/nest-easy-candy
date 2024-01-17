@@ -46,7 +46,7 @@ export class UtilService {
 	public toObjectId(id: string | Types.ObjectId): Types.ObjectId {
 		try {
 			if (id instanceof Types.ObjectId) return id as Types.ObjectId
-			return Types.ObjectId(id as string)
+			return new Types.ObjectId(id as string)
 		} catch (e) {
 			throw new ApiException(10004)
 		}

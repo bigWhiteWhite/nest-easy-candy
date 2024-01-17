@@ -124,8 +124,8 @@ export class AdminSystemService {
 					return null
 				}
 			}
-			const menus = await this.menuService.handleMenus(system.menuIds, true)
-			return { ...system, menus }
+			// const menus = await this.menuService.handleMenus(system.menuIds, true)
+			return { ...system, menus: [] }
 		} catch (error) {
 			return Promise.reject(error)
 		}

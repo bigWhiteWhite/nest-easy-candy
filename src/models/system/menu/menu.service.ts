@@ -183,7 +183,6 @@ export class MenuService {
 			)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
-			console.log('🚀 ~ file: menu.service.ts:193 ~ MenuService ~ deleteMenu ~ error:', error)
 			return Promise.reject(error)
 		}
 	}
@@ -209,6 +208,7 @@ export class MenuService {
 	 * @deprecated 从所有菜单中找到传入menuIds的父级菜单
 	 * @param menus 未过滤前的路由列表，menus里面的_id是字符串
 	 */
+	// a/b/c 只传了c过来，但是下面的方法找parentId，只能找到a，没有办法回显b
 	async findParentIds(menus: Array<UpdateMenuDto>): Promise<Array<UpdateMenuDto>> {
 		const parentMenus = []
 		const findParent = async (menu: UpdateMenuDto) => {
@@ -244,7 +244,8 @@ export class MenuService {
 	 */
 	async toggleRouterList(list: Array<UpdateMenuDto>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		const sortList = uniqBy(
-			list.map((_) => ({ ..._, _id: this.utilService.toObjectId(_._id) })),
+			list,
+			// list.map((_) => ({ ..._, _id: this.utilService.toObjectId(_._id) })),
 			'_id'
 		)
 		if (sortList.length === 0) return []
@@ -254,7 +255,10 @@ export class MenuService {
 			// ) as Array<UpdateMenuDto>
 			const parent = (await this.findParentIds(sortList)) as Array<UpdateMenuDto>
 			return parent.map((_) => {
-				const children = filter(sortList, (o: any) => o.parentId?.toString() === _._id.toString()) || []
+				const children =
+					filter(sortList, (o: any) => {
+						return o.parentId?.toString() === _._id.toString()
+					}) || []
 				this.toggleChildren(children, sortList)
 				return { ..._, children }
 			})
@@ -286,7 +290,7 @@ export class MenuService {
 	 * @return 返回菜单和菜单ids
 	 */
 	async getMenus(menuIdArray: Array<Types.ObjectId | string>): Promise<{ menus?: Array<CreateMenuDto>; menuIds?: Array<Types.ObjectId> }> {
-		const uniqMenuIds = uniq(menuIdArray)
+		const uniqMenuIds = uniq(menuIdArray.map((_) => _.toString()))
 		const menus: any = await this.menusModel
 			.find({
 				_id: { $in: uniqMenuIds.map((_) => this.utilService.toObjectId(_)) }
@@ -301,7 +305,6 @@ export class MenuService {
 			menus
 		}
 	}
-
 	/**
 	 * @description 获取指定的菜单menuIds并进行父子排序
 	 * @param menuIds 指定menuIds
@@ -309,7 +312,7 @@ export class MenuService {
 	 */
 	async handleMenus(menuIds: Array<Types.ObjectId>, onlyParent = true): Promise<Array<UpdateMenuDto>> {
 		try {
-			const ids = uniq(menuIds)
+			const ids = uniq(menuIds.map((_) => _.toString()))
 			// const menus = await this.filterValMenus(ids)
 			const { menus } = await this.getMenus(ids)
 			return this.toggleRouterList(menus, onlyParent)

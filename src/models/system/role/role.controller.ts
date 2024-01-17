@@ -6,7 +6,7 @@ import { PageDto } from '@/common/class/res.class'
 
 @Controller('role')
 export class RoleController {
-	constructor(private readonly roleService: RoleService) { }
+	constructor(private readonly roleService: RoleService) {}
 
 	@Post()
 	@ApiOperation({ summary: '添加角色' })

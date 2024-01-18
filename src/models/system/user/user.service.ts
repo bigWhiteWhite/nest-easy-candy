@@ -119,7 +119,7 @@ export class UserService {
 	 * 删除单个用户
 	 */
 	async delete(userId: string) {
-		await this.userModel.findByIdAndRemove(userId)
+		await this.userModel.findByIdAndDelete(userId)
 		this.wsService.noticeUsersUpdateMenus(userId, EVENT_KICK)
 	}
 
@@ -150,28 +150,28 @@ export class UserService {
 			throw new ApiException(10009)
 		}
 		const userSysMenuId = [] as Array<UserSysMenuId>
-		await Promise.all(
-			user.roles.map(async (roleId) => {
-				const role = await this.roleService.findOne(roleId, true)
-				if (role) {
-					role.systems.map((item) => {
-						const userSysMenu = userSysMenuId.find((sysMenus) => {
-							return sysMenus._id.toString() === item.system?._id.toString()
-						})
-						if (userSysMenu) {
-							userSysMenu.menuIds = union(userSysMenu.menuIds, item.menuIds)
-						} else {
-							userSysMenuId.push({
-								...item.system,
-								menuIds: item.menuIds
-							})
-						}
-					})
-				} else {
-					user.roles = user.roles.filter((id) => id !== roleId) // 删除对应的 roleId
-				}
-			})
-		)
+		// await Promise.all(
+		// 	user.roles.map(async (roleId) => {
+		// 		const role = await this.roleService.findOne(roleId, true)
+		// 		if (role) {
+		// 			role.systems.map((item) => {
+		// 				const userSysMenu = userSysMenuId.find((sysMenus) => {
+		// 					return sysMenus._id.toString() === item.system?._id.toString()
+		// 				})
+		// 				if (userSysMenu) {
+		// 					userSysMenu.menuIds = union(userSysMenu.menuIds, item.menuIds)
+		// 				} else {
+		// 					userSysMenuId.push({
+		// 						...item.system,
+		// 						menuIds: item.menuIds
+		// 					})
+		// 				}
+		// 			})
+		// 		} else {
+		// 			user.roles = user.roles.filter((id) => id !== roleId) // 删除对应的 roleId
+		// 		}
+		// 	})
+		// )
 		const userSystemMenus: Array<UserSystemMenus> = await Promise.all(
 			userSysMenuId.map(async (sysMenu) => {
 				const { menuIds, ..._ } = sysMenu

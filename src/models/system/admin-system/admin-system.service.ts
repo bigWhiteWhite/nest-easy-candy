@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, UpdateSystemDto } from './dto/admin-systen.dto'
-import { isEmpty } from 'lodash'
+import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, SystemNameId, UpdateSystemDto } from './dto/admin-systen.dto'
+import { intersection, isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
 import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
@@ -24,7 +24,7 @@ export class AdminSystemService {
 	/**
 	 * @description 获取所有系统
 	 */
-	async listSystem(pagination, query: QuerySystem): Promise<PageList<CreateSystemDto>> {
+	async listSystem(pagination, query: QuerySystem): Promise<PageList<SystemInfoDto>> {
 		try {
 			const { systemName, systemValue } = query
 			const filter = {} as any
@@ -54,14 +54,31 @@ export class AdminSystemService {
 					}
 				)
 				.populate({
-					path: 'menus'
+					path: 'menus',
+					populate: {
+						path: 'parentMenu',
+						populate: {
+							path: 'parentMenu',
+							populate: {
+								path: 'parentMenu'
+							}
+						}
+					}
 				})
+				.lean()
 				.exec()
-			// .lean()
+			const list = await Promise.all(
+				systemList.map(async (system) => {
+					const menus = await this.menuService.toggleRouterList(system.menus)
+					return {
+						...system,
+						menus
+					}
+				})
+			)
 			const count = await this.systemModel.countDocuments(filter)
-
 			return {
-				list: systemList,
+				list,
 				pagination: {
 					pageSize: pageSize,
 					current: current,
@@ -74,7 +91,6 @@ export class AdminSystemService {
 	}
 
 	/**
-	 * !!!!!!! 没有做校验菜单是否存在
 	 * @description 增加系统 - 还需判断菜单id是否存在于菜单表里面
 	 */
 	async addSystem(body: CreateSystemDto) {
@@ -85,7 +101,11 @@ export class AdminSystemService {
 			if (!isEmpty(exists)) {
 				throw new ApiException(10200)
 			}
-			return await this.systemModel.create(body)
+			const { menuIds } = await this.menuService.getMenus(body.menus)
+			return await this.systemModel.create({
+				...body,
+				menus: menuIds
+			})
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -97,10 +117,10 @@ export class AdminSystemService {
 	 */
 	async updateSystem(body: UpdateSystemDto, id: string) {
 		try {
-			const { menuIds } = await this.menuService.getMenus(body.menuIds)
+			const { menuIds } = await this.menuService.getMenus(body.menus)
 			const system = await this.systemModel.findByIdAndUpdate(id, {
 				...body,
-				menuIds
+				menus: menuIds
 			})
 			if (!system) {
 				throw new ApiException(10201)
@@ -116,7 +136,7 @@ export class AdminSystemService {
 	 */
 	async infoSystem(id: string, isError?: boolean): Promise<SystemInfoDto> {
 		try {
-			const system = await this.systemModel.findById(id).lean()
+			const system = await this.systemModel.findById(id).lean().exec()
 			if (isEmpty(system)) {
 				if (!isError) {
 					throw new ApiException(10201)
@@ -124,8 +144,7 @@ export class AdminSystemService {
 					return null
 				}
 			}
-			// const menus = await this.menuService.handleMenus(system.menuIds, true)
-			return { ...system, menus: [] }
+			return system
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -149,7 +168,10 @@ export class AdminSystemService {
 		}
 	}
 
-	async getSystemIds() {
+	/**
+	 * @description 返回所有系统的id和系统名称
+	 */
+	async getSystemIds(): Promise<Array<SystemNameId>> {
 		try {
 			return await this.systemModel.find().select('_id systemName')
 		} catch (error) {
@@ -175,10 +197,26 @@ export class AdminSystemService {
 						}
 					}
 				},
-				{ $pull: { systemMenusIds: { systemId: id } } },
-				{ multi: true }
+				{ $pull: { systemMenusIds: { systemId: id } } }
 			)
 			this.wsService.noticeUpdateMenus(1, system.systemName)
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	/**
+	 * @description 过滤出存在于当前系统id的菜单
+	 * @params systemId - 系统id
+	 * @params menusIds -	菜单id数组
+	 */
+	async filterSystemMenu(systemId: string, menusIds: Array<string>) {
+		try {
+			const { menus } = await this.systemModel.findById(systemId).exec()
+			return intersection(
+				menus.map((_) => _.toString()),
+				menusIds
+			)
 		} catch (error) {
 			return Promise.reject(error)
 		}

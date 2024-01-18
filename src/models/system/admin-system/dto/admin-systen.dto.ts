@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { IsString, IsNotEmpty, MinLength, IsArray, IsOptional, ArrayNotEmpty } from 'class-validator'
 import { UpdateMenuDto } from '../../menu/dto/menu.dto'
 import { Types } from 'mongoose'
@@ -20,33 +20,29 @@ export class CreateSystemDto {
 	@IsArray()
 	@ArrayNotEmpty()
 	@IsOptional()
-	readonly menus?: Array<UpdateMenuDto>
+	readonly menus?: Array<string>
 }
-export class UpdateSystemDto {
-	@ApiProperty({ description: '系统名称' })
-	@IsString()
-	@IsOptional()
-	systemName?: string
-
-	@ApiProperty({ description: '系统菜单ids -- 涵盖该系统下的所有菜单' })
-	@IsArray()
-	@ArrayNotEmpty()
-	readonly menuIds: Array<Types.ObjectId>
-}
-
-export class SystemInfoDto {
+export class UpdateSystemDto extends PartialType(CreateSystemDto) {
 	@ApiProperty({
 		description: '系统ID'
 	})
 	@IsString()
-	readonly _id?: string
+	readonly _id?: string | Types.ObjectId
+}
+export class SystemNameId {
+	@ApiProperty({
+		description: '系统ID'
+	})
+	@IsString()
+	readonly _id?: string | Types.ObjectId
 
 	@ApiProperty({ description: '系统名称' })
 	@IsString()
 	@IsNotEmpty()
 	@MinLength(2)
 	readonly systemName: string
-
+}
+export class SystemInfoDto extends PartialType(SystemNameId) {
 	@ApiProperty({ description: '系统值' })
 	@IsString()
 	@MinLength(2)
@@ -57,9 +53,9 @@ export class SystemInfoDto {
 	@ArrayNotEmpty()
 	readonly menus: Array<UpdateMenuDto>
 
-	@ApiProperty({ description: '系统下的所有菜单Ids' })
-	@IsArray()
-	readonly menuIds: Array<Types.ObjectId>
+	// @ApiProperty({ description: '系统下的所有菜单Ids' })
+	// @IsArray()
+	// readonly menuIds: Array<Types.ObjectId>
 }
 
 export class SystemIds {

@@ -1,24 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsOptional, IsString, ValidateNested, IsNotEmpty, ArrayNotEmpty, IsArray } from 'class-validator'
+import { SystemInfoDto } from '../../admin-system/dto/admin-systen.dto'
+import { UpdateMenuDto } from '../../menu/dto/menu.dto'
 
 export class SystemMenusIdsType {
-	@ApiProperty({ description: '系统ID' })
+	@ApiProperty({ description: '系统名' })
 	@IsNotEmpty()
-	@IsString()
-	readonly systemId: string
+	@ValidateNested()
+	@Type(() => SystemInfoDto)
+	readonly system: SystemInfoDto
 
+	@ApiProperty({ description: '菜单IDs' })
+	@ValidateNested()
+	@Type(() => UpdateMenuDto)
+	readonly menus: Array<UpdateMenuDto>
+}
+export class CreateSystemMenusIds {
 	@ApiProperty({ description: '系统名' })
 	@IsNotEmpty()
 	@IsString()
-	readonly systemName: string
+	readonly system: string
 
 	@ApiProperty({ description: '菜单IDs' })
 	@IsArray()
 	@ArrayNotEmpty({
 		message: '菜单Ids不能为空'
 	})
-	readonly menuIds: Array<string>
+	readonly menus: Array<string>
 }
 
 export class CreateRoleDto {
@@ -36,8 +45,8 @@ export class CreateRoleDto {
 	@IsArray()
 	@ArrayNotEmpty()
 	@ValidateNested({ each: true })
-	@Type(() => SystemMenusIdsType)
-	readonly systemMenusIds: SystemMenusIdsType[]
+	@Type(() => CreateSystemMenusIds)
+	readonly systemMenusIds: CreateSystemMenusIds[]
 }
 
 export class QueryRole {

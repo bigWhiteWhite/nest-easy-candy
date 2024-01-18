@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, IsArray, ValidateIf } from 'class-validator'
+import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, ValidateIf } from 'class-validator'
 export class Meta {
 	@ApiProperty({ description: '菜单标题' })
 	@IsString()
@@ -58,6 +58,7 @@ export class Meta {
 	@IsOptional()
 	readonly icon: string
 }
+
 export class CreateMenuDto {
 	@ApiProperty({ description: '父级菜单' })
 	@IsString()
@@ -69,7 +70,7 @@ export class CreateMenuDto {
 	@MinLength(2)
 	@ValidateIf((obj) => obj.type === 1)
 	@IsNotEmpty()
-	readonly path: string
+	readonly path?: string
 
 	@ApiProperty({ description: '菜单类型 1为菜单, 2为按钮' })
 	@IsNumber()
@@ -110,17 +111,21 @@ export class CreateMenuDto {
 	@Type(() => Meta)
 	readonly meta: Meta
 }
-
 export class UpdateMenuDto extends PartialType(CreateMenuDto) {
 	@ApiProperty({ description: '菜单ID' })
 	@IsString()
 	readonly _id?: string | Types.ObjectId
 }
+export class MenuListDto extends PartialType(UpdateMenuDto) {
+	@ApiProperty({ description: '父级菜单ID' })
+	@IsString()
+	readonly parentId?: string | null
 
-export class ChildrenMenuDto extends PartialType(UpdateMenuDto) {
-	@ApiProperty({ description: '菜单ID' })
-	@IsArray()
-	children?: Array<UpdateMenuDto>
+	@ApiProperty({ description: '子级菜单数组' })
+	@IsOptional()
+	@ValidateNested()
+	@Type(() => MenuListDto)
+	readonly children?: MenuListDto
 }
 
 export class QueryMenu {
@@ -133,7 +138,7 @@ export class QueryMenu {
 	@ApiProperty({ description: '是否只要parent那一级' })
 	@IsBoolean()
 	@IsOptional()
-	readonly onlyParent: boolean
+	readonly outWarpParent: boolean
 
 	@ApiProperty({ description: '是否展示按钮菜单' })
 	@IsBoolean()

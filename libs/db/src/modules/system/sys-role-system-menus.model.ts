@@ -1,32 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Ref, modelOptions, prop } from '@typegoose/typegoose'
 import { Role } from './sys-role.model'
-import { Types } from 'mongoose'
+import { Menus } from './sys-menus.model'
+import { System } from './sys-system.model'
 export class SystemMenusIds {
 	@ApiProperty({ description: '系统ID' })
 	@prop({
 		required: true,
 		unique: true,
-		type: () => String
+		ref: 'System'
 	})
-	systemId: string
+	system: Ref<System>
 
-	@ApiProperty({ description: '系统名称' })
-	@prop({
-		required: true,
-		unique: true,
-		type: () => String
-	})
-	systemName: string
-
-	@ApiProperty({ description: '菜单IDs' })
+	// immutable: true // 这个验证规则会禁止修改
+	@ApiProperty({ description: '菜单' })
 	@prop({
 		required: true,
 		allowMixed: 0,
-		type: () => [Types.ObjectId],
-		immutable: true // 这个验证规则会禁止修改
+		unique: true,
+		ref: 'Menus'
 	})
-	menuIds: Array<Types.ObjectId | string>
+	menus: Ref<Menus>[]
 }
 /**
  * @description 角色和系统值关联表
@@ -43,9 +37,6 @@ export class RoleSystemMenus {
 	})
 	roleSystemId: Ref<Role>
 
-	// @ApiProperty({ description: '角色拥有的所有系统id' })
-	// @prop({ required: true, type: () => Array<string> })
-	// systemIds: string[]
 	@ApiProperty({ description: '角色拥有的所有系统及对应系统下所拥有的菜单id' })
 	@prop({
 		required: true,

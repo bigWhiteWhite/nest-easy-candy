@@ -19,4 +19,5 @@ const getMongoString = (configService: ConfigService) =>
 	':' +
 	configService.get('MONGO_PORT') +
 	'/' +
-	configService.get('MONGO_AUTHDATABASE')
+	configService.get('MONGO_AUTHDATABASE') +
+	'?replicaSet=fresh'

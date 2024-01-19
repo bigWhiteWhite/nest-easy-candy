@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { customAlphabet, nanoid } from 'nanoid'
 import { Request } from 'express'
 import * as CryptoJS from 'crypto-js'
-import { Types } from 'mongoose'
+import { PopulateOptions, Types } from 'mongoose'
 import { ApiException } from '../../service/exceptions/api.exception'
 import { isEqual } from 'lodash'
 @Injectable()
@@ -16,6 +16,18 @@ export class UtilService {
 		return isEqual(oldData, updateData)
 	}
 
+	/**
+	 * @description 生成多嵌套的Menus填充
+	 */
+	generatePopulateConfig(path: string, depth: number, params?: Partial<PopulateOptions>): PopulateOptions {
+		if (depth > 0) {
+			return {
+				...params,
+				path,
+				populate: this.generatePopulateConfig(path, depth - 1, params) as any
+			}
+		}
+	}
 	/**
 	 * 获取请求IP
 	 */

@@ -10,9 +10,13 @@ import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
 import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
+import { RoleSystemMenusInfo } from './dto/update-role.dto'
+import { UtilService } from '@/shared/tools/util.service'
+import { PopulateOptions } from 'mongoose'
 
 @Injectable()
 export class RoleService {
+	readonly menuPopConfig = {} as PopulateOptions // 填充菜单配置
 	constructor(
 		@InjectModel(Role)
 		private readonly roleModel: ReturnModelType<typeof Role>,
@@ -21,41 +25,86 @@ export class RoleService {
 		@InjectModel(User)
 		private readonly userModel: ReturnModelType<typeof User>,
 		private readonly adminSystemService: AdminSystemService,
+		private utilService: UtilService,
 		private menuService: MenuService,
 		private wsService: WSService
-	) {}
+	) {
+		const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+			model: 'Menus',
+			options: {
+				lean: true
+			}
+		})
+		this.menuPopConfig = {
+			strictPopulate: false,
+			path: 'menus',
+			model: 'Menus',
+			options: {
+				lean: true // 切换成普通对象
+			},
+			populate: parentPopConfig
+		}
+	}
 
 	/**
 	 * @description 角色表添加，判断有无角色
 	 * @description 角色系统表关联，判断有无系统，系统合并，系统菜单合并，判断菜单是否存在
 	 */
 	async create(roleBody: CreateRoleDto) {
+		// 添加事务锁
+		// const session = await this.roleModel.startSession()
+		// session.startTransaction()
 		try {
 			const hasRole = await this.roleModel.findOne({
 				// 判断角色是否存在
 				roleName: roleBody.roleName
 			})
 			if (hasRole) throw new ApiException(10400)
-			const systemMenusIds = await Promise.all(
-				unionBy(roleBody.systemMenusIds, 'system').map(async (item) => {
-					return {
-						system: item.system,
-						menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
-					}
-				})
-			)
-			// 创建角色
-			const { _id } = await this.roleModel.create({
+			const role = await this.roleModel.create({
 				roleName: roleBody.roleName,
 				remark: roleBody.remark
 			})
-			// 创建角色系统关联
-			await this.roleSystemMenus.create({
-				roleSystemId: _id,
-				systemMenusIds
-			})
+			await Promise.all(
+				unionBy(roleBody.systemMenus, 'system').map(async (item) => {
+					// 创建角色系统关联
+					await this.roleSystemMenus.create({
+						roleSystemId: role._id,
+						system: item.system,
+						menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
+					})
+				})
+			)
+			// 创建角色 - 事务 https://mongoosejs.com/docs/api/model.html#Model.create()
+			// const role = await this.roleModel.create(
+			// 	[
+			// 		{
+			// 			roleName: roleBody.roleName,
+			// 			remark: roleBody.remark
+			// 		}
+			// 	],
+			// 	{
+			// 		session
+			// 	}
+			// )
+			// await Promise.all(
+			// 	unionBy(roleBody.systemMenus, 'system').map(async (item) => {
+			// 		// 创建角色系统关联
+			// 		await this.roleSystemMenus.create(
+			// 			{
+			// 				roleSystemId: role._id,
+			// 				system: item.system,
+			// 				menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
+			// 			},
+			// 			{ session }
+			// 		)
+			// 	})
+			// )
+			// await session.commitTransaction()
 		} catch (error) {
+			// await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			// session.endSession()
 		}
 	}
 
@@ -96,9 +145,9 @@ export class RoleService {
 		}
 	}
 
-	async findOne(id: string, isError?: boolean) {
+	async findRoleWithPopulate(id: string, isError?: boolean) {
 		try {
-			const role = await this.roleModel
+			const role = (await this.roleModel
 				.findById(id)
 				.populate({
 					path: 'roleSystemMenus',
@@ -111,30 +160,89 @@ export class RoleService {
 								strictPopulate: false, // 设置为允许填充不在架构中的路径
 								path: 'system',
 								model: 'System', // 用于填充的模型的可选名称
-								select: 'systemName systemValue' // 可选字段 前面加-号是排除
+								select: 'systemName systemValue menus', // 可选字段 前面加-号是排除
+								options: {
+									lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
+								},
+								populate: this.menuPopConfig
 							},
+							this.menuPopConfig
+						]
+					}
+				})
+				.lean()
+				.exec()) as unknown as RoleSystemMenusInfo
+			if (isEmpty(role)) {
+				if (!isError) {
+					throw new ApiException(10401)
+				} else {
+					return null
+				}
+			}
+			const roleSystemMenus = role.roleSystemMenus.map((item) => {
+				const { systemMenusIds } = item
+
+				return {
+					system: {
+						_id: systemMenusIds.system._id,
+						systemName: systemMenusIds.system.systemName,
+						systemValue: systemMenusIds.system.systemValue
+					},
+					systemMenus: this.menuService.toggleRouterList(systemMenusIds.system.menus || []),
+					menus: this.menuService.toggleRouterList(systemMenusIds.menus)
+				}
+
+				// const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
+				// 	const system = {
+				// 		...systemMenus.system,
+				// 		menus: this.menuService.toggleRouterList(systemMenus.menus)
+				// 	}
+				// 	return {
+				// 		system,
+				// 		menus: this.menuService.toggleRouterList(systemMenus.menus)
+				// 	}
+				// })
+				// return {
+				// 	...item,
+				// 	systemMenusIds
+				// }
+			})
+
+			return {
+				...role,
+				roleSystemMenus
+			}
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	async findRoleNoPopulate(id: string, isError?: boolean) {
+		try {
+			const role = (await this.roleModel
+				.findById(id)
+				.populate({
+					path: 'roleSystemMenus',
+					select: 'roleSystemMenus', // 可选字段 前面加-号是排除
+					populate: {
+						path: 'systemMenusIds',
+						strictPopulate: false, // 设置为允许填充不在架构中的路径
+						populate: [
 							{
-								strictPopulate: false,
-								path: 'menus',
-								model: 'Menus',
-								populate: {
-									path: 'parentMenu',
-									model: 'Menus',
-									populate: {
-										path: 'parentMenu',
-										model: 'Menus',
-										populate: {
-											path: 'parentMenu',
-											model: 'Menus'
-										}
-									}
-								}
+								strictPopulate: false, // 设置为允许填充不在架构中的路径
+								path: 'system',
+								model: 'System', // 用于填充的模型的可选名称
+								select: 'systemName systemValue menus', // 可选字段 前面加-号是排除
+								options: {
+									lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
+								},
+								populate: this.menuPopConfig
 							}
 						]
 					}
 				})
 				.lean()
-				.exec()
+				.exec()) as unknown as RoleSystemMenusInfo
 			if (isEmpty(role)) {
 				if (!isError) {
 					throw new ApiException(10401)
@@ -143,24 +251,22 @@ export class RoleService {
 				}
 			}
 			// const roleSystemMenus = role.roleSystemMenus.map((item) => {
-			// 	console.log('🚀 ~ file: role.service.ts:137 ~ RoleService ~ roleSystemMenus ~ item:', item)
-			// 	const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
-			// 		return {
-			// 			...systemMenus,
-			// 			menus: this.menuService.toggleRouterList(systemMenus.menus)
-			// 		}
-			// 	})
+			// 	const { systemMenusIds } = item
 			// 	return {
-			// 		...item,
-			// 		systemMenusIds
+			// 		system: {
+			// 			_id: systemMenusIds.system._id,
+			// 			systemName: systemMenusIds.system.systemName,
+			// 			systemValue: systemMenusIds.system.systemValue
+			// 		},
+			// 		systemMenus: this.menuService.toggleRouterList(systemMenusIds.system.menus || []),
+			// 		menus: systemMenusIds.menus
 			// 	}
 			// })
-			console.log('🚀 ~ file: role.service.ts:158 ~ RoleService ~ //roleSystemMenus ~  role.roleSystemMenus:', role.roleSystemMenus)
-
-			return {
-				...role
-				// roleSystemMenus: role
-			}
+			return role
+			// return {
+			// 	...role,
+			// 	roleSystemMenus
+			// }
 		} catch (error) {
 			return Promise.reject(error)
 		}

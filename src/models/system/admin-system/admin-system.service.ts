@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, SystemInfo, UpdateSystemDto } from './dto/admin-systen.dto'
+import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, SystemInfo, SystemId } from './dto/admin-systen.dto'
 import { intersection, isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
 import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
-import { PageList } from '@/common/class/res.class'
+import { PageList, PageOptionsDto } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
+import { MenuListDto } from '../menu/dto/menu.dto'
+import { UtilService } from '@/shared/tools/util.service'
 
 @Injectable()
 export class AdminSystemService {
@@ -18,13 +20,14 @@ export class AdminSystemService {
 		@InjectModel(RoleSystemMenus)
 		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
 		private menuService: MenuService,
+		private utilService: UtilService,
 		private wsService: WSService
 	) {}
 
 	/**
 	 * @description 获取所有系统
 	 */
-	async listSystem(pagination, query: QuerySystem): Promise<PageList<SystemInfoDto>> {
+	async listSystem(pagination: PageOptionsDto, query: QuerySystem): Promise<PageList<SystemInfoDto>> {
 		try {
 			const { systemName, systemValue } = query
 			const filter = {} as any
@@ -43,6 +46,12 @@ export class AdminSystemService {
 				}
 			}
 			const { current = 1, pageSize = 10 } = pagination
+			const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+				model: 'Menus',
+				options: {
+					lean: true
+				}
+			})
 			const systemList = await this.systemModel
 				.find(
 					filter,
@@ -55,27 +64,17 @@ export class AdminSystemService {
 				)
 				.populate({
 					path: 'menus',
-					populate: {
-						path: 'parentMenu',
-						populate: {
-							path: 'parentMenu',
-							populate: {
-								path: 'parentMenu'
-							}
-						}
-					}
+					populate: parentPopConfig
 				})
 				.lean()
 				.exec()
-			const list = await Promise.all(
-				systemList.map(async (system) => {
-					const menus = await this.menuService.toggleRouterList(system.menus)
-					return {
-						...system,
-						menus
-					}
-				})
-			)
+			const list = systemList.map((system) => {
+				const menus = this.menuService.toggleRouterList(system.menus)
+				return {
+					...system,
+					menus
+				}
+			})
 			const count = await this.systemModel.countDocuments(filter)
 			return {
 				list,
@@ -115,7 +114,7 @@ export class AdminSystemService {
 	 * @description 更新系统 - 系统添加或者更新的时候有什么menuId就添加什么menuId，但是查询的时候如果menuId有pId就要返回对应pId
 	 * @description 更新系统 - 通知当前系统下面的用户重新获取系统菜单
 	 */
-	async updateSystem(body: UpdateSystemDto, id: string) {
+	async updateSystem(body: CreateSystemDto, id: string) {
 		try {
 			const { menuIds } = await this.menuService.getMenus(body.menus)
 			const system = await this.systemModel.findByIdAndUpdate(id, {
@@ -133,10 +132,29 @@ export class AdminSystemService {
 
 	/**
 	 * @description 获取系统信息
+	 * @params systemId 系统ids
+	 * @params isError 当找不到系统时是否报错，默然报错，传true不报错
+	 * @params shouldPopulate 是否填充系统的菜单，不填充则返回菜单id
 	 */
-	async infoSystem(id: string, isError?: boolean): Promise<SystemInfoDto> {
+	async infoSystem({ systemId, isError, shouldPopulate }: SystemId): Promise<SystemInfoDto> {
 		try {
-			const system = await this.systemModel.findById(id).lean().exec()
+			const query = this.systemModel.findById(systemId)
+			if (shouldPopulate) {
+				const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+					model: 'Menus',
+					options: {
+						lean: true
+					}
+				})
+				query.populate({
+					path: 'menus',
+					options: {
+						lean: true
+					},
+					populate: parentPopConfig
+				})
+			}
+			const system = await query.lean().exec()
 			if (isEmpty(system)) {
 				if (!isError) {
 					throw new ApiException(10201)
@@ -144,7 +162,14 @@ export class AdminSystemService {
 					return null
 				}
 			}
-			return system
+			let menus = system.menus as unknown as Array<MenuListDto>
+			if (shouldPopulate) {
+				menus = this.menuService.toggleRouterList(system.menus)
+			}
+			return {
+				...system,
+				menus
+			}
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -152,13 +177,15 @@ export class AdminSystemService {
 
 	/**
 	 * @description 根据系统id返回处理以后的系统-菜单
-	 * @params 系统ids
+	 * @params systemIds 系统ids
+	 * @params isError 当找不到系统时是否报错，默然报错，传true不报错
+	 * @params shouldPopulate 是否填充系统的菜单，不填充则返回菜单id
 	 */
-	async infoSystems({ systemIds }: SystemIds): Promise<Array<SystemInfoDto>> {
+	async infoSystems({ systemIds, isError = true, shouldPopulate }: SystemIds): Promise<Array<SystemInfoDto>> {
 		try {
 			const systemMenus = await Promise.all(
-				systemIds.map(async (id) => {
-					const info = await this.infoSystem(id, true)
+				systemIds.map(async (systemId) => {
+					const info = await this.infoSystem({ systemId, isError, shouldPopulate })
 					if (info) return info
 				})
 			)
@@ -184,26 +211,26 @@ export class AdminSystemService {
 	 * @description 删除
 	 */
 	async deleteSystem(id) {
-		try {
-			const system = await this.systemModel.findByIdAndDelete(id)
-			if (isEmpty(system)) {
-				throw new ApiException(10201)
-			}
-			// 查询对应的角色系统表，将系统同步删除
-			await this.roleSystemMenus.updateMany(
-				{
-					systemMenusIds: {
-						$elemMatch: {
-							systemId: id
-						}
-					}
-				},
-				{ $pull: { systemMenusIds: { systemId: id } } }
-			)
-			this.wsService.noticeUpdateMenus(1, system.systemName)
-		} catch (error) {
-			return Promise.reject(error)
-		}
+		// try {
+		// 	const system = await this.systemModel.findByIdAndDelete(id)
+		// 	if (isEmpty(system)) {
+		// 		throw new ApiException(10201)
+		// 	}
+		// 	// 查询对应的角色系统表，将系统同步删除
+		// 	await this.roleSystemMenus.updateMany(
+		// 		{
+		// 			systemMenusIds: {
+		// 				$elemMatch: {
+		// 					systemId: id
+		// 				}
+		// 			}
+		// 		},
+		// 		{ $pull: { systemMenusIds: { systemId: id } } }
+		// 	)
+		// 	this.wsService.noticeUpdateMenus(1, system.systemName)
+		// } catch (error) {
+		// 	return Promise.reject(error)
+		// }
 	}
 
 	/**

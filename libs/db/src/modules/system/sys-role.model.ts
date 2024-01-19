@@ -10,7 +10,7 @@ import { RoleSystemMenus } from './sys-role-system-menus.model'
 export class Role {
 	@ApiProperty({ description: '角色名称', example: 'role' }) // 接口文档里面对于字段的描述和默认值
 	@prop({
-		required: true,
+		// required: true,
 		unique: true
 	})
 	roleName: string

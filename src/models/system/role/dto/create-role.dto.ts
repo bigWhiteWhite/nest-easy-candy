@@ -46,7 +46,7 @@ export class CreateRoleDto {
 	@ArrayNotEmpty()
 	@ValidateNested({ each: true })
 	@Type(() => CreateSystemMenusIds)
-	readonly systemMenusIds: CreateSystemMenusIds[]
+	readonly systemMenus: CreateSystemMenusIds[]
 }
 
 export class QueryRole {

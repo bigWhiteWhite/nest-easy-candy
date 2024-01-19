@@ -102,37 +102,39 @@ export class RoleService {
 				.findById(id)
 				.populate({
 					path: 'roleSystemMenus',
+					select: 'roleSystemMenus', // 可选字段 前面加-号是排除
 					populate: {
 						path: 'systemMenusIds',
+						strictPopulate: false, // 设置为允许填充不在架构中的路径
 						populate: [
 							{
 								strictPopulate: false, // 设置为允许填充不在架构中的路径
 								path: 'system',
 								model: 'System', // 用于填充的模型的可选名称
 								select: 'systemName systemValue' // 可选字段 前面加-号是排除
+							},
+							{
+								strictPopulate: false,
+								path: 'menus',
+								model: 'Menus',
+								populate: {
+									path: 'parentMenu',
+									model: 'Menus',
+									populate: {
+										path: 'parentMenu',
+										model: 'Menus',
+										populate: {
+											path: 'parentMenu',
+											model: 'Menus'
+										}
+									}
+								}
 							}
-							// {
-							// 	strictPopulate: false, // 设置为允许填充不在架构中的路径
-							// 	path: 'menus',
-							// 	model: 'Menus' // 用于填充的模型的可选名称
-							// }
 						]
 					}
 				})
 				.lean()
 				.exec()
-			const roleSystemMenus = role.roleSystemMenus.map((item) => {
-				const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
-					return {
-						...systemMenus,
-						menus: this.menuService.handleMenus(systemMenus.menus)
-					}
-				})
-				return {
-					...item,
-					systemMenusIds
-				}
-			})
 			if (isEmpty(role)) {
 				if (!isError) {
 					throw new ApiException(10401)
@@ -140,9 +142,24 @@ export class RoleService {
 					return null
 				}
 			}
+			// const roleSystemMenus = role.roleSystemMenus.map((item) => {
+			// 	console.log('🚀 ~ file: role.service.ts:137 ~ RoleService ~ roleSystemMenus ~ item:', item)
+			// 	const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
+			// 		return {
+			// 			...systemMenus,
+			// 			menus: this.menuService.toggleRouterList(systemMenus.menus)
+			// 		}
+			// 	})
+			// 	return {
+			// 		...item,
+			// 		systemMenusIds
+			// 	}
+			// })
+			console.log('🚀 ~ file: role.service.ts:158 ~ RoleService ~ //roleSystemMenus ~  role.roleSystemMenus:', role.roleSystemMenus)
+
 			return {
-				...role,
-				roleSystemMenus
+				...role
+				// roleSystemMenus: role
 			}
 		} catch (error) {
 			return Promise.reject(error)

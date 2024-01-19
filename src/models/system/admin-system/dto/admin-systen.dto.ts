@@ -29,7 +29,7 @@ export class UpdateSystemDto extends PartialType(CreateSystemDto) {
 	@IsString()
 	readonly _id?: string | Types.ObjectId
 }
-export class SystemNameId {
+export class SystemInfo {
 	@ApiProperty({
 		description: '系统ID'
 	})
@@ -41,21 +41,17 @@ export class SystemNameId {
 	@IsNotEmpty()
 	@MinLength(2)
 	readonly systemName: string
-}
-export class SystemInfoDto extends PartialType(SystemNameId) {
+
 	@ApiProperty({ description: '系统值' })
 	@IsString()
 	@MinLength(2)
 	readonly systemValue: string
-
+}
+export class SystemInfoDto extends PartialType(SystemInfo) {
 	@ApiProperty({ description: '系统下的所有菜单' })
 	@IsArray()
 	@ArrayNotEmpty()
 	readonly menus: Array<UpdateMenuDto>
-
-	// @ApiProperty({ description: '系统下的所有菜单Ids' })
-	// @IsArray()
-	// readonly menuIds: Array<Types.ObjectId>
 }
 
 export class SystemIds {

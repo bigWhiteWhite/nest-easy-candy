@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, SystemNameId, UpdateSystemDto } from './dto/admin-systen.dto'
+import { CreateSystemDto, QuerySystem, SystemIds, SystemInfoDto, SystemInfo, UpdateSystemDto } from './dto/admin-systen.dto'
 import { intersection, isEmpty } from 'lodash'
 import { MenuService } from '../menu/menu.service'
 import { System } from '@app/db/modules/system/sys-system.model'
@@ -171,9 +171,10 @@ export class AdminSystemService {
 	/**
 	 * @description 返回所有系统的id和系统名称
 	 */
-	async getSystemIds(): Promise<Array<SystemNameId>> {
+	async getSystemIds(): Promise<Array<SystemInfo>> {
 		try {
-			return await this.systemModel.find().select('_id systemName')
+			return await this.systemModel.find()
+			// .select('_id systemName systemValue')
 		} catch (error) {
 			return Promise.reject(error)
 		}

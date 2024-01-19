@@ -216,17 +216,30 @@ export class MenuService {
 		const buildTree = (node) => {
 			const { parentMenu, ...params } = node // 只返回parentId就够
 			// 角色查询的时候传过来的parentMenu是字符串
-			const parentId = typeof parentMenu === 'object' ? parentMenu?._id : parentMenu
 			const children = withParent?.filter((child) => {
-				const childPId = typeof child.parentMenu === 'object' ? child.parentMenu?._id : child.parentMenu
+				const childPId = child.parentMenu?._id
 				return childPId.toString() === node._id.toString()
 			})
 			return {
 				...params,
-				parentId,
+				parentId: parentMenu?._id,
 				children: children?.map((item) => buildTree(item))
 			}
 		}
+		// const buildTree = (node) => {
+		// 	const { parentMenu, ...params } = node // 只返回parentId就够
+		// 	// 角色查询的时候传过来的parentMenu是字符串
+		// 	const parentId = typeof parentMenu === 'object' ? parentMenu?._id : parentMenu
+		// 	const children = withParent?.filter((child) => {
+		// 		const childPId = typeof child.parentMenu === 'object' ? child.parentMenu?._id : child.parentMenu
+		// 		return childPId.toString() === node._id.toString()
+		// 	})
+		// 	return {
+		// 		...params,
+		// 		parentId,
+		// 		children: children?.map((item) => buildTree(item))
+		// 	}
+		// }
 		return withoutParent?.map((root) => buildTree(root))
 	}
 

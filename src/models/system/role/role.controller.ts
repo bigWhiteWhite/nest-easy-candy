@@ -22,9 +22,15 @@ export class RoleController {
 	}
 
 	@Get(':id')
-	@ApiOperation({ summary: '获取角色信息' })
-	findOne(@Param('id') id: string) {
-		return this.roleService.findOne(id)
+	@ApiOperation({ summary: '获取角色信息且填充' })
+	findRoleWithPopulate(@Param('id') id: string) {
+		return this.roleService.findRoleWithPopulate(id)
+	}
+
+	@Get('no-populate/:id')
+	@ApiOperation({ summary: '获取角色信息但是不填充' })
+	findRoleNoPopulate(@Param('id') id: string) {
+		return this.roleService.findRoleNoPopulate(id)
 	}
 
 	@Patch(':id')

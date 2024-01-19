@@ -10,6 +10,8 @@ import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
 import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
+import { RoleSystemMenusInfo } from './dto/update-role.dto'
+import { UtilService } from '@/shared/tools/util.service'
 
 @Injectable()
 export class RoleService {
@@ -21,6 +23,7 @@ export class RoleService {
 		@InjectModel(User)
 		private readonly userModel: ReturnModelType<typeof User>,
 		private readonly adminSystemService: AdminSystemService,
+		private utilService: UtilService,
 		private menuService: MenuService,
 		private wsService: WSService
 	) {}
@@ -96,9 +99,24 @@ export class RoleService {
 		}
 	}
 
-	async findOne(id: string, isError?: boolean) {
+	async findRoleWithPopulate(id: string, isError?: boolean) {
 		try {
-			const role = await this.roleModel
+			const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+				model: 'Menus',
+				options: {
+					lean: true
+				}
+			})
+			const menuPopConfig = {
+				strictPopulate: false,
+				path: 'menus',
+				model: 'Menus',
+				options: {
+					lean: true // 切换成普通对象
+				},
+				populate: parentPopConfig
+			}
+			const role = (await this.roleModel
 				.findById(id)
 				.populate({
 					path: 'roleSystemMenus',
@@ -111,30 +129,18 @@ export class RoleService {
 								strictPopulate: false, // 设置为允许填充不在架构中的路径
 								path: 'system',
 								model: 'System', // 用于填充的模型的可选名称
-								select: 'systemName systemValue' // 可选字段 前面加-号是排除
+								select: 'systemName systemValue menus', // 可选字段 前面加-号是排除
+								options: {
+									lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
+								},
+								populate: menuPopConfig
 							},
-							{
-								strictPopulate: false,
-								path: 'menus',
-								model: 'Menus',
-								populate: {
-									path: 'parentMenu',
-									model: 'Menus',
-									populate: {
-										path: 'parentMenu',
-										model: 'Menus',
-										populate: {
-											path: 'parentMenu',
-											model: 'Menus'
-										}
-									}
-								}
-							}
+							menuPopConfig
 						]
 					}
 				})
 				.lean()
-				.exec()
+				.exec()) as unknown as RoleSystemMenusInfo
 			if (isEmpty(role)) {
 				if (!isError) {
 					throw new ApiException(10401)
@@ -142,25 +148,54 @@ export class RoleService {
 					return null
 				}
 			}
-			// const roleSystemMenus = role.roleSystemMenus.map((item) => {
-			// 	console.log('🚀 ~ file: role.service.ts:137 ~ RoleService ~ roleSystemMenus ~ item:', item)
-			// 	const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
-			// 		return {
-			// 			...systemMenus,
-			// 			menus: this.menuService.toggleRouterList(systemMenus.menus)
-			// 		}
-			// 	})
-			// 	return {
-			// 		...item,
-			// 		systemMenusIds
-			// 	}
-			// })
-			console.log('🚀 ~ file: role.service.ts:158 ~ RoleService ~ //roleSystemMenus ~  role.roleSystemMenus:', role.roleSystemMenus)
+			const roleSystemMenus = role.roleSystemMenus.map((item) => {
+				const systemMenusIds = item.systemMenusIds.map((systemMenus) => {
+					const system = {
+						...systemMenus.system,
+						menus: this.menuService.toggleRouterList(systemMenus.menus)
+					}
+					return {
+						system,
+						menus: this.menuService.toggleRouterList(systemMenus.menus)
+					}
+				})
+				return {
+					...item,
+					systemMenusIds
+				}
+			})
 
 			return {
-				...role
-				// roleSystemMenus: role
+				...role,
+				roleSystemMenus
 			}
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	async findRoleNoPopulate(id: string, isError?: boolean) {
+		try {
+			const role = (await this.roleModel
+				.findById(id)
+				.populate({
+					path: 'roleSystemMenus',
+					select: 'roleSystemMenus', // 可选字段 前面加-号是排除
+					populate: {
+						path: 'systemMenusIds',
+						strictPopulate: false // 设置为允许填充不在架构中的路径
+					}
+				})
+				.lean()
+				.exec()) as unknown as RoleSystemMenusInfo
+			if (isEmpty(role)) {
+				if (!isError) {
+					throw new ApiException(10401)
+				} else {
+					return null
+				}
+			}
+			return role
 		} catch (error) {
 			return Promise.reject(error)
 		}

@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateMenuDto, QueryMenu, MenuListDto, UpdateMenuDto } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { isEmpty, uniq, groupBy } from 'lodash'
+import { isEmpty, uniq, groupBy, unionBy } from 'lodash'
 import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
@@ -44,22 +44,20 @@ export class MenuService {
 				}
 			}
 			const { current = 1, pageSize = 10 } = pagination
+			const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+				model: 'Menus',
+				options: {
+					lean: true
+				}
+			})
 			const list = await this.menusModel
 				.find()
 				// 三级嵌套填充关联文档，如果不够再加
-				.populate({
-					path: 'parentMenu',
-					populate: {
-						path: 'parentMenu',
-						populate: {
-							path: 'parentMenu'
-						}
-					}
-				})
+				.populate(parentPopConfig)
 				.lean()
 				.exec()
 			// 添加children
-			const menusWithParent = await this.toggleRouterList(list, outWarpParent)
+			const menusWithParent = this.toggleRouterList(list, outWarpParent)
 			const count = await this.menusModel.countDocuments(filter)
 			return {
 				list: menusWithParent,
@@ -118,15 +116,16 @@ export class MenuService {
 	/**
 	 * @description 获取菜单信息
 	 */
-	async infoMenu(id): Promise<MenuListDto> {
+	async infoMenu(id: string, shouldPopulate?: boolean): Promise<MenuListDto> {
 		try {
-			const menus = await this.menusModel
+			const query = this.menusModel
 				.findOne({
 					_id: this.utilService.toObjectId(id),
 					isEnable: 1
 				})
 				.sort({ pIndex: 1, cIndex: 1 })
-				.populate({
+			if (shouldPopulate) {
+				query.populate({
 					path: 'parentMenu',
 					populate: {
 						path: 'parentMenu',
@@ -135,7 +134,8 @@ export class MenuService {
 						}
 					}
 				})
-				.exec()
+			}
+			const menus = await query.exec()
 			if (!isEmpty(menus)) {
 				return menus
 			}
@@ -203,22 +203,35 @@ export class MenuService {
 
 	/**
 	 * @description 根据parentMenu给菜单添加对应的children菜单
-	 * @param outWarpParent 最外层是否只保存一级父集
+	//  * @description 当list中的元素缺乏对应的父级的时候，这个元素会被排除掉，例如[a,b,c]中，假设b有父级d，但是d不在list中，那么b将被排除
+	 * @param outWarpParent 最外层是否只保存一级父集,默认保存
 	 */
 	toggleRouterList(list: Array<UpdateMenuDto>, outWarpParent?: boolean): Array<MenuListDto> {
-		let withoutParent = list
 		let withParent = list
+		let withoutParent = list
 		if (!outWarpParent) {
+			// 找出第一级父级菜单
+			const getTopLevel = (item: UpdateMenuDto) => {
+				if (item.parentMenu) {
+					return getTopLevel(item.parentMenu)
+				} else {
+					return {
+						...item,
+						_id: item._id.toString()
+					}
+				}
+			}
 			const groupedByParentMenu = groupBy(list, (node) => (node.parentMenu ? 'withParent' : 'withoutParent'))
-			withoutParent = groupedByParentMenu['withoutParent'] || []
 			withParent = groupedByParentMenu['withParent'] || []
+			withoutParent = unionBy(
+				list.map((item) => getTopLevel(item)),
+				'_id'
+			)
 		}
 		const buildTree = (node) => {
 			const { parentMenu, ...params } = node // 只返回parentId就够
-			// 角色查询的时候传过来的parentMenu是字符串
 			const children = withParent?.filter((child) => {
-				const childPId = child.parentMenu?._id
-				return childPId.toString() === node._id.toString()
+				return child.parentMenu?._id.toString() === node._id.toString()
 			})
 			return {
 				...params,
@@ -226,20 +239,6 @@ export class MenuService {
 				children: children?.map((item) => buildTree(item))
 			}
 		}
-		// const buildTree = (node) => {
-		// 	const { parentMenu, ...params } = node // 只返回parentId就够
-		// 	// 角色查询的时候传过来的parentMenu是字符串
-		// 	const parentId = typeof parentMenu === 'object' ? parentMenu?._id : parentMenu
-		// 	const children = withParent?.filter((child) => {
-		// 		const childPId = typeof child.parentMenu === 'object' ? child.parentMenu?._id : child.parentMenu
-		// 		return childPId.toString() === node._id.toString()
-		// 	})
-		// 	return {
-		// 		...params,
-		// 		parentId,
-		// 		children: children?.map((item) => buildTree(item))
-		// 	}
-		// }
 		return withoutParent?.map((root) => buildTree(root))
 	}
 

@@ -1,9 +1,5 @@
 const a = [
 	{
-		_id: 'a',
-		parentMenu: null
-	},
-	{
 		_id: 'b',
 		parentMenu: {
 			_id: 'a',

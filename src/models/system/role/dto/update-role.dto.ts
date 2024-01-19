@@ -10,7 +10,7 @@ export class UpdateRoleDto extends PartialType(CreateRoleDto) {}
 export class SystemMenusIds {
 	@ApiProperty({ description: '系统对象' })
 	@IsNotEmpty()
-	@Type(() => RoleSystemMenus)
+	@Type(() => SystemInfo)
 	system: SystemInfo
 
 	@ApiProperty({ description: '菜单数组' })
@@ -50,15 +50,9 @@ export class RoleInfo {
 	@IsOptional()
 	readonly remark: string
 }
-export class RoleSystemMenus extends RoleInfo {
+export class RoleSystemMenusInfo extends RoleInfo {
 	@ApiProperty({ description: '角色拥有的系统菜单数组' })
 	@ValidateNested()
 	@Type(() => Array<RoleSystemContent>)
 	roleSystemMenus: Array<RoleSystemContent>
-}
-export class RoleInfoSystem extends RoleInfo {
-	@ApiProperty({ description: '角色系统记录对象' })
-	@IsNotEmpty()
-	@Type(() => RoleSystemMenus)
-	roleSystemMenus?: RoleSystemMenus
 }

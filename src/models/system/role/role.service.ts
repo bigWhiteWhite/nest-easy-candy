@@ -272,33 +272,6 @@ export class RoleService {
 		}
 	}
 
-	async findRoleNoPopulate(id: string, isError?: boolean) {
-		try {
-			const role = (await this.roleModel
-				.findById(id)
-				.populate({
-					path: 'roleSystemMenus',
-					select: 'roleSystemMenus', // 可选字段 前面加-号是排除
-					populate: {
-						path: 'systemMenusIds',
-						strictPopulate: false // 设置为允许填充不在架构中的路径
-					}
-				})
-				.lean()
-				.exec()) as unknown as RoleSystemMenusInfo
-			if (isEmpty(role)) {
-				if (!isError) {
-					throw new ApiException(10401)
-				} else {
-					return null
-				}
-			}
-			return role
-		} catch (error) {
-			return Promise.reject(error)
-		}
-	}
-
 	async update(id: string, roleBody: CreateRoleDto) {
 		try {
 			const hasRole = await this.roleModel.findById(id)

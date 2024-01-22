@@ -141,10 +141,10 @@ export class UserService {
 	}
 
 	/**
-	 * 查找用户信息
+	 * 查找用户信息填充菜单和系统
 	 * @param userId 用户id
 	 */
-	async info(userId: string) {
+	async infoWithSystem(userId: string) {
 		const user = (await this.userModel
 			.findById(userId)
 			.populate({
@@ -177,7 +177,7 @@ export class UserService {
 			roleSystemMenus.map((item) => {
 				const menus = item.menus.map((_) => _.toString())
 				const userSysMenu = userSysMenuId.find((sysMenus) => {
-					return sysMenus.system._id.toString() === item.system?._id.toString()
+					return sysMenus.system?._id.toString() === item.system?._id.toString()
 				})
 				if (userSysMenu) {
 					userSysMenu.menus = union(userSysMenu.menus, menus)
@@ -198,6 +198,18 @@ export class UserService {
 			})
 		)
 		return { ...userinfo, userSystemMenus }
+	}
+
+	/**
+	 * 查找用户信息
+	 * @param userId 用户id
+	 */
+	async info(userId: string) {
+		const user = await this.userModel.findById(userId).lean().exec()
+		if (isEmpty(user)) {
+			throw new ApiException(10009)
+		}
+		return user
 	}
 
 	/**

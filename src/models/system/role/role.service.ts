@@ -224,6 +224,7 @@ export class RoleService {
 					return null
 				}
 			}
+			console.log('🚀 ~ RoleService ~ roleSystemMenus ~ role:', role)
 			const roleSystemMenus = role.roleSystemMenus.map((item) => {
 				return {
 					system: {

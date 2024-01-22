@@ -217,12 +217,9 @@ export class AdminSystemService {
 				throw new ApiException(10201)
 			}
 			// 查询对应的角色系统表，将系统同步删除
-			await this.roleSystemMenus.updateMany(
-				{
-					system: id
-				},
-				{ $pull: { system: id } }
-			)
+			await this.roleSystemMenus.deleteMany({
+				system: id
+			})
 			this.wsService.noticeUpdateMenus(1, system.systemName)
 		} catch (error) {
 			return Promise.reject(error)

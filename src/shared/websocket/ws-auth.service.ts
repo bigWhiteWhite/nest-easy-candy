@@ -36,17 +36,18 @@ export class AuthService {
 	 */
 	async joinRoom(client: Socket, user: AdminUser) {
 		try {
-			// const { userSystemMenus, username, roles } = await this.userService.info(user._id)
-			// const systemNames = userSystemMenus.map((system) => system.systemName)
-			// systemNames.forEach((name) => {
-			// 	console.log(`${username}加入系统sys:${name}房间`)
-			// 	client.join(`sys:${name}`)
-			// })
-			// roles.forEach((id) => {
-			// 	console.log(`${username}加入角色role:${id}房间`)
-			// 	client.join(`role:${id}`)
-			// })
-			// client.broadcast.to(systemNames).emit(EVENT_ONLINE, { username })
+			const { username, userSystemMenus } = await this.userService.infoWithSystem(user._id)
+			const { roles } = await this.userService.info(user._id)
+			const systemNames = userSystemMenus.map((item) => item.system.systemName)
+			systemNames.forEach((name) => {
+				console.log(`${username}加入系统sys:${name}房间`)
+				client.join(`sys:${name}`)
+			})
+			roles.forEach((id) => {
+				console.log(`${username}加入角色role:${id}房间`)
+				client.join(`role:${id}`)
+			})
+			client.broadcast.to(systemNames).emit(EVENT_ONLINE, { username })
 		} catch (error) {
 			return Promise.reject(error)
 		}

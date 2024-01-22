@@ -93,7 +93,7 @@ export class AuthController {
 	@UseGuards(AuthGuard('jwt'))
 	@ApiBearerAuth()
 	async info(@UserInfo() user: AdminUser): Promise<any> {
-		return await this.userService.info(user._id)
+		return await this.userService.infoWithSystem(user._id)
 	}
 
 	@Get('infoId/:id')

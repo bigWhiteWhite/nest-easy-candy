@@ -2,16 +2,15 @@ import { Injectable } from '@nestjs/common'
 import { User } from '@app/db/modules/system/sys-user.model'
 import { InjectModel } from 'nestjs-typegoose'
 import { ReturnModelType } from '@typegoose/typegoose'
-import { DeleteAuthDto, EditAuthDto, ImageCaptchaDto, RegisterAuthDto } from './dto/user.dto'
+import { DeleteAuthDto, ImageCaptchaDto, RegisterAuthDto, UserInfo, UserSystemMenuId, UserSystemMenus } from './dto/user.dto'
 import { faker } from '@faker-js/faker'
 import { JwtService } from '@nestjs/jwt'
 import { isEmpty, union } from 'lodash'
 import { ImageCaptcha } from './user.class'
 import * as svgCaptcha from 'svg-captcha'
-import { Types } from 'mongoose'
 import { compareSync } from 'bcryptjs'
 import { ConfigService } from '@nestjs/config'
-import { QueryUser, UserSysInfo, UserSysMenuId, UserSystemMenus } from './dto/user-query.dto'
+import { QueryUser } from './dto/user-query.dto'
 import { RoleService } from '../role/role.service'
 import { MenuService } from '../menu/menu.service'
 import { AdminUser } from '../system.interface'
@@ -22,20 +21,23 @@ import { RedisService } from '@/shared/redis/redis.service'
 import { UtilService } from '@/shared/tools/util.service'
 import { EVENT_UPDATE_MENU, EVENT_KICK } from '@/shared/websocket/ws.event'
 import { WSService } from '@/shared/websocket/ws.service'
+import { PopulateOptions } from 'mongoose'
 
 @Injectable()
 export class UserService {
+	readonly menuPopConfig = {} as PopulateOptions // 填充菜单配置
+
 	constructor(
 		@InjectModel(User)
 		private readonly userModel: ReturnModelType<typeof User>,
-		private redisService: RedisService,
-		private jwtService: JwtService,
-		private utilService: UtilService,
-		private configService: ConfigService,
-		private roleService: RoleService,
-		private menuService: MenuService,
-		private logService: LogService,
-		private wsService: WSService
+		private readonly redisService: RedisService,
+		private readonly jwtService: JwtService,
+		private readonly utilService: UtilService,
+		private readonly configService: ConfigService,
+		private readonly roleService: RoleService,
+		private readonly menuService: MenuService,
+		private readonly logService: LogService,
+		private readonly wsService: WSService
 	) {}
 
 	/**
@@ -97,9 +99,11 @@ export class UserService {
 	 * @param param Object 对应SysUser实体类
 	 */
 	async register(body: RegisterAuthDto) {
-		const exists = await this.userModel.findOne({
-			account: body.account
-		})
+		const exists = await this.userModel
+			.findOne({
+				account: body.account
+			})
+			.exec()
 		if (!isEmpty(exists)) {
 			throw new ApiException(10001)
 		}
@@ -110,7 +114,7 @@ export class UserService {
 	/**
 	 * 编辑用户信息
 	 */
-	async edit(body: EditAuthDto, userId: string) {
+	async edit(body: RegisterAuthDto, userId: string) {
 		await this.userModel.findByIdAndUpdate(userId, body)
 		this.wsService.noticeUsersUpdateMenus(userId, EVENT_UPDATE_MENU)
 	}
@@ -129,7 +133,7 @@ export class UserService {
 	async deleteMany(_: DeleteAuthDto) {
 		const { userIds } = _
 		await this.userModel.deleteMany({
-			_id: { $in: userIds.map((_) => Types.ObjectId(_)) }
+			_id: { $in: userIds.map((_) => this.utilService.toObjectId(_)) }
 		})
 		userIds.map((_) => {
 			this.wsService.noticeUsersUpdateMenus(_, EVENT_KICK)
@@ -140,49 +144,60 @@ export class UserService {
 	 * 查找用户信息
 	 * @param userId 用户id
 	 */
-	async info(userId: string): Promise<UserSysInfo> {
-		const user = await this.userModel
-			.findOne({
-				_id: userId
+	async info(userId: string) {
+		const user = (await this.userModel
+			.findById(userId)
+			.populate({
+				path: 'roles',
+				model: 'Role',
+				populate: {
+					path: 'roleSystemMenus',
+					populate: [
+						{
+							strictPopulate: false, // 设置为允许填充不在架构中的路径
+							path: 'system',
+							model: 'System', // 用于填充的模型的可选名称
+							select: 'systemName systemValue', // 可选字段 前面加-号是排除
+							options: {
+								lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
+							}
+						}
+					]
+				}
 			})
 			.lean()
+			.exec()) as unknown as UserInfo
 		if (isEmpty(user)) {
 			throw new ApiException(10009)
 		}
-		const userSysMenuId = [] as Array<UserSysMenuId>
-		// await Promise.all(
-		// 	user.roles.map(async (roleId) => {
-		// 		const role = await this.roleService.findOne(roleId, true)
-		// 		if (role) {
-		// 			role.systems.map((item) => {
-		// 				const userSysMenu = userSysMenuId.find((sysMenus) => {
-		// 					return sysMenus._id.toString() === item.system?._id.toString()
-		// 				})
-		// 				if (userSysMenu) {
-		// 					userSysMenu.menuIds = union(userSysMenu.menuIds, item.menuIds)
-		// 				} else {
-		// 					userSysMenuId.push({
-		// 						...item.system,
-		// 						menuIds: item.menuIds
-		// 					})
-		// 				}
-		// 			})
-		// 		} else {
-		// 			user.roles = user.roles.filter((id) => id !== roleId) // 删除对应的 roleId
-		// 		}
-		// 	})
-		// )
+		const { roles, ...userinfo } = user
+		const userSysMenuId = [] as Array<UserSystemMenuId>
+		roles.map((role) => {
+			const { roleSystemMenus } = role
+			roleSystemMenus.map((item) => {
+				const menus = item.menus.map((_) => _.toString())
+				const userSysMenu = userSysMenuId.find((sysMenus) => {
+					return sysMenus.system._id.toString() === item.system?._id.toString()
+				})
+				if (userSysMenu) {
+					userSysMenu.menus = union(userSysMenu.menus, menus)
+				} else {
+					userSysMenuId.push({
+						system: item.system,
+						menus
+					})
+				}
+			})
+		})
 		const userSystemMenus: Array<UserSystemMenus> = await Promise.all(
 			userSysMenuId.map(async (sysMenu) => {
-				const { menuIds, ..._ } = sysMenu
-				// const menus = await this.menuService.handleMenus(menuIds, true)
 				return {
-					..._,
-					menus: []
+					system: sysMenu.system,
+					menus: await this.menuService.handleMenus(sysMenu.menus)
 				}
 			})
 		)
-		return { ...user, userSystemMenus }
+		return { ...userinfo, userSystemMenus }
 	}
 
 	/**

@@ -547,11 +547,6 @@ class System {
   @prop({ ref: Menu })
   menuIds: Ref<Menu>[]; // 使用 Ref 类型来表示关联的模型
 }
-
-const MenuModel = getModelForClass(Menu);
-const SystemModel = getModelForClass(System);
-
-export { MenuModel, SystemModel };
 ```
 
 在上述代码中，`System` 类中的 `menuIds` 字段使用了 `Ref<Menu>[]` 类型，表示这是一个菜单模型的 ID 数组，并使用 `ref: Menu` 指定关联的模型。
@@ -589,6 +584,102 @@ const notesGroups = await NotesGroupModel.find({}).populate('notes').exec();
 console.log(notesGroups);
 
 ```
+
+## 深度查询
+
+```ts
+// 查询systemMenusIds字段中的menus是否包含menuId
+const roleSystemMenus = await this.roleSystemMenus.find({
+    systemMenusIds: {
+        $elemMatch: {
+            menus: { $in: [menuId] }
+        }
+    }
+})
+// 更新深层菜单
+await Promise.all(
+    systemMenus.map(async (record) => {
+        try {
+            // 找到匹配的 systemMenusIds 子文档
+            const updatedSystemMenusIds = record.systemMenusIds.map((item) => {
+                const menuIds = item.menuIds.map((_) => _.toString())
+                if (menuIds.includes(id)) {
+                    // 如果找到匹配的 systemMenu，则删除其中的 menuId
+                    const index = menuIds.indexOf(id)
+                    if (index !== -1) {
+                        item.menuIds.splice(index, 1)
+                    }
+                }
+                return item
+            })
+            // 更新数据库中的文档
+            await this.roleSystemMenus.updateOne({ _id: record._id }, { $set: { systemMenusIds: updatedSystemMenusIds } })
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    })
+)
+// 查询对应的角色系统表，将系统同步删除
+await this.roleSystemMenus.updateMany(
+    {
+        systemMenusIds: {
+            $elemMatch: {
+                systemId: id
+            }
+        }
+    },
+    { $pull: { systemMenusIds: { systemId: id } } },
+    { multi: true }
+)
+
+```
+
+表结构
+
+```ts
+// roleSystemMenus表结构
+export class SystemMenusIds {
+	@prop({
+		required: true,
+		unique: true,
+		type: () => String
+	})
+	systemId: string
+
+	@prop({
+		required: true,
+		unique: true,
+		type: () => String
+	})
+	systemName: string
+
+	@prop({
+		required: true,
+		type: () => [Types.ObjectId],
+		immutable: true // 这个验证规则会禁止修改
+	})
+	menuIds: Array<Types.ObjectId | string>
+}
+/**
+ * @description 角色和系统值关联表
+ */
+@modelOptions({
+	schemaOptions: {
+		timestamps: true // 创建时间， 更新时间
+	}
+})
+export class RoleSystemMenus {
+	@prop({
+		ref: 'Role'
+	})
+	roleSystemId: Ref<Role>
+
+	@prop({ required: true, type: () => Array<SystemMenusIds> })
+	systemMenusIds?: SystemMenusIds[]
+}
+```
+
+
 
 ## MongoDb
 

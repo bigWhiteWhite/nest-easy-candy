@@ -21,7 +21,6 @@ export class RoleSystemMenus {
 	@ApiProperty({ description: '系统ID' })
 	@prop({
 		required: true,
-		unique: true,
 		ref: 'System'
 	})
 	system: Ref<System>
@@ -31,7 +30,6 @@ export class RoleSystemMenus {
 	@prop({
 		required: true,
 		allowMixed: 0,
-		unique: true,
 		ref: 'Menus'
 	})
 	menus: Ref<Menus>[]

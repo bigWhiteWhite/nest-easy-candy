@@ -9,11 +9,11 @@ import { WSService } from '@/shared/websocket/ws.service'
 @Injectable()
 export class OnlineService {
 	constructor(
-		private wsService: WSService,
-		private wsGateway: WSGateway,
-		private jwtService: JwtService,
-		private userService: UserService,
-		private logService: LogService
+		private readonly wsService: WSService,
+		private readonly wsGateway: WSGateway,
+		private readonly jwtService: JwtService,
+		private readonly userService: UserService,
+		private readonly logService: LogService
 	) {}
 
 	/**

@@ -10,9 +10,11 @@ import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
 import { WSService } from '@/shared/websocket/ws.service'
-import { Types } from 'mongoose'
+import { PopulateOptions, Types } from 'mongoose'
 @Injectable()
 export class MenuService {
+	readonly menuPopConfig = {} as PopulateOptions // 填充菜单配置
+
 	constructor(
 		@InjectModel(Menus)
 		private readonly menusModel: ReturnModelType<typeof Menus>,
@@ -20,9 +22,16 @@ export class MenuService {
 		private readonly systemModel: ReturnModelType<typeof System>,
 		@InjectModel(RoleSystemMenus)
 		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
-		private utilService: UtilService,
-		private wsService: WSService
-	) {}
+		private readonly utilService: UtilService,
+		private readonly wsService: WSService
+	) {
+		this.menuPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
+			model: 'Menus',
+			options: {
+				lean: true
+			}
+		})
+	}
 
 	/**
 	 * @description 获取所有菜单及所拥有的菜单
@@ -51,7 +60,15 @@ export class MenuService {
 				}
 			})
 			const list = await this.menusModel
-				.find()
+				.find(
+					filter,
+					{},
+					{
+						sort: { updatedAt: -1 },
+						limit: pageSize,
+						skip: (current - 1) * pageSize
+					}
+				)
 				// 三级嵌套填充关联文档，如果不够再加
 				.populate(parentPopConfig)
 				.lean()
@@ -125,15 +142,7 @@ export class MenuService {
 				})
 				.sort({ pIndex: 1, cIndex: 1 })
 			if (shouldPopulate) {
-				query.populate({
-					path: 'parentMenu',
-					populate: {
-						path: 'parentMenu',
-						populate: {
-							path: 'parentMenu'
-						}
-					}
-				})
+				query.populate(this.menuPopConfig)
 			}
 			const menus = await query.exec()
 			if (!isEmpty(menus)) {
@@ -166,35 +175,12 @@ export class MenuService {
 				{ $pull: { menus: { $in: [menuId] } } }
 			)
 			// 查询对应的角色系统表，将菜单同步删除
-			// const systemMenus = await this.roleSystemMenus.find({
-			// 	systemMenusIds: {
-			// 		$elemMatch: {
-			// 			menus: { $in: [menuId] }
-			// 		}
-			// 	}
-			// })
-			// await Promise.all(
-			// 	systemMenus.map(async (record) => {
-			// 		try {
-			// 			// 找到匹配的 systemMenusIds 子文档
-			// 			const updatedSystemMenusIds = record.systemMenusIds.map((item) => {
-			// 				const menuIds = item.menus.map((_) => _.toString())
-			// 				if (menuIds.includes(id)) {
-			// 					// 如果找到匹配的 systemMenu，则删除其中的 menuId
-			// 					const index = menuIds.indexOf(id)
-			// 					if (index !== -1) {
-			// 						item.menus.splice(index, 1)
-			// 					}
-			// 				}
-			// 				return item
-			// 			})
-			// 			// 更新数据库中的文档
-			// 			await this.roleSystemMenus.updateOne({ _id: record._id }, { $set: { systemMenusIds: updatedSystemMenusIds } })
-			// 		} catch (error) {
-			// 			return Promise.reject(error)
-			// 		}
-			// 	})
-			// )
+			await this.roleSystemMenus.updateMany(
+				{
+					menus: { $in: [menuId] }
+				},
+				{ $pull: { menus: { $in: [menuId] } } }
+			)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
 			return Promise.reject(error)
@@ -203,7 +189,6 @@ export class MenuService {
 
 	/**
 	 * @description 根据parentMenu给菜单添加对应的children菜单
-	//  * @description 当list中的元素缺乏对应的父级的时候，这个元素会被排除掉，例如[a,b,c]中，假设b有父级d，但是d不在list中，那么b将被排除
 	 * @param outWarpParent 最外层是否只保存一级父集,默认保存
 	 */
 	toggleRouterList(list: Array<UpdateMenuDto>, outWarpParent?: boolean): Array<MenuListDto> {
@@ -252,6 +237,7 @@ export class MenuService {
 			.find({
 				_id: { $in: uniqMenuIds.map((_) => this.utilService.toObjectId(_)) }
 			})
+			.populate(this.menuPopConfig)
 			.lean()
 			.exec() // .select('_id')
 		const menuIds = menus.map((_) => _._id)
@@ -265,7 +251,7 @@ export class MenuService {
 	 * @param menuIds 指定menuIds
 	 * @param outWarpParent 最外层是否只保存一级父集
 	 */
-	async handleMenus(menuIds: Array<Types.ObjectId>, outWarpParent?: boolean): Promise<Array<UpdateMenuDto>> {
+	async handleMenus(menuIds: Array<Types.ObjectId | string>, outWarpParent?: boolean): Promise<Array<UpdateMenuDto>> {
 		try {
 			const ids = uniq(menuIds.map((_) => _.toString()))
 			const { menus } = await this.getMenus(ids)

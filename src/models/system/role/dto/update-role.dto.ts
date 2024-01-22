@@ -35,6 +35,27 @@ export class RoleSystemContent {
 	@Type(() => Array<MenuListDto>)
 	readonly menus: Array<MenuListDto>
 }
+export class RoleSystemIdContent {
+	@ApiProperty({ description: '关联ID' })
+	@IsNotEmpty()
+	@IsString()
+	readonly _id?: string
+
+	@ApiProperty({ description: '关联角色ID' })
+	@IsNotEmpty()
+	@IsString()
+	readonly roleSystemId: string
+
+	@ApiProperty({ description: '系统对象' })
+	@IsNotEmpty()
+	@Type(() => SystemInfo)
+	readonly system: SystemInfo
+
+	@ApiProperty({ description: '菜单id数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	readonly menus: Array<string>
+}
 export class RoleInfo {
 	@ApiProperty({ description: '角色ID' })
 	@IsNotEmpty()
@@ -56,4 +77,10 @@ export class RoleSystemMenusInfo extends RoleInfo {
 	@ValidateNested()
 	@Type(() => Array<RoleSystemContent>)
 	readonly roleSystemMenus: Array<RoleSystemContent>
+}
+export class RoleSystemMenusIdInfo extends RoleInfo {
+	@ApiProperty({ description: '角色拥有的系统菜单数组' })
+	@ValidateNested()
+	@Type(() => Array<RoleSystemIdContent>)
+	readonly roleSystemMenus: Array<RoleSystemIdContent>
 }

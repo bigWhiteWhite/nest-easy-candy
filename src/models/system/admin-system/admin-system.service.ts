@@ -19,9 +19,9 @@ export class AdminSystemService {
 		private readonly systemModel: ReturnModelType<typeof System>,
 		@InjectModel(RoleSystemMenus)
 		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
-		private menuService: MenuService,
-		private utilService: UtilService,
-		private wsService: WSService
+		private readonly menuService: MenuService,
+		private readonly utilService: UtilService,
+		private readonly wsService: WSService
 	) {}
 
 	/**
@@ -183,13 +183,13 @@ export class AdminSystemService {
 	 */
 	async infoSystems({ systemIds, isError = true, shouldPopulate }: SystemIds): Promise<Array<SystemInfoDto>> {
 		try {
-			const systemMenus = await Promise.all(
+			const roleSystemMenus = await Promise.all(
 				systemIds.map(async (systemId) => {
 					const info = await this.infoSystem({ systemId, isError, shouldPopulate })
 					if (info) return info
 				})
 			)
-			return systemMenus
+			return roleSystemMenus
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -211,26 +211,22 @@ export class AdminSystemService {
 	 * @description 删除
 	 */
 	async deleteSystem(id) {
-		// try {
-		// 	const system = await this.systemModel.findByIdAndDelete(id)
-		// 	if (isEmpty(system)) {
-		// 		throw new ApiException(10201)
-		// 	}
-		// 	// 查询对应的角色系统表，将系统同步删除
-		// 	await this.roleSystemMenus.updateMany(
-		// 		{
-		// 			systemMenusIds: {
-		// 				$elemMatch: {
-		// 					systemId: id
-		// 				}
-		// 			}
-		// 		},
-		// 		{ $pull: { systemMenusIds: { systemId: id } } }
-		// 	)
-		// 	this.wsService.noticeUpdateMenus(1, system.systemName)
-		// } catch (error) {
-		// 	return Promise.reject(error)
-		// }
+		try {
+			const system = await this.systemModel.findByIdAndDelete(id)
+			if (isEmpty(system)) {
+				throw new ApiException(10201)
+			}
+			// 查询对应的角色系统表，将系统同步删除
+			await this.roleSystemMenus.updateMany(
+				{
+					system: id
+				},
+				{ $pull: { system: id } }
+			)
+			this.wsService.noticeUpdateMenus(1, system.systemName)
+		} catch (error) {
+			return Promise.reject(error)
+		}
 	}
 
 	/**

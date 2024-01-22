@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { modelOptions, prop, DocumentType } from '@typegoose/typegoose'
+import { modelOptions, prop, DocumentType, Ref } from '@typegoose/typegoose'
 import { hashSync } from 'bcryptjs'
+import { Role } from './sys-role.model'
 
 export type UserDocument = DocumentType<User>
 
@@ -71,11 +72,9 @@ export class User {
 	userAvatar: string
 
 	@ApiProperty({ description: '用户拥有的角色ID' })
-	// 定义字段,描述字段是否是必选等属性
 	@prop({
-		required: true,
 		allowMixed: 0,
-		default: []
+		ref: 'Role'
 	})
-	roles: Array<string>
+	roles: Ref<Role>[]
 }

@@ -4,9 +4,9 @@ import { UserService } from './user.service'
 import { ApiBody, ApiOperation, ApiTags, ApiBearerAuth, ApiSecurity, ApiOkResponse } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { User } from '@app/db/modules/system/sys-user.model'
-import { DeleteAuthDto, EditAuthDto, ImageCaptchaDto, RegisterAuthDto, LoginUserDto, UpdatePasswordDto } from './dto/user.dto'
+import { DeleteAuthDto, ImageCaptchaDto, RegisterAuthDto, LoginUserDto, UpdatePasswordDto } from './dto/user.dto'
 import { ImageCaptcha } from './user.class'
-import { QueryUser, UserSysInfo } from './dto/user-query.dto'
+import { QueryUser } from './dto/user-query.dto'
 import { AdminUser } from '../system.interface'
 import { ADMIN_PREFIX } from '@/admin.constant'
 import { Authorize } from '@/service/decorators/authorize.decorator'
@@ -18,7 +18,7 @@ import { PageDto } from '@/common/class/res.class'
 @Controller('user')
 @ApiTags('登录注册')
 export class AuthController {
-	constructor(private userService: UserService, private utilService: UtilService) { }
+	constructor(private userService: UserService, private utilService: UtilService) {}
 
 	@Post('generate')
 	@ApiOperation({ summary: '批量生产假用户' })
@@ -48,7 +48,7 @@ export class AuthController {
 	@ApiOperation({ summary: '更新用户信息' })
 	@UseGuards(AuthGuard('jwt'))
 	@ApiBearerAuth()
-	async edit(@Body() dto: EditAuthDto, @Param('id') id: string): Promise<void> {
+	async edit(@Body() dto: RegisterAuthDto, @Param('id') id: string): Promise<void> {
 		return this.userService.edit(dto, id)
 	}
 
@@ -98,7 +98,7 @@ export class AuthController {
 
 	@Get('infoId/:id')
 	@ApiOperation({ summary: '根据用户id获取个人信息' })
-	async infoId(@Param('id') id: string): Promise<UserSysInfo> {
+	async infoId(@Param('id') id: string) {
 		return await this.userService.info(id)
 	}
 

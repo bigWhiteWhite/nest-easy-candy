@@ -108,7 +108,7 @@ export class UserService {
 			throw new ApiException(10001)
 		}
 		if (!body.password) body.password = USER_INIT_PASSWORD
-		return await this.userModel.create(body)
+		await this.userModel.create(body)
 	}
 
 	/**

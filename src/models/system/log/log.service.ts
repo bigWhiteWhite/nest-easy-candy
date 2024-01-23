@@ -35,7 +35,7 @@ export class LogService {
 	 */
 	async countLoginLog(): Promise<number> {
 		const userIds = await this.userModel.distinct('_id')
-		return await this.loginLogModel.count({
+		return await this.loginLogModel.countDocuments({
 			userId: { $in: userIds }
 		})
 	}
@@ -82,7 +82,7 @@ export class LogService {
 	 * 清空表中的所有数据
 	 */
 	async clearLoginLog(): Promise<void> {
-		await this.loginLogModel.remove()
+		await this.loginLogModel.deleteMany({})
 	}
 
 	/**

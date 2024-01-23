@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
 		}
 		// 校验用户密码版本
 		const pv = await this.userService.getRedisPasswordVersionById(request[ADMIN_USER]._id)
-		if (pv !== `${request[ADMIN_USER].pv}`) {
+		if (pv && pv !== `${request[ADMIN_USER].pv}`) {
 			// 密码版本不一致，登录期间已更改过密码
 			throw new ApiException(11004)
 		}

@@ -66,7 +66,6 @@ export class RoleService {
 			})
 			await Promise.all(
 				unionBy(roleBody.systemMenus, 'system').map(async (item) => {
-					console.log('🚀 ~ RoleService ~ unionBy ~ item:', item)
 					// 创建角色系统关联
 					await this.roleSystemMenus.create({
 						roleSystemId: role._id,
@@ -224,7 +223,6 @@ export class RoleService {
 					return null
 				}
 			}
-			console.log('🚀 ~ RoleService ~ roleSystemMenus ~ role:', role)
 			const roleSystemMenus = role.roleSystemMenus.map((item) => {
 				return {
 					system: {

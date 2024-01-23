@@ -124,6 +124,17 @@ export class AdminSystemService {
 			if (!system) {
 				throw new ApiException(10201)
 			}
+			// 当更新系统中删除了菜单，需要更新角色系统表中的菜单同步删除
+			await this.roleSystemMenus.updateMany(
+				{
+					system: id
+				},
+				{
+					$pull: {
+						menus: { $nin: menuIds }
+					}
+				}
+			)
 			this.wsService.noticeUpdateMenus(1, system.systemName)
 		} catch (error) {
 			return Promise.reject(error)

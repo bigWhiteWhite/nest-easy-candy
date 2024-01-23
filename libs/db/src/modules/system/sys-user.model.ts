@@ -28,7 +28,7 @@ export class User {
 	})
 	username: string
 
-	@ApiProperty({ description: '密码', example: '123456' })
+	@ApiProperty({ description: '密码' })
 	@prop({
 		required: true,
 		select: false, // 默认查询不返回这个字段 --> 可以指定.select('+password')去提出password

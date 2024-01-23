@@ -1,5 +1,6 @@
+import { Types } from 'mongoose'
 export interface LoginInfo {
-	id: string
+	id: string | Types.ObjectId
 	userId: string
 	username: string
 	phone: number | string

@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateMenuDto, QueryMenu, MenuListDto, UpdateMenuDto } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
-import { isEmpty, uniq, groupBy, unionBy } from 'lodash'
+import { isEmpty, uniq, unionBy } from 'lodash'
 import { PageList } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
@@ -195,23 +195,23 @@ export class MenuService {
 		let withParent = list
 		let withoutParent = list
 		if (!outWarpParent) {
-			// 找出第一级父级菜单
-			const getTopLevel = (item: UpdateMenuDto) => {
+			const menuTopParent = [] // 顶点父级路由
+			const menuWithParent = [] // 父级路由不包含顶点
+			const getParentLevel = (item: UpdateMenuDto) => {
+				const data = {
+					...item,
+					_id: item._id.toString()
+				}
 				if (item.parentMenu) {
-					return getTopLevel(item.parentMenu)
+					menuWithParent.push(data)
+					getParentLevel(data.parentMenu)
 				} else {
-					return {
-						...item,
-						_id: item._id.toString()
-					}
+					menuTopParent.push(data)
 				}
 			}
-			const groupedByParentMenu = groupBy(list, (node) => (node.parentMenu ? 'withParent' : 'withoutParent'))
-			withParent = groupedByParentMenu['withParent'] || []
-			withoutParent = unionBy(
-				list.map((item) => getTopLevel(item)),
-				'_id'
-			)
+			list.map((item) => getParentLevel(item))
+			withoutParent = unionBy(menuTopParent, '_id')
+			withParent = unionBy(menuWithParent, '_id')
 		}
 		const buildTree = (node) => {
 			const { parentMenu, ...params } = node // 只返回parentId就够

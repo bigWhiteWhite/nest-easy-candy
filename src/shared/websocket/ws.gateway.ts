@@ -45,6 +45,7 @@ export class WSGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGa
 	async handleConnection(client: Socket): Promise<void> {
 		try {
 			const user: AdminUser = this.authService.checkAdminAuthToken(client.handshake?.query?.token)
+			console.log('🚀 ~ WSGateway ~ handleConnection ~ user:', user)
 			this.authService.joinRoom(client, user)
 		} catch (e) {
 			client.disconnect()

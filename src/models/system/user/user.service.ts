@@ -267,9 +267,7 @@ export class UserService {
 			// Token设置过期时间 48小时， 需要同步更改jwtService的过期时间
 			await this.redisService.getRedis().set(`admin:token:${user._id}`, jwtSign, 'EX', this.configService.get('jwtExpires'))
 			// 设置用户所有的权限
-			// await this.redisService
-			// 	.getRedis()
-			// 	.set(`admin:perms:${userId}`, JSON.stringify(perms))
+			await this.redisService.getRedis().set(`admin:perms:${user._id}`, JSON.stringify(user.roles))
 			this.logService.saveLoginLog(user, ip, ua)
 			return jwtSign
 		}

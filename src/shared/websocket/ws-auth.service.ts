@@ -39,6 +39,7 @@ export class AuthService {
 			const { username, userSystemMenus } = await this.userService.infoWithSystem(user._id)
 			const { roles } = await this.userService.info(user._id)
 			const systemNames = userSystemMenus.map((item) => item.system.systemName)
+			client.join(`user:${user._id}`)
 			systemNames.forEach((name) => {
 				console.log(`${username}加入系统sys:${name}房间`)
 				client.join(`sys:${name}`)

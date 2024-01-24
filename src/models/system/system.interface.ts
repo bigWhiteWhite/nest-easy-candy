@@ -1,3 +1,5 @@
+import { Types } from 'mongoose'
+
 export interface AdminUser {
 	_id: string
 	pv: number
@@ -6,4 +8,5 @@ export interface AdminUser {
 	status: number
 	iat: number
 	exp: number
+	roles: Array<Types.ObjectId>
 }

@@ -154,32 +154,60 @@ export class MenuService {
 	}
 
 	/**
+	 * @description 找寻该id下所有的子菜单id
+	 */
+	async findChildIds(id: Types.ObjectId) {
+		try {
+			const childIds = []
+			const findChildId = async (ids: Array<Types.ObjectId>) => {
+				await Promise.all(
+					ids.map(async (id) => {
+						childIds.push(id)
+						const menus = await this.menusModel
+							.find({
+								parentMenu: { $in: [id] }
+							})
+							.select('_id')
+							.lean()
+							.exec()
+						if (menus.length > 0) {
+							await findChildId(menus.map((_) => _._id))
+						}
+					})
+				)
+			}
+			await findChildId([id])
+			return childIds
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+
+	/**
 	 * @description 删除 - 如果有子节点，需要将子节点的菜单也删掉
 	 */
 	async deleteMenu(id: string) {
 		try {
-			const menuId = this.utilService.toObjectId(id)
-			const _ = await this.menusModel.findByIdAndDelete(menuId)
+			const menuIds = await this.findChildIds(this.utilService.toObjectId(id))
+			const _ = await this.menusModel.deleteMany({
+				_id: menuIds
+			})
 			if (isEmpty(_)) {
 				throw new ApiException(10301)
 			}
-			// 删除所拥有的子菜单
-			await this.menusModel.deleteMany({
-				parentMenu: { $in: id }
-			})
 			// 查询对应的系统表，将包含的菜单同步删除
 			await this.systemModel.updateMany(
 				{
-					menus: { $in: [menuId] }
+					menus: { $in: menuIds }
 				},
-				{ $pull: { menus: { $in: [menuId] } } }
+				{ $pull: { menus: { $in: menuIds } } }
 			)
 			// 查询对应的角色系统表，将菜单同步删除
 			await this.roleSystemMenus.updateMany(
 				{
-					menus: { $in: [menuId] }
+					menus: { $in: menuIds }
 				},
-				{ $pull: { menus: { $in: [menuId] } } }
+				{ $pull: { menus: { $in: menuIds } } }
 			)
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
@@ -190,6 +218,7 @@ export class MenuService {
 	/**
 	 * @description 根据parentMenu给菜单添加对应的children菜单
 	 * @param outWarpParent 最外层是否只保存一级父集,默认保存
+	 * @param list 菜单id如果是父级菜单，则需要找出下属的所有子菜单id
 	 */
 	toggleRouterList(list: Array<UpdateMenuDto>, outWarpParent?: boolean): Array<MenuListDto> {
 		let withParent = list
@@ -209,7 +238,8 @@ export class MenuService {
 					menuTopParent.push(data)
 				}
 			}
-			list.map((item) => getParentLevel(item))
+			list.map((item) => getParentLevel(item)) // 找出并分类父级路由
+			// const a = this.findChildIds(list.map((_) => this.utilService.toObjectId(_._id)))
 			withoutParent = unionBy(menuTopParent, '_id')
 			withParent = unionBy(menuWithParent, '_id')
 		}

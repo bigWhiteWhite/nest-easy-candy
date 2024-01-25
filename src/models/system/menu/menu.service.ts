@@ -73,7 +73,7 @@ export class MenuService {
 				.populate(parentPopConfig)
 				.lean()
 				.exec()
-			// 添加children
+			// 添加children，这里无需使用handleMenus方法，因为已经把所有的菜单都传过去，不会漏子菜单
 			const menusWithParent = this.toggleRouterList(list, outWarpParent)
 			const count = await this.menusModel.countDocuments(filter)
 			return {
@@ -119,6 +119,7 @@ export class MenuService {
 
 	/**
 	 * @description 更新菜单
+	 * @description ?更新了父级菜单？
 	 */
 	async updateMenu(body: CreateMenuDto, id: string) {
 		try {
@@ -259,17 +260,42 @@ export class MenuService {
 
 	/**
 	 * @description 判断菜单列表是否存在于菜单表中,过滤出有效的菜单id
+	 * @params needChildMenu 是否找出菜单下属的所有子菜单
 	 * @return 返回菜单和菜单ids
 	 */
-	async getMenus(menuIdArray: Array<Types.ObjectId | string>): Promise<{ menus?: Array<UpdateMenuDto>; menuIds?: Array<Types.ObjectId> }> {
-		const uniqMenuIds = uniq(menuIdArray.map((_) => _.toString()))
+	async getMenus(
+		menuIdArray: Array<Types.ObjectId | string>,
+		needChildMenu = false
+	): Promise<{ menus?: Array<UpdateMenuDto>; menuIds?: Array<Types.ObjectId> }> {
+		let uniqMenuIds = uniq(menuIdArray.map((_) => _.toString()))
+		if (needChildMenu) {
+			// 找出菜单下属的所有子菜单
+			let childMenuId = []
+			const findChildIds = async (ids) => {
+				const childMenu = await this.menusModel
+					.find({
+						parentMenu: { $in: ids.map((_) => this.utilService.toObjectId(_)) }
+						// parentMenu: { $in: uniqMenuIds.map((_) => this.utilService.toObjectId(_)) }
+					})
+					.select('_id')
+					.lean()
+					.exec()
+				if (childMenu.length > 0) {
+					const childIds = childMenu.map((_) => _._id) as Array<Types.ObjectId>
+					childMenuId = childMenuId.concat(childIds)
+					await findChildIds(childIds)
+				}
+			}
+			await findChildIds(uniqMenuIds)
+			uniqMenuIds = uniqMenuIds.concat(childMenuId)
+		}
 		const menus = await this.menusModel
 			.find({
 				_id: { $in: uniqMenuIds.map((_) => this.utilService.toObjectId(_)) }
 			})
 			.populate(this.menuPopConfig)
 			.lean()
-			.exec() // .select('_id')
+			.exec()
 		const menuIds = menus.map((_) => _._id)
 		return {
 			menuIds,
@@ -284,7 +310,7 @@ export class MenuService {
 	async handleMenus(menuIds: Array<Types.ObjectId | string>, outWarpParent?: boolean): Promise<Array<UpdateMenuDto>> {
 		try {
 			const ids = uniq(menuIds.map((_) => _.toString()))
-			const { menus } = await this.getMenus(ids)
+			const { menus } = await this.getMenus(ids, true)
 			return this.toggleRouterList(menus, outWarpParent)
 		} catch (error) {
 			return Promise.reject(error)

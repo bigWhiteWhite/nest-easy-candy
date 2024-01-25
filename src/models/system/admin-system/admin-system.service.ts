@@ -9,8 +9,7 @@ import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.mo
 import { PageList, PageOptionsDto } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
-import { MenuListDto } from '../menu/dto/menu.dto'
-import { UtilService } from '@/shared/tools/util.service'
+import { Types } from 'mongoose'
 
 @Injectable()
 export class AdminSystemService {
@@ -20,7 +19,6 @@ export class AdminSystemService {
 		@InjectModel(RoleSystemMenus)
 		private readonly roleSystemMenus: ReturnModelType<typeof RoleSystemMenus>,
 		private readonly menuService: MenuService,
-		private readonly utilService: UtilService,
 		private readonly wsService: WSService
 	) {}
 
@@ -46,12 +44,6 @@ export class AdminSystemService {
 				}
 			}
 			const { current = 1, pageSize = 10 } = pagination
-			const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
-				model: 'Menus',
-				options: {
-					lean: true
-				}
-			})
 			const systemList = await this.systemModel
 				.find(
 					filter,
@@ -62,19 +54,17 @@ export class AdminSystemService {
 						skip: (current - 1) * pageSize
 					}
 				)
-				.populate({
-					path: 'menus',
-					populate: parentPopConfig
-				})
 				.lean()
 				.exec()
-			const list = systemList.map((system) => {
-				const menus = this.menuService.toggleRouterList(system.menus)
-				return {
-					...system,
-					menus
-				}
-			})
+			const list = await Promise.all(
+				systemList.map(async (system) => {
+					const menus = await this.menuService.handleMenus(system.menus as Array<Types.ObjectId>)
+					return {
+						...system,
+						menus
+					}
+				})
+			)
 			const count = await this.systemModel.countDocuments(filter)
 			return {
 				list,
@@ -150,21 +140,6 @@ export class AdminSystemService {
 	async infoSystem({ systemId, isError, shouldPopulate }: SystemId): Promise<SystemInfoDto> {
 		try {
 			const query = this.systemModel.findById(systemId)
-			if (shouldPopulate) {
-				const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
-					model: 'Menus',
-					options: {
-						lean: true
-					}
-				})
-				query.populate({
-					path: 'menus',
-					options: {
-						lean: true
-					},
-					populate: parentPopConfig
-				})
-			}
 			const system = await query.lean().exec()
 			if (isEmpty(system)) {
 				if (!isError) {
@@ -173,9 +148,9 @@ export class AdminSystemService {
 					return null
 				}
 			}
-			let menus = system.menus as unknown as Array<MenuListDto>
+			let menus = system.menus as any
 			if (shouldPopulate) {
-				menus = this.menuService.toggleRouterList(system.menus)
+				menus = await this.menuService.handleMenus(system.menus as any)
 			}
 			return {
 				...system,

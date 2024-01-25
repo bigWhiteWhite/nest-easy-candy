@@ -12,11 +12,10 @@ import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
 import { RoleSystemMenusInfo } from './dto/update-role.dto'
 import { UtilService } from '@/shared/tools/util.service'
-import { PopulateOptions } from 'mongoose'
+import { PopulateOptions, Types } from 'mongoose'
 
 @Injectable()
 export class RoleService {
-	readonly menuPopConfig = {} as PopulateOptions // 填充菜单配置
 	constructor(
 		@InjectModel(Role)
 		private readonly roleModel: ReturnModelType<typeof Role>,
@@ -28,23 +27,7 @@ export class RoleService {
 		private readonly utilService: UtilService,
 		private readonly menuService: MenuService,
 		private readonly wsService: WSService
-	) {
-		const parentPopConfig = this.utilService.generatePopulateConfig('parentMenu', 4, {
-			model: 'Menus',
-			options: {
-				lean: true
-			}
-		})
-		this.menuPopConfig = {
-			strictPopulate: false,
-			path: 'menus',
-			model: 'Menus',
-			options: {
-				lean: true // 切换成普通对象
-			},
-			populate: parentPopConfig
-		}
-	}
+	) {}
 
 	/**
 	 * @description 角色表添加，判断有无角色
@@ -159,10 +142,8 @@ export class RoleService {
 							select: 'systemName systemValue menus', // 可选字段 前面加-号是排除
 							options: {
 								lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
-							},
-							populate: this.menuPopConfig
-						},
-						this.menuPopConfig
+							}
+						}
 					]
 				})
 				.lean()
@@ -174,18 +155,19 @@ export class RoleService {
 					return null
 				}
 			}
-			const roleSystemMenus = role.roleSystemMenus.map((item) => {
-				return {
-					system: {
-						_id: item.system._id,
-						systemName: item.system.systemName,
-						systemValue: item.system.systemValue
-					},
-					systemMenus: this.menuService.toggleRouterList(item.system.menus || []),
-					menus: this.menuService.toggleRouterList(item.menus)
-				}
-			})
-
+			const roleSystemMenus = await Promise.all(
+				role.roleSystemMenus.map(async (item) => {
+					return {
+						system: {
+							_id: item.system._id,
+							systemName: item.system.systemName,
+							systemValue: item.system.systemValue
+						},
+						systemMenus: await this.menuService.handleMenus((item.system.menus as Array<Types.ObjectId>) || []),
+						menus: await this.menuService.handleMenus(item.menus as Array<Types.ObjectId>)
+					}
+				})
+			)
 			return {
 				...role,
 				roleSystemMenus
@@ -209,8 +191,7 @@ export class RoleService {
 							select: 'systemName systemValue menus', // 可选字段 前面加-号是排除
 							options: {
 								lean: true // 通过 Mongoose 的 populate 方法填充的,返回的是Mongoose文档而不是普通的 JavaScript 对象
-							},
-							populate: this.menuPopConfig
+							}
 						}
 					]
 				})
@@ -223,17 +204,19 @@ export class RoleService {
 					return null
 				}
 			}
-			const roleSystemMenus = role.roleSystemMenus.map((item) => {
-				return {
-					system: {
-						_id: item.system._id,
-						systemName: item.system.systemName,
-						systemValue: item.system.systemValue
-					},
-					systemMenus: this.menuService.toggleRouterList(item.system.menus || []),
-					menus: item.menus
-				}
-			})
+			const roleSystemMenus = await Promise.all(
+				role.roleSystemMenus.map(async (item) => {
+					return {
+						system: {
+							_id: item.system._id,
+							systemName: item.system.systemName,
+							systemValue: item.system.systemValue
+						},
+						systemMenus: await this.menuService.handleMenus((item.system.menus as Array<Types.ObjectId>) || []),
+						menus: item.menus
+					}
+				})
+			)
 			return {
 				...role,
 				roleSystemMenus

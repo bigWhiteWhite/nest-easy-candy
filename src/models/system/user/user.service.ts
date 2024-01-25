@@ -11,7 +11,6 @@ import * as svgCaptcha from 'svg-captcha'
 import { compareSync } from 'bcryptjs'
 import { ConfigService } from '@nestjs/config'
 import { QueryUser } from './dto/user-query.dto'
-import { RoleService } from '../role/role.service'
 import { MenuService } from '../menu/menu.service'
 import { AdminUser } from '../system.interface'
 import { LogService } from '../log/log.service'
@@ -21,12 +20,8 @@ import { RedisService } from '@/shared/redis/redis.service'
 import { UtilService } from '@/shared/tools/util.service'
 import { EVENT_UPDATE_MENU, EVENT_KICK } from '@/shared/websocket/ws.event'
 import { WSService } from '@/shared/websocket/ws.service'
-import { PopulateOptions } from 'mongoose'
-
 @Injectable()
 export class UserService {
-	readonly menuPopConfig = {} as PopulateOptions // 填充菜单配置
-
 	constructor(
 		@InjectModel(User)
 		private readonly userModel: ReturnModelType<typeof User>,
@@ -34,7 +29,6 @@ export class UserService {
 		private readonly jwtService: JwtService,
 		private readonly utilService: UtilService,
 		private readonly configService: ConfigService,
-		private readonly roleService: RoleService,
 		private readonly menuService: MenuService,
 		private readonly logService: LogService,
 		private readonly wsService: WSService

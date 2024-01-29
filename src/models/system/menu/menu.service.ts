@@ -2,11 +2,11 @@ import { Menus } from '@app/db/modules/system/sys-menus.model'
 import { System } from '@app/db/modules/system/sys-system.model'
 import { RoleSystemMenus } from '@app/db/modules/system/sys-role-system-menus.model'
 import { Injectable } from '@nestjs/common'
-import { CreateMenuDto, QueryMenu, MenuListDto, UpdateMenuDto } from './dto/menu.dto'
+import { CreateMenuDto, QueryMenu, MenuListDto, UpdateMenuDto, MenuObj } from './dto/menu.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { isEmpty, uniq, unionBy } from 'lodash'
-import { PageList } from '@/common/class/res.class'
+import { PageList, PageOptionsDto } from '@/common/class/res.class'
 import { ApiException } from '@/service/exceptions/api.exception'
 import { UtilService } from '@/shared/tools/util.service'
 import { WSService } from '@/shared/websocket/ws.service'
@@ -36,7 +36,7 @@ export class MenuService {
 	/**
 	 * @description 获取所有菜单及所拥有的菜单
 	 */
-	async listMenu(pagination, query: QueryMenu): Promise<PageList<MenuListDto>> {
+	async listMenu(pagination: PageOptionsDto, query: QueryMenu): Promise<PageList<MenuListDto>> {
 		try {
 			const { name, outWarpParent, showBtnMenu = true } = query
 			const filter = {
@@ -88,6 +88,7 @@ export class MenuService {
 			return Promise.reject(error)
 		}
 	}
+
 	/**
 	 * @description 检查菜单是否存在
 	 */
@@ -107,11 +108,11 @@ export class MenuService {
 	/**
 	 * @description 增加菜单
 	 */
-	async addMenu(body: CreateMenuDto) {
+	async addMenu(body: CreateMenuDto): Promise<void> {
 		try {
 			// 已在model中判断path为唯一
 			this.hasMenu(body.parentMenu)
-			return await this.menusModel.create(body)
+			await this.menusModel.create(body)
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -121,7 +122,7 @@ export class MenuService {
 	 * @description 更新菜单
 	 * @description ?更新了父级菜单？
 	 */
-	async updateMenu(body: CreateMenuDto, id: string) {
+	async updateMenu(body: CreateMenuDto, id: string): Promise<void> {
 		try {
 			this.hasMenu(body.parentMenu)
 			await this.menusModel.findByIdAndUpdate(id, body)
@@ -157,7 +158,7 @@ export class MenuService {
 	/**
 	 * @description 找寻该id下所有的子菜单id
 	 */
-	async findChildIds(id: Types.ObjectId) {
+	async findChildIds(id: Types.ObjectId): Promise<Array<Types.ObjectId>> {
 		try {
 			const childIds = []
 			const findChildId = async (ids: Array<Types.ObjectId>) => {
@@ -187,12 +188,17 @@ export class MenuService {
 	/**
 	 * @description 删除 - 如果有子节点，需要将子节点的菜单也删掉
 	 */
-	async deleteMenu(id: string) {
+	async deleteMenu(id: string): Promise<void> {
+		// 添加事务锁
+		const session = await this.menusModel.startSession()
+		session.startTransaction()
 		try {
 			const menuIds = await this.findChildIds(this.utilService.toObjectId(id))
-			const _ = await this.menusModel.deleteMany({
-				_id: menuIds
-			})
+			const _ = await this.menusModel
+				.deleteMany({
+					_id: menuIds
+				})
+				.session(session)
 			if (isEmpty(_)) {
 				throw new ApiException(10301)
 			}
@@ -201,18 +207,24 @@ export class MenuService {
 				{
 					menus: { $in: menuIds }
 				},
-				{ $pull: { menus: { $in: menuIds } } }
+				{ $pull: { menus: { $in: menuIds } } },
+				{ session }
 			)
 			// 查询对应的角色系统表，将菜单同步删除
 			await this.roleSystemMenus.updateMany(
 				{
 					menus: { $in: menuIds }
 				},
-				{ $pull: { menus: { $in: menuIds } } }
+				{ $pull: { menus: { $in: menuIds } } },
+				{ session }
 			)
+			await session.commitTransaction()
 			this.wsService.noticeUpdateMenus(0)
 		} catch (error) {
+			await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			session.endSession()
 		}
 	}
 
@@ -263,10 +275,7 @@ export class MenuService {
 	 * @params needChildMenu 是否找出菜单下属的所有子菜单
 	 * @return 返回菜单和菜单ids
 	 */
-	async getMenus(
-		menuIdArray: Array<Types.ObjectId | string>,
-		needChildMenu = false
-	): Promise<{ menus?: Array<UpdateMenuDto>; menuIds?: Array<Types.ObjectId> }> {
+	async getMenus(menuIdArray: Array<Types.ObjectId | string>, needChildMenu = false): Promise<MenuObj> {
 		let uniqMenuIds = uniq(menuIdArray.map((_) => _.toString()))
 		if (needChildMenu) {
 			// 找出菜单下属的所有子菜单
@@ -302,6 +311,7 @@ export class MenuService {
 			menus
 		}
 	}
+
 	/**
 	 * @description 获取指定的菜单menuIds并进行父子排序
 	 * @param menuIds 指定menuIds

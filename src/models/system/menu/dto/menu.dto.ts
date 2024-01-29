@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, ValidateIf } from 'class-validator'
+import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsBoolean, ValidateNested, ValidateIf, IsArray, ArrayNotEmpty } from 'class-validator'
 export class Meta {
 	@ApiProperty({ description: '菜单标题' })
 	@IsString()
@@ -127,7 +127,6 @@ export class MenuListDto extends PartialType(UpdateMenuDto) {
 	@Type(() => MenuListDto)
 	readonly children?: MenuListDto
 }
-
 export class QueryMenu {
 	@ApiProperty({ description: '菜单name' })
 	@IsString()
@@ -144,4 +143,15 @@ export class QueryMenu {
 	@IsBoolean()
 	@IsOptional()
 	readonly showBtnMenu: boolean
+}
+export class MenuObj {
+	@ApiProperty({ description: '菜单数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	menus?: Array<UpdateMenuDto>
+
+	@ApiProperty({ description: '菜单id数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	menuIds?: Array<Types.ObjectId>
 }

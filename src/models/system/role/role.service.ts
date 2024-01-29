@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { CreateRoleDto } from './dto/create-role.dto'
+import { CreateRoleDto, QueryRole } from './dto/create-role.dto'
 import { ReturnModelType } from '@typegoose/typegoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { isEmpty, unionBy } from 'lodash'
@@ -10,8 +10,9 @@ import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
 import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
-import { RoleSystemMenusInfo } from './dto/update-role.dto'
+import { RoleInfo, RoleSystemMenusInfo } from './dto/update-role.dto'
 import { Types } from 'mongoose'
+import { PageList, PageOptionsDto } from '@/common/class/res.class'
 
 @Injectable()
 export class RoleService {
@@ -31,7 +32,7 @@ export class RoleService {
 	 * @description 角色表添加，判断有无角色
 	 * @description 角色系统表关联，判断有无系统，系统合并，系统菜单合并，判断菜单是否存在
 	 */
-	async create(roleBody: CreateRoleDto) {
+	async create(roleBody: CreateRoleDto): Promise<void> {
 		// 添加事务锁
 		const session = await this.roleModel.startSession()
 		session.startTransaction()
@@ -77,7 +78,7 @@ export class RoleService {
 		}
 	}
 
-	async listRole(pagination, query) {
+	async listRole(pagination: PageOptionsDto, query: QueryRole): Promise<PageList<RoleInfo>> {
 		try {
 			const { roleName } = query
 			const filter = {} as any
@@ -100,6 +101,7 @@ export class RoleService {
 					}
 				)
 				.lean()
+				.exec()
 			const count = await this.roleModel.countDocuments(filter)
 			return {
 				list: roleList,
@@ -213,52 +215,78 @@ export class RoleService {
 	}
 
 	async update(id: string, roleBody: CreateRoleDto) {
+		// 添加事务锁
+		const session = await this.roleModel.startSession()
+		session.startTransaction()
 		try {
-			const hasRole = await this.roleModel.findById(id)
+			const hasRole = await this.roleModel.findById(id).exec()
 			if (!hasRole) throw new ApiException(10401)
 			// 更新角色
-			await this.roleModel.findByIdAndUpdate(id, {
-				roleName: roleBody.roleName,
-				remark: roleBody.remark
-			})
+			await this.roleModel
+				.findByIdAndUpdate(id, {
+					roleName: roleBody.roleName,
+					remark: roleBody.remark
+				})
+				.session(session)
+				.exec()
 			// 更新角色系统关联
 			await Promise.all(
 				roleBody.systemMenus.map(async (item) => {
-					await this.roleSystemMenus.updateOne(
-						{ roleSystemId: id, system: item.system },
-						{
-							$set: { menus: item.menus }
-						},
-						{
-							upsert: true // 找不到指定的记录则创建一条新的记录
-						}
-					)
+					await this.roleSystemMenus
+						.updateOne(
+							{ roleSystemId: id, system: item.system },
+							{
+								$set: { menus: item.menus }
+							},
+							{
+								session,
+								upsert: true // 找不到指定的记录则创建一条新的记录
+							}
+						)
+						.exec()
 				})
 			)
+			await session.commitTransaction()
 			// 角色改变，通知重新获取菜单
 			this.wsService.noticeUpdateMenus(2, id)
 		} catch (error) {
+			await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			session.endSession()
 		}
 	}
 
 	async remove(id: string) {
+		// 添加事务锁
+		const session = await this.roleModel.startSession()
+		session.startTransaction()
 		try {
-			await this.roleModel.findByIdAndDelete(id)
-			await this.roleSystemMenus.findOneAndDelete({
-				roleSystemId: id
-			})
+			await this.roleModel.findByIdAndDelete(id).session(session).exec()
+			await this.roleSystemMenus
+				.findOneAndDelete({
+					roleSystemId: id
+				})
+				.session(session)
+				.exec()
 			// 查询对应的用户表，将包含的角色同步删除
-			await this.userModel.updateMany(
-				{
-					roles: { $in: [id] }
-				},
-				{ $pull: { roles: id } }
-			)
+			await this.userModel
+				.updateMany(
+					{
+						roles: { $in: [id] }
+					},
+					{ $pull: { roles: id } }
+				)
+				.session(session)
+				.exec()
+			await session.commitTransaction()
 			// 角色改变，通知重新获取菜单
 			this.wsService.noticeUpdateMenus(2, id)
 		} catch (error) {
+			await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			session.endSession()
 		}
 	}
 }

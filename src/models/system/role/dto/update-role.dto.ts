@@ -4,6 +4,7 @@ import { IsNotEmpty, IsString, IsOptional, ValidateNested, ArrayNotEmpty, IsArra
 import { Type } from 'class-transformer'
 import { SystemInfo } from '../../admin-system/dto/admin-systen.dto'
 import { MenuListDto } from '../../menu/dto/menu.dto'
+import { Types } from 'mongoose'
 
 export class UpdateRoleDto extends PartialType(CreateRoleDto) {}
 
@@ -60,7 +61,7 @@ export class RoleInfo {
 	@ApiProperty({ description: '角色ID' })
 	@IsNotEmpty()
 	@IsString()
-	readonly _id?: string
+	readonly _id?: string | Types.ObjectId
 
 	@ApiProperty({ description: '角色名称' })
 	@IsNotEmpty()

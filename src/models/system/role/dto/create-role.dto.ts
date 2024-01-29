@@ -51,7 +51,7 @@ export class CreateRoleDto {
 
 export class QueryRole {
 	@ApiProperty({ description: '角色名称' })
-	@IsNotEmpty()
 	@IsString()
+	@IsOptional()
 	readonly roleName: string
 }

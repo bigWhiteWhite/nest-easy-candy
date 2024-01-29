@@ -82,7 +82,7 @@ export class AdminSystemService {
 	/**
 	 * @description 增加系统 - 还需判断菜单id是否存在于菜单表里面
 	 */
-	async addSystem(body: CreateSystemDto) {
+	async addSystem(body: CreateSystemDto): Promise<void> {
 		try {
 			const exists = await this.systemModel.findOne({
 				systemValue: body.systemValue
@@ -91,7 +91,7 @@ export class AdminSystemService {
 				throw new ApiException(10200)
 			}
 			const { menuIds } = await this.menuService.getMenus(body.menus)
-			return await this.systemModel.create({
+			await this.systemModel.create({
 				...body,
 				menus: menuIds
 			})
@@ -104,30 +104,42 @@ export class AdminSystemService {
 	 * @description 更新系统 - 系统添加或者更新的时候有什么menuId就添加什么menuId，但是查询的时候如果menuId有pId就要返回对应pId
 	 * @description 更新系统 - 通知当前系统下面的用户重新获取系统菜单
 	 */
-	async updateSystem(body: CreateSystemDto, id: string) {
+	async updateSystem(body: CreateSystemDto, id: string): Promise<void> {
+		// 添加事务锁
+		const session = await this.systemModel.startSession()
+		session.startTransaction()
 		try {
 			const { menuIds } = await this.menuService.getMenus(body.menus)
-			const system = await this.systemModel.findByIdAndUpdate(id, {
-				...body,
-				menus: menuIds
-			})
+			if (menuIds.length <= 0) throw new ApiException(10301)
+			const system = await this.systemModel
+				.findByIdAndUpdate(id, {
+					...body,
+					menus: menuIds
+				})
+				.session(session)
 			if (!system) {
 				throw new ApiException(10201)
 			}
 			// 当更新系统中删除了菜单，需要更新角色系统表中的菜单同步删除
-			await this.roleSystemMenus.updateMany(
-				{
-					system: id
-				},
-				{
-					$pull: {
-						menus: { $nin: menuIds }
+			await this.roleSystemMenus
+				.updateMany(
+					{
+						system: id
+					},
+					{
+						$pull: {
+							menus: { $nin: menuIds }
+						}
 					}
-				}
-			)
+				)
+				.session(session)
+			await session.commitTransaction()
 			this.wsService.noticeUpdateMenus(1, system.systemName)
 		} catch (error) {
+			await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			session.endSession()
 		}
 	}
 
@@ -196,19 +208,28 @@ export class AdminSystemService {
 	/**
 	 * @description 删除
 	 */
-	async deleteSystem(id) {
+	async deleteSystem(id: string): Promise<void> {
+		// 添加事务锁
+		const session = await this.systemModel.startSession()
+		session.startTransaction()
 		try {
-			const system = await this.systemModel.findByIdAndDelete(id)
+			const system = await this.systemModel.findByIdAndDelete(id).session(session)
 			if (isEmpty(system)) {
 				throw new ApiException(10201)
 			}
 			// 查询对应的角色系统表，将系统同步删除
-			await this.roleSystemMenus.deleteMany({
-				system: id
-			})
+			await this.roleSystemMenus
+				.deleteMany({
+					system: id
+				})
+				.session(session)
+			await session.commitTransaction()
 			this.wsService.noticeUpdateMenus(1, system.systemName)
 		} catch (error) {
+			await session.abortTransaction()
 			return Promise.reject(error)
+		} finally {
+			session.endSession()
 		}
 	}
 
@@ -217,7 +238,7 @@ export class AdminSystemService {
 	 * @params systemId - 系统id
 	 * @params menusIds -	菜单id数组
 	 */
-	async filterSystemMenu(systemId: string, menusIds: Array<string>) {
+	async filterSystemMenu(systemId: string, menusIds: Array<string>): Promise<Array<string>> {
 		try {
 			const { menus } = await this.systemModel.findById(systemId).exec()
 			return intersection(

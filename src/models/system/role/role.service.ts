@@ -11,8 +11,7 @@ import { WSService } from '@/shared/websocket/ws.service'
 import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
 import { RoleSystemMenusInfo } from './dto/update-role.dto'
-import { UtilService } from '@/shared/tools/util.service'
-import { PopulateOptions, Types } from 'mongoose'
+import { Types } from 'mongoose'
 
 @Injectable()
 export class RoleService {
@@ -24,7 +23,6 @@ export class RoleService {
 		@InjectModel(User)
 		private readonly userModel: ReturnModelType<typeof User>,
 		private readonly adminSystemService: AdminSystemService,
-		private readonly utilService: UtilService,
 		private readonly menuService: MenuService,
 		private readonly wsService: WSService
 	) {}
@@ -35,59 +33,47 @@ export class RoleService {
 	 */
 	async create(roleBody: CreateRoleDto) {
 		// 添加事务锁
-		// const session = await this.roleModel.startSession()
-		// session.startTransaction()
+		const session = await this.roleModel.startSession()
+		session.startTransaction()
 		try {
 			const hasRole = await this.roleModel.findOne({
 				// 判断角色是否存在
 				roleName: roleBody.roleName
 			})
 			if (hasRole) throw new ApiException(10400)
-			const role = await this.roleModel.create({
-				roleName: roleBody.roleName,
-				remark: roleBody.remark
-			})
+			// 创建角色 - 事务 https://mongoosejs.com/docs/api/model.html#Model.create()
+			const role: any = await this.roleModel.create(
+				[
+					{
+						roleName: roleBody.roleName,
+						remark: roleBody.remark
+					}
+				],
+				{
+					session
+				}
+			)
 			await Promise.all(
 				unionBy(roleBody.systemMenus, 'system').map(async (item) => {
 					// 创建角色系统关联
-					await this.roleSystemMenus.create({
-						roleSystemId: role._id,
-						system: item.system,
-						menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
-					})
+					await this.roleSystemMenus.create(
+						[
+							{
+								roleSystemId: role._id,
+								system: item.system,
+								menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
+							}
+						],
+						{ session }
+					)
 				})
 			)
-			// 创建角色 - 事务 https://mongoosejs.com/docs/api/model.html#Model.create()
-			// const role = await this.roleModel.create(
-			// 	[
-			// 		{
-			// 			roleName: roleBody.roleName,
-			// 			remark: roleBody.remark
-			// 		}
-			// 	],
-			// 	{
-			// 		session
-			// 	}
-			// )
-			// await Promise.all(
-			// 	unionBy(roleBody.roleSystemMenus, 'system').map(async (item) => {
-			// 		// 创建角色系统关联
-			// 		await this.roleSystemMenus.create(
-			// 			{
-			// 				roleSystemId: role._id,
-			// 				system: item.system,
-			// 				menus: await this.adminSystemService.filterSystemMenu(item.system, item.menus)
-			// 			},
-			// 			{ session }
-			// 		)
-			// 	})
-			// )
-			// await session.commitTransaction()
+			await session.commitTransaction()
 		} catch (error) {
-			// await session.abortTransaction()
+			await session.abortTransaction()
 			return Promise.reject(error)
 		} finally {
-			// session.endSession()
+			session.endSession()
 		}
 	}
 

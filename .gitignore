@@ -12,6 +12,8 @@ pnpm-error.log*
 lerna-debug.log*
 deploy/redis/*
 deploy/redis/db
+db
+db/mongo/*
 mongo
 mongodb
 mongodb-data

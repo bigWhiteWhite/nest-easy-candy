@@ -68,6 +68,7 @@ export class RegisterAuthDto extends UserBaseInfo {
 		description: '归属角色',
 		type: [Number]
 	})
+	@IsArray()
 	@ArrayNotEmpty()
 	@ArrayMinSize(1)
 	roles: string[]

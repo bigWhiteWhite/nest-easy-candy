@@ -15,13 +15,12 @@ RUN echo Asia/GuangZhou > /etc/timezone
 WORKDIR /nest-easy-candy
 
 # 下载pm2
-# RUN pnpm add pm2 --global
-RUN yarn add pm2 --global
+RUN pnpm add pm2 --global
 
 # 拷贝源代码
 COPY ./ ./
-RUN yarn install
-RUN yarn run build
+RUN pnpm install
+RUN pnpm run build
 # 暴露端口 - httpserver set port
 EXPOSE 7001
 # 暴露端口 - websokcet set port

@@ -679,39 +679,6 @@ export class RoleSystemMenus {
 }
 ```
 
-
-
-## MongoDb
-
-记录一些常用小技巧
-
-### 修改字段名
-
-`记得先不要修改model里面的名称，还是先用menuIds，改完再换`
-
-```ts
-await this.systemModel
-        .updateMany(
-        {},
-        {
-            $rename: { menuIds: 'menus' }
-        }
-    ).exec()
-```
-
-### 批量设置值
-
-```ts
-await this.menusModel
-        .updateMany(
-        { parentMenu: { $in: [''] } }, // 过滤条件
-        {
-            $set: { parentMenu: null }
-        }
-    )
-        .exec()
-```
-
 ## WebSocket
 
 WebSocket 是一种网络通信协议，它允许在客户端和服务器之间建立持久、全双工的通信通道。WebSocket 的作用是**提供实时、低延迟的双向通信**，使服务器能够主动向客户端推送数据，而不需要客户端不断地发起请求。

@@ -1,7 +1,11 @@
 version: "3.0"
 # openssl rand -base64 756 > .docker/mongo/replica.key
 # icacls scripts\mongodb_rs_init.sh /grant Everyone:RX
-
+# healthcheck:
+#   test: ["CMD", "mongo", "--eval", "'rs.status() == 1'"]
+#   interval: 10s
+#   timeout: 5s
+#   retries: 3
 services:
   # mongodb replicaset primary - 主节点
   mongod1:
@@ -88,9 +92,10 @@ services:
       - mongod3
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/mongodb_rs_init.sh:/scripts/mongodb_rs_init.sh
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/wait-for-it.sh:/scripts/wait-for-it.sh
+      # - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/wait-for-it.sh:/scripts/wait-for-it.sh
+      #"/scripts/wait-for-it.sh",
     restart: on-failure
-    entrypoint: ["/bin/bash", "/scripts/wait-for-it.sh", "/scripts/mongodb_rs_init.sh"]
+    entrypoint: ["/bin/bash", "/scripts/mongodb_rs_init.sh"]
 
   # docker容器启动的redis默认是没有redis.conf的配置文件，所以用docker启动redis之前，需要先去官网下载redis.conf的配置文件
   redis:  # 服务名称
@@ -138,5 +143,4 @@ services:
 # 如nestjs连接mongo和redis，可以通过容器名来互相通信
 networks:
   nest-candy-net:
-    driver: bridge
     name: nest-candy-net

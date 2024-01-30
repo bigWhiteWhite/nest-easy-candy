@@ -57,6 +57,38 @@ export class RoleSystemIdContent {
 	@ArrayNotEmpty()
 	readonly menus: Array<string>
 }
+export class RoleSystemResult {
+	@ApiProperty({ description: '系统对象' })
+	@IsNotEmpty()
+	@Type(() => SystemInfo)
+	readonly system: SystemInfo
+
+	@ApiProperty({ description: '系统菜单数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	readonly systemMenus: Array<MenuListDto>
+
+	@ApiProperty({ description: '用户拥有菜单数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	readonly menus: Array<MenuListDto>
+}
+export class RoleSystemIdResult {
+	@ApiProperty({ description: '系统对象' })
+	@IsNotEmpty()
+	@Type(() => SystemInfo)
+	readonly system: SystemInfo
+
+	@ApiProperty({ description: '系统菜单数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	readonly systemMenus: Array<MenuListDto>
+
+	@ApiProperty({ description: '用户拥有菜单数组' })
+	@IsArray()
+	@ArrayNotEmpty()
+	readonly menus: Array<string>
+}
 export class RoleInfo {
 	@ApiProperty({ description: '角色ID' })
 	@IsNotEmpty()
@@ -84,4 +116,16 @@ export class RoleSystemMenusIdInfo extends RoleInfo {
 	@ValidateNested()
 	@Type(() => Array<RoleSystemIdContent>)
 	readonly roleSystemMenus: Array<RoleSystemIdContent>
+}
+export class RoleSystemMenusResult extends RoleInfo {
+	@ApiProperty({ description: '返回角色拥有的系统菜单数组' })
+	@ValidateNested()
+	@Type(() => Array<RoleSystemResult>)
+	readonly roleSystemMenus: Array<RoleSystemResult>
+}
+export class RoleSystemMenusIdResult extends RoleInfo {
+	@ApiProperty({ description: '返回角色拥有的系统菜单数组' })
+	@ValidateNested()
+	@Type(() => Array<RoleSystemIdResult>)
+	readonly roleSystemMenus: Array<RoleSystemIdResult>
 }

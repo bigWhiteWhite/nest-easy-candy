@@ -10,7 +10,7 @@ import { ApiException } from '@/service/exceptions/api.exception'
 import { WSService } from '@/shared/websocket/ws.service'
 import { AdminSystemService } from '../admin-system/admin-system.service'
 import { MenuService } from '../menu/menu.service'
-import { RoleInfo, RoleSystemMenusInfo } from './dto/update-role.dto'
+import { RoleInfo, RoleSystemIdResult, RoleSystemMenusIdResult, RoleSystemMenusInfo, RoleSystemMenusResult } from './dto/update-role.dto'
 import { Types } from 'mongoose'
 import { PageList, PageOptionsDto } from '@/common/class/res.class'
 
@@ -116,7 +116,7 @@ export class RoleService {
 		}
 	}
 
-	async findRoleWithPopulate(id: string, isError?: boolean) {
+	async findRoleWithPopulate(id: string, isError?: boolean): Promise<RoleSystemMenusResult> {
 		try {
 			const role = (await this.roleModel
 				.findById(id)
@@ -165,7 +165,7 @@ export class RoleService {
 		}
 	}
 
-	async findRoleNoPopulate(id: string, isError?: boolean) {
+	async findRoleNoPopulate(id: string, isError?: boolean): Promise<RoleSystemMenusIdResult> {
 		try {
 			const role = (await this.roleModel
 				.findById(id)
@@ -192,7 +192,7 @@ export class RoleService {
 					return null
 				}
 			}
-			const roleSystemMenus = await Promise.all(
+			const roleSystemMenus = (await Promise.all(
 				role.roleSystemMenus.map(async (item) => {
 					return {
 						system: {
@@ -204,7 +204,7 @@ export class RoleService {
 						menus: item.menus
 					}
 				})
-			)
+			)) as unknown as Array<RoleSystemIdResult>
 			return {
 				...role,
 				roleSystemMenus
@@ -214,7 +214,7 @@ export class RoleService {
 		}
 	}
 
-	async update(id: string, roleBody: CreateRoleDto) {
+	async update(id: string, roleBody: CreateRoleDto): Promise<void> {
 		// 添加事务锁
 		const session = await this.roleModel.startSession()
 		session.startTransaction()
@@ -232,6 +232,7 @@ export class RoleService {
 			// 更新角色系统关联
 			await Promise.all(
 				roleBody.systemMenus.map(async (item) => {
+					console.log('🚀 ~ RoleService ~ roleBody.systemMenus.map ~ item:', item)
 					await this.roleSystemMenus
 						.updateOne(
 							{ roleSystemId: id, system: item.system },
@@ -257,7 +258,7 @@ export class RoleService {
 		}
 	}
 
-	async remove(id: string) {
+	async remove(id: string): Promise<void> {
 		// 添加事务锁
 		const session = await this.roleModel.startSession()
 		session.startTransaction()

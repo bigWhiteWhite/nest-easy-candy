@@ -69,8 +69,6 @@ export class RegisterAuthDto extends UserBaseInfo {
 		type: [Number]
 	})
 	@IsArray()
-	@ArrayNotEmpty()
-	@ArrayMinSize(1)
 	roles: string[]
 }
 

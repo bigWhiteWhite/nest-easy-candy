@@ -1,34 +1,96 @@
 version: "3.0"
-#  uri: 'mongodb://candyAdmin:candyAdmin@127.0.0.1:27017/candyAdmin',
+# openssl rand -base64 756 > .docker/mongo/replica.key
+# icacls scripts\mongodb_rs_init.sh /grant Everyone:RX
+
 services:
-  mongo:
+  # mongodb replicaset primary - 主节点
+  mongod1:
+    container_name: mongod1
     image: mongo:latest
-    container_name: nest-easy-candy-mongo # 容器名称
-    command: mongod --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
-    restart: always # 自动重启
-    ports:
-    - 27017:27017
-    volumes:
-      - ./db/mongo/data:/data/db
-      - ./db/mongo/logs:/data/logs # 用来存放日志
-    # environment: 设置环境变量 - 优先级比env_file高
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_INITDB_REPLICA_SET: ${MONGO_REPLICA_NAME}
-    env_file:
-      - .env
-      - .env.test
-      - .env.prod
-    # healthcheck:
-    #   test: ["CMD", "mongo", "--eval", "'rs.status().ok == 1'"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 3
-    expose:
-    - 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data1:/data/db
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs1:/data/logs
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
+    depends_on:
+      - mongod2
+      - mongod3
+    restart: always
+    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
+    entrypoint:
+      - bash
+      - -c
+      - |
+        chmod 400 /data/replica.key
+        chown 999:999 /data/replica.key
+        exec docker-entrypoint.sh $$@
     networks:
-    - nest-candy-net
+      - nest-candy-net
+
+  # mongodb replicaset secondary - 副节点
+  mongod2:
+    container_name: mongod2
+    image: mongo:latest
+    expose:
+      - 27017
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data2:/data/db
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data2:/data/logs
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
+    restart: always
+    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
+    entrypoint:
+      - bash
+      - -c
+      - |
+        chmod 400 /data/replica.key
+        chown 999:999 /data/replica.key
+        exec docker-entrypoint.sh $$@
+    networks:
+      - nest-candy-net
+
+  # mongodb replicaset arbiter - 仲裁节点
+  mongod3:
+    container_name: mongod3
+    image: mongo:latest
+    expose:
+      - 27017
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data3:/data/db
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data3:/data/logs
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
+    restart: always
+    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
+    entrypoint:
+      - bash
+      - -c
+      - |
+        chmod 400 /data/replica.key
+        chown 999:999 /data/replica.key
+        exec docker-entrypoint.sh $$@
+    networks:
+      - nest-candy-net
+
+  # 初始化副本集
+  mongo-setup:
+    image: mongo:latest
+    container_name: mongo-setup
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    depends_on:
+      - mongod1
+      - mongod2
+      - mongod3
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/mongodb_rs_init.sh:/scripts/mongodb_rs_init.sh
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/wait-for-it.sh:/scripts/wait-for-it.sh
+    restart: on-failure
+    entrypoint: ["/bin/bash", "/scripts/wait-for-it.sh", "/scripts/mongodb_rs_init.sh"]
 
   # docker容器启动的redis默认是没有redis.conf的配置文件，所以用docker启动redis之前，需要先去官网下载redis.conf的配置文件
   redis:  # 服务名称
@@ -66,7 +128,7 @@ services:
       - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
     # 当前服务启动之前先要把depends_on指定的服务启动起来才行
     depends_on:
-      - mongo
+      - mongod1
       - redis
     networks:
       - nest-candy-net
@@ -76,5 +138,5 @@ services:
 # 如nestjs连接mongo和redis，可以通过容器名来互相通信
 networks:
   nest-candy-net:
-    name: nest-candy-net
     driver: bridge
+    name: nest-candy-net

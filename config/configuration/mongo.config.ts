@@ -5,7 +5,12 @@ export const getMongoConfig = async (configService: ConfigService): Promise<Type
 	const dbConfig = {
 		uri: getMongoString(configService)
 	}
-	console.log('🚀 ~ file: mongo.config.ts:9 ~ getMongoConfig ~ dbConfig:', dbConfig)
+	console.log(
+		'🚀 ~ file: mongo.config.ts:9 ~ getMongoConfig ~ port, host, dbConfig:',
+		configService.get('ADMIN_PORT'),
+		configService.get('MONGO_HOST'),
+		dbConfig
+	)
 	return dbConfig
 }
 

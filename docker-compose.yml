@@ -3,27 +3,28 @@ version: "3.0"
 services:
   mongo:
     image: mongo:latest
-    # command: mongod --replSet rs0
     container_name: nest-easy-candy-mongo # 容器名称
+    command: mongod --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
     restart: always # 自动重启
     ports:
     - 27017:27017
-    # healthcheck:
-      # test: ["CMD", "mongo", "--eval", "'rs.status().ok == 1'"]
-      # interval: 10s
-      # timeout: 5s
-      # retries: 3
     volumes:
       - ./db/mongo/data:/data/db
       - ./db/mongo/logs:/data/logs # 用来存放日志
     # environment: 设置环境变量 - 优先级比env_file高
     environment:
-      MONGO_INITDB_ROOT_USERNAME: candyAdmin
-      MONGO_INITDB_ROOT_PASSWORD: candyAdmin
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_REPLICA_SET: ${MONGO_REPLICA_NAME}
     env_file:
       - .env
       - .env.test
       - .env.prod
+    # healthcheck:
+    #   test: ["CMD", "mongo", "--eval", "'rs.status().ok == 1'"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
     expose:
     - 27017
     networks:
@@ -76,3 +77,4 @@ services:
 networks:
   nest-candy-net:
     name: nest-candy-net
+    driver: bridge

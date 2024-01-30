@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Patch, Delete, Param } from '@nestjs/common'
+import { Body, Controller, Post, Patch, Delete, Param } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AdminSystemService } from './admin-system.service'
 import { CreateSystemDto, QuerySystem, SystemId, SystemIds, SystemInfo } from './dto/admin-systen.dto'

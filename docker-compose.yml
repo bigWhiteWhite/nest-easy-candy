@@ -39,11 +39,14 @@ services:
   mongod2:
     container_name: mongod2
     image: mongo:latest
-    expose:
-      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 27018:27018
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data2:/data/db
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data2:/data/logs
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs2:/data/logs
       - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
     restart: always
     command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
@@ -61,11 +64,14 @@ services:
   mongod3:
     container_name: mongod3
     image: mongo:latest
-    expose:
-      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 27019:27019
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data3:/data/db
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data3:/data/logs
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs3:/data/logs
       - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
     restart: always
     command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
@@ -96,6 +102,8 @@ services:
       #"/scripts/wait-for-it.sh",
     restart: on-failure
     entrypoint: ["/bin/bash", "/scripts/mongodb_rs_init.sh"]
+    networks:
+      - nest-candy-net
 
   # docker容器启动的redis默认是没有redis.conf的配置文件，所以用docker启动redis之前，需要先去官网下载redis.conf的配置文件
   redis:  # 服务名称

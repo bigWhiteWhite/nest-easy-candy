@@ -15,9 +15,12 @@ done
 echo "###### 发现工作 ${m1} 实例, 初始化用户设置 & 初始化rs设置..."
 
 # setup user + pass and initialize replica sets
-# var admin = db.getSiblingDB('admin');
 mongosh --host ${m1}:${port} <<EOF
-db.auth('$rootUser', '$rootPassword');
+print("Root User: $rootUser");
+print("Root Password: $rootPassword");
+var admin = db.getSiblingDB('admin');
+admin.auth($rootUser, $rootPassword);
+print("认证成功");
 
 var config = {
     "_id": "${MONGO_REPLICA_NAME}",

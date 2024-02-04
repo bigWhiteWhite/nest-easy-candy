@@ -47,18 +47,4 @@ var config = {
 rs.initiate(config, { force: true });
 rs.status();
 
-use admin
-db.auth(rootUser, rootPassword);
-var authDb = db.getSiblingDB(authDatabase)
-authDb.createUser({
-    "user":rootUser,
-    "pwd":rootPassword,
-    "roles":[
-        {
-            role:"readWrite",
-            db:authDatabase
-        }
-    ]
-})
-show users
 EOF

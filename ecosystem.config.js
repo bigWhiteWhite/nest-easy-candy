@@ -40,7 +40,7 @@ module.exports = {
 			user: 'root',
 			host: '39.108.99.86',
 			ref: 'origin/master',
-			'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env test' // 这里设置构建环境是测试还是生产
+			'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env prod' // 这里设置构建环境是测试还是生产
 		}
 	}
 }

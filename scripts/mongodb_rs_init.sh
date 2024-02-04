@@ -18,9 +18,6 @@ var rootUser = process.env.MONGO_INITDB_ROOT_USERNAME;
 var rootPassword = process.env.MONGO_INITDB_ROOT_PASSWORD;
 var replicaName = process.env.MONGO_REPLICA_NAME;
 var authDatabase = process.env.MONGO_AUTHDATABASE;
-print("Root User: ", rootUser);
-print("Root Password: ", rootPassword);
-print("Root replicaName: ", replicaName);
 var admin = db.getSiblingDB('admin');
 admin.auth(rootUser, rootPassword);
 print("认证成功");
@@ -52,12 +49,16 @@ rs.status();
 
 use admin
 db.auth(rootUser, rootPassword);
-show users
-db.updateUser(rootUser, [
-    { role:"root", db:"admin"},
-    { role:"readWrite", db:"candyAdmin"},
-    { role:"readWrite", db:"adminSystem"}
-])
-use adminSystem
+var authDb = db.getSiblingDB(authDatabase)
+authDb.createUser({
+    "user":rootUser,
+    "pwd":rootPassword,
+    "roles":[
+        {
+            role:"readWrite",
+            db:authDatabase
+        }
+    ]
+})
 show users
 EOF

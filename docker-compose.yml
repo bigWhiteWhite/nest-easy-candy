@@ -2,10 +2,11 @@ version: "3.0"
 # openssl rand -base64 756 > .docker/mongo/replica.key
 # icacls scripts\mongodb_rs_init.sh /grant Everyone:RX
 # healthcheck:
-#   test: ["CMD", "mongo", "--eval", "'rs.status() == 1'"]
+#   test: ["CMD", "mongosh", "'rs.status() == 1'"]
 #   interval: 10s
 #   timeout: 5s
 #   retries: 3
+
 services:
   # mongodb replicaset primary - 主节点
   mongod1:
@@ -14,6 +15,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
       MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
     ports:
       - 27017:27017
@@ -43,6 +45,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
       MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
     ports:
       - 27018:27017
@@ -69,6 +72,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
       MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
     ports:
       - 27019:27017
@@ -95,6 +99,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
       MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
     depends_on:
       - mongod1
@@ -102,7 +107,6 @@ services:
       - mongod3
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/mongodb_rs_init.sh:/scripts/mongodb_rs_init.sh
-      # - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/wait-for-it.sh:/scripts/wait-for-it.sh
     restart: on-failure
     entrypoint: ["/bin/bash", "/scripts/mongodb_rs_init.sh"]
     networks:
@@ -114,13 +118,12 @@ services:
     container_name: nest-easy-candy-redis # 容器名称
     restart: always # 自动重启
     volumes:
-      - ./deploy/redis/db:/data # 把持久化数据挂载到宿主机
-      - ./deploy/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf  # 把redis的配置文件挂载到宿主机
-      - ./deploy/redis/logs:/logs # 用来存放日志
-    env_file: # docker-compose --env-file .env.test up
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/redis/db:/data  # 把持久化数据挂载到宿主机
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf # 把redis的配置文件挂载到宿主机
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/redis/logs:/logs # 用来存放日志
+    env_file:
       - .env
-      - .env.test
-      - .env.prod
+      - .env.${NODE_ENV}
     ports:
       - '${REDIS_PORT}:6379'  # 本机端口:容器端口 - '${REDIS_PORT}:6379'
     command: >
@@ -137,20 +140,18 @@ services:
     restart: always
     env_file:
       - .env
-      - .env.test
-      - .env.prod
+      - .env.${NODE_ENV}
     ports:
       - '${ADMIN_PORT}:7001'  # 本机端口:容器端口 - '${ADMIN_PORT}:7001'
       - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
     # 当前服务启动之前先要把depends_on指定的服务启动起来才行
     depends_on:
-      - mongo-setup
+      - mongod1
       - redis
     networks:
       - nest-candy-net
 
-# 声明一下网桥  my-server。
-# 重要：将所有服务都挂载在同一网桥即可通过容器名来互相通信了
+# 声明一下网桥  my-server。重要：将所有服务都挂载在同一网桥即可通过容器名来互相通信了
 # 如nestjs连接mongo和redis，可以通过容器名来互相通信
 networks:
   nest-candy-net:

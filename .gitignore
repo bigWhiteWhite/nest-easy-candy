@@ -10,13 +10,8 @@ pnpm-debug.log*
 pnpm-debug.log*
 pnpm-error.log*
 lerna-debug.log*
-deploy/redis/*
-deploy/redis/db
-db
-db/mongo/*
-mongo
-mongodb
-mongodb-data
+volumes
+.docker
 
 # OS
 .DS_Store
@@ -33,6 +28,3 @@ mongodb-data
 *.launch
 .settings/
 *.sublime-workspace
-
-# IDE - VSCode
-# .vscode/*

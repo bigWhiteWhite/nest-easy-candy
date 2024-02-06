@@ -1,14 +1,16 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { ResOp } from '../../common/class/res.class'
-import { Logger } from '../../shared/logger'
 import { ApiException } from '../exceptions/api.exception'
 import { isDev } from '@/config/env'
+import { LoggerService } from '@/shared/logger/logger.service'
 /**
  * @description 处理http报错，添加日志
  */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
+	constructor(private readonly logger: LoggerService) {}
+
 	catch(exception: HttpException, host: ArgumentsHost) {
 		const ctx = host.switchToHttp()
 		const response = ctx.getResponse<Response>()
@@ -33,7 +35,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 			Response: ${exception.toString()} \n
 		<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     `
-		Logger.info(logFormat)
+		this.logger.log(logFormat)
 		const result = new ResOp(code, '', message)
 		response.status(status).send(result)
 	}

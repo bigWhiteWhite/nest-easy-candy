@@ -3,11 +3,12 @@
  */
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
 import { ResOp } from '../../common/class/res.class'
-import { Logger } from '../../shared/logger'
 import { ApiException } from '../exceptions/api.exception'
+import { LoggerService } from '@/shared/logger/logger.service'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+	constructor(private readonly logger: LoggerService) {}
 	catch(exception: unknown, host: ArgumentsHost) {
 		const ctx = host.switchToHttp()
 		const response = ctx.getResponse()
@@ -27,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 			Response: ${exception} \n
 		<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     `
-		Logger.error(logFormat)
+		this.logger.error(logFormat)
 		const result = new ResOp(code, '', `Service Error: ${exception}`)
 		response.status(status).send(result)
 	}

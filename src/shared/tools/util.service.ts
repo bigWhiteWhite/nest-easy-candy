@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { customAlphabet, nanoid } from 'nanoid'
 import { Request } from 'express'
 import * as CryptoJS from 'crypto-js'
-import { ApiException } from '../../service/exceptions/api.exception'
 import { isEqual } from 'lodash'
 @Injectable()
 export class UtilService {

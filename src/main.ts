@@ -7,15 +7,15 @@ import { HttpExceptionFilter } from './service/filters/http-exception.filter'
 import { AllExceptionsFilter } from './service/filters/any-exception.filter'
 import { join } from 'path'
 import { ConfigService } from '@nestjs/config'
-import { logger } from './middleware/logger.middleware'
 import * as cookieParser from 'cookie-parser'
 import * as expressSession from 'express-session'
 import * as express from 'express'
 import { Logger } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { AdminModule } from './app.module'
+import { LoggerService } from './shared/logger/logger.service'
+import { ServerModule } from './app.module'
 async function bootstrap() {
-	const app = await NestFactory.create<NestExpressApplication>(AdminModule)
+	const app = await NestFactory.create<NestExpressApplication>(ServerModule)
 	const configService: ConfigService = app.get(ConfigService)
 	// ? 加统一前缀
 	app.setGlobalPrefix('api')
@@ -23,23 +23,18 @@ async function bootstrap() {
 	await app.useStaticAssets(join(__dirname, 'public'), {
 		prefix: '/public'
 	})
-	//  全局配置跨域
-	// app.enableCors({
-	// 	// 允许的请求源
-	// 	origin: '*'
-	// })
 	app.use(express.json()) // For parsing application/json
 	app.use(express.urlencoded({ extended: true })) // For parsing application/x-www-form-urlencoded
 	// 监听所有的请求路由，并打印日志
-	app.use(logger)
+	app.useLogger(app.get(LoggerService))
 	// api interceptor 统一处理返回接口结果
 	app.useGlobalInterceptors(new ApiTransformInterceptor(new Reflector()))
 	// 使用全局拦截器打印出参
-	app.useGlobalInterceptors(new TransformInterceptor())
+	app.useGlobalInterceptors(new TransformInterceptor(app.get(LoggerService)))
 	// 过滤处理 HTTP 异常
-	app.useGlobalFilters(new HttpExceptionFilter())
+	app.useGlobalFilters(new HttpExceptionFilter(app.get(LoggerService)))
 	// 过滤所有异常
-	app.useGlobalFilters(new AllExceptionsFilter())
+	app.useGlobalFilters(new AllExceptionsFilter(app.get(LoggerService)))
 	// 配置模板引擎
 	app.setBaseViewsDir(join(__dirname, 'views'))
 	// websocket

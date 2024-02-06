@@ -1,5 +1,5 @@
 export interface AdminUser {
-	_id: string
+	id: number
 	pv: number
 	username: string
 	phone: number

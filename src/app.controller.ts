@@ -4,7 +4,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 // import { join } from 'path'
 // import dayjs = require('dayjs')
 
-@Controller('/admin')
+@Controller('/server')
 export class AdminController {
 	@Get('setCookie')
 	setCookie(@Response() res) {

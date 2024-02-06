@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
-import { AdminModule } from '@/admin.module'
+import { ServerModule } from '@/admin.module'
 
 describe('AdminController (e2e)', () => {
 	let app: INestApplication
 
 	beforeEach(async () => {
 		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [AdminModule]
+			imports: [ServerModule]
 		}).compile()
 
 		app = moduleFixture.createNestApplication()

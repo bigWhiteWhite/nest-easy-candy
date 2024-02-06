@@ -4,10 +4,11 @@
 import { ArgumentMetadata, Injectable, PipeTransform, BadRequestException } from '@nestjs/common'
 import { ValidationError, validate } from 'class-validator'
 import { plainToClass } from 'class-transformer'
-import { Logger } from '../../shared/logger'
+import { LoggerService } from '@/shared/logger/logger.service'
 
 @Injectable()
 export class ValidationPipe implements PipeTransform {
+	constructor(private logger: LoggerService) {}
 	findConstraints(validationError: ValidationError): string | undefined {
 		if (validationError.constraints) {
 			// 如果当前 validationError 包含 constraints，返回它
@@ -36,7 +37,7 @@ export class ValidationPipe implements PipeTransform {
 		if (errors.length > 0) {
 			// const msg = Object.values(errors[0].constraints)[0] 只需要取第一个错误信息并返回即可
 			const msg = this.findConstraints(errors[0]) // 只需要取第一个错误信息并返回即可
-			Logger.error(`Validation failed: ${msg}`)
+			this.logger.error(`Validation failed: ${msg}`)
 			throw new BadRequestException(`Validation failed: ${msg}`)
 		}
 		return value

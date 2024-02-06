@@ -1,9 +1,9 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
-import { isDev } from 'config/env'
 import { Request, Response } from 'express'
 import { ResOp } from '../../common/class/res.class'
 import { Logger } from '../../shared/logger'
 import { ApiException } from '../exceptions/api.exception'
+import { isDev } from '@/config/env'
 /**
  * @description 处理http报错，添加日志
  */

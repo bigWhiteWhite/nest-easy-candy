@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { Request } from 'express'
-import { API_USER } from '../../admin.constant'
+import { API_USER } from '../../app.constant'
 import { AdminUser } from '../../models/system/system.interface'
 /**
  * @description auth.guard守卫已经在用户登录的时候将用户的信息存放于请求头上面

@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash'
 import { Request } from 'express'
 import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
-import { API_USER, AUTHORIZE_KEY_METADATA } from '../admin.constant'
+import { API_USER, AUTHORIZE_KEY_METADATA } from '../app.constant'
 import { ApiException } from '../service/exceptions/api.exception'
 
 // 注册身份验证守卫

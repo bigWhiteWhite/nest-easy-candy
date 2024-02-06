@@ -4,7 +4,7 @@ import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Response } from 'express'
 import { ResOp } from '../../common/class/res.class'
-import { TRANSFORM_KEEP_KEY_METADATA } from '../../admin.constant'
+import { TRANSFORM_KEEP_KEY_METADATA } from '@/app.constant'
 /**
  * 统一处理返回接口结果，如果不需要则添加@Keep装饰器
  */

@@ -1,8 +1,8 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { API_USER } from '../../admin.constant'
 import { Logger } from '@/shared/logger'
+import { API_USER } from '@/app.constant'
 /**
  * @description 添加日志, 出参信息-查看返回数据
  */

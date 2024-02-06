@@ -1,17 +1,23 @@
 import dayjs = require('dayjs')
+import { ConfigModule } from '@nestjs/config'
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common' // 模块的导入顺序会影响执行顺序
 import { MulterModule } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { InitMiddleware } from './middleware/init.middleware'
 import { AuthMiddleware } from './middleware/auth.middleware'
-// import { AuthGuard } from './guards/auth.guard'
+import Configuration from './config'
 import { APP_PIPE } from '@nestjs/core' // APP_GUARD
 import { indexModule } from './models/index.module'
 import { SharedModule } from './shared/shared.module'
 import { ValidationPipe } from './service/pipes/validation.pipe'
-import { AdminController } from './admin.controller'
+import { AdminController } from './app.controller'
 @Module({
 	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			load: [Configuration],
+			envFilePath: ['.env', `.env.${process.env.NODE_ENV}`]
+		}),
 		MulterModule.register({
 			storage: diskStorage({
 				// /根目录为项目目录，也就是nest-cli.json同级目录

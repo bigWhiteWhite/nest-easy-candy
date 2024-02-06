@@ -1,6 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core'
 import { IoAdapter } from '@nestjs/platform-socket.io'
-import { AdminModule } from './admin.module'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { ApiTransformInterceptor } from './service/interceptors/api-transform.interceptor'
 import { TransformInterceptor } from './service/interceptors/transform.interceptor'
@@ -14,6 +13,7 @@ import * as expressSession from 'express-session'
 import * as express from 'express'
 import { Logger } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { AdminModule } from './app.module'
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AdminModule)
 	const configService: ConfigService = app.get(ConfigService)

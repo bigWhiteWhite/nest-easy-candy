@@ -8,7 +8,7 @@ import { Repository } from 'typeorm'
 
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	// 本地策略,local为策略名,在auth.model引入以后，然后在控制器里面指明使用local策略就可以了
-	constructor(@InjectRepository(SysUser) private userRepository: Repository<SysUser>) {
+	constructor(@InjectRepository(SysUser) private userModel: Repository<SysUser>) {
 		super({
 			usernameField: 'phone',
 			passwordField: 'password'
@@ -19,7 +19,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 	 */
 	async validate(phone: string, password: string) {
 		// .select('+password') // 指明要返回password字段
-		const user = await this.userRepository.findOne({ where: { phone } })
+		const user = await this.userModel.findOne({ where: { phone } })
 		if (!user) {
 			throw new ApiException(10009)
 		}

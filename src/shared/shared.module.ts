@@ -7,14 +7,25 @@ import { UtilService } from './tools/util.service'
 import { WinstonLogLevel } from './logger/logger.interface'
 import { LoggerModule } from './logger/logger.module'
 import { LoggerService } from './logger/logger.service'
+import { JwtModule } from '@nestjs/jwt'
 // ?使用了@Global()意味着其中定义的提供者（服务）将在整个 Nest.js 应用程序中可用
-const providers = [UtilService, RedisService, LoggerModule, LoggerService]
+const providers = [UtilService, RedisService, LoggerModule, LoggerService, JwtModule]
 @Global() // 全局共享模块
 @Module({
 	imports: [
 		HttpModule.register({
 			timeout: 5000,
 			maxRedirects: 5
+		}),
+		JwtModule.registerAsync({
+			imports: [ConfigModule],
+			useFactory: async (configService: ConfigService) => ({
+				secret: configService.get<string>('jwt.secret'),
+				signOptions: {
+					expiresIn: 60 * 60 * 48 // '48h'
+				}
+			}),
+			inject: [ConfigService]
 		}),
 		RedisModule.registerAsync({
 			imports: [ConfigModule],

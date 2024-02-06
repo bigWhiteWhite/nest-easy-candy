@@ -13,13 +13,15 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from './dto/user.dto'
 import { AdminUser } from '../system.interface'
 import { hashSync } from 'bcryptjs'
+import { LogService } from '../log/log.service'
 @Injectable()
 export class UserService {
 	constructor(
 		private readonly redisService: RedisService,
 		private readonly jwtService: JwtService,
 		private readonly utilService: UtilService,
-		@InjectRepository(SysUser) private userRepository: Repository<SysUser>,
+		private readonly logService: LogService,
+		@InjectRepository(SysUser) private userModel: Repository<SysUser>,
 		@InjectEntityManager() private entityManager: EntityManager
 	) {}
 	/**
@@ -62,14 +64,13 @@ export class UserService {
 	async clearLoginStatus(uid: number): Promise<void> {
 		await this.redisService.getRedis().del(`server:passwordVersion:${uid}`)
 		await this.redisService.getRedis().del(`server:token:${uid}`)
-		await this.redisService.getRedis().del(`server:perms:${uid}`)
 	}
 
 	/**
 	 * 用户注册，如果返回false则表示已存在该用户
 	 */
 	async register(body: CreateUserDto) {
-		const exists = this.userRepository.findOne({
+		const exists = this.userModel.findOne({
 			where: { phone: body.phone }
 		})
 		if (!isEmpty(exists)) {
@@ -89,21 +90,20 @@ export class UserService {
 	 * 用户登录
 	 */
 	async login(user: AdminUser, ip: string, ua: string) {
-		const oldToken = await this.getRedisTokenById(user.id)
 		// 每次登录都将密码版本设置为1
 		await this.redisService.getRedis().set(`server:passwordVersion:${user.id}`, 1)
-		// 目前是多点登录
-		if (oldToken) return oldToken
-		else {
-			const jwtSign = this.jwtService.sign({
-				id: String(user.id),
-				pv: 1,
-				username: user.username,
-				phone: user.phone,
-				status: user.status
-			})
-			return jwtSign
-		}
+		const jwtSign = this.jwtService.sign({
+			id: String(user.id),
+			pv: 1,
+			username: user.username,
+			phone: user.phone,
+			status: user.status
+		})
+		await this.redisService.getRedis().set(`server:passwordVersion:${user.id}`, 1)
+		// Token设置过期时间 24小时
+		await this.redisService.getRedis().set(`server:token:${user.id}`, jwtSign, 'EX', 60 * 60 * 24)
+		await this.logService.saveLoginLog(user, ip, ua)
+		return jwtSign
 	}
 
 	async getRedisPasswordVersionById(id: number): Promise<string> {
@@ -112,9 +112,5 @@ export class UserService {
 
 	async getRedisTokenById(id: number): Promise<string> {
 		return this.redisService.getRedis().get(`server:token:${id}`)
-	}
-
-	async getRedisPermsById(id: number): Promise<string> {
-		return this.redisService.getRedis().get(`server:perms:${id}`)
 	}
 }

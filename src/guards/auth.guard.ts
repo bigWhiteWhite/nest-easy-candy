@@ -10,7 +10,7 @@ import { UserService } from '@/models/system/user/user.service'
 // 注册身份验证守卫
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private reflector: Reflector, private jwtService: JwtService, private userService: UserService) {}
+	constructor(private readonly reflector: Reflector, private readonly jwtService: JwtService, private readonly userService: UserService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		// 检测是否是开放类型的，例如获取验证码类型的接口不需要校验，可以加入@Authorize可自动放过

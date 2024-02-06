@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
-import { TypeOrmModule } from '@nestjs/typeorm'
-import SysUser from '@/entities/server/sys-user.entity'
+import { UserModule } from './user/user.module'
 @Module({
-	imports: [TypeOrmModule.forFeature([SysUser])]
+	imports: [UserModule]
 })
 export class SystemModule {}

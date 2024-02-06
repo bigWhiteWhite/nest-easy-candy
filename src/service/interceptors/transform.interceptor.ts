@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { ADMIN_USER } from '../../admin.constant'
+import { API_USER } from '../../admin.constant'
 import { Logger } from '@/shared/logger'
 /**
  * @description 添加日志, 出参信息-查看返回数据
@@ -17,7 +17,7 @@ export class TransformInterceptor implements NestInterceptor {
 					Request original url: ${req.originalUrl}
 					Method: ${req.method}
 					IP: ${req.ip}
-					User: ${JSON.stringify(req[ADMIN_USER])}
+					User: ${JSON.stringify(req[API_USER])}
 					Response data:\n ${JSON.stringify(data)}
 				<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				`

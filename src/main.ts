@@ -1,5 +1,4 @@
 import { NestFactory, Reflector } from '@nestjs/core'
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { AdminModule } from './admin.module'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -10,15 +9,16 @@ import { AllExceptionsFilter } from './service/filters/any-exception.filter'
 import { join } from 'path'
 import { ConfigService } from '@nestjs/config'
 import { logger } from './middleware/logger.middleware'
-import { Logger } from './shared/logger'
 import * as cookieParser from 'cookie-parser'
 import * as expressSession from 'express-session'
 import * as express from 'express'
+import { Logger } from '@nestjs/common'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AdminModule)
 	const configService: ConfigService = app.get(ConfigService)
 	// ? 加统一前缀
-	app.setGlobalPrefix('admin')
+	app.setGlobalPrefix('api')
 	// 配置静态资源路径: https://docs.nestjs.cn/8/techniques?id=mvc%e6%a8%a1%e5%9e%8b-%e8%a7%86%e5%9b%be%e6%8e%a7%e5%88%b6%e5%99%a8
 	await app.useStaticAssets(join(__dirname, 'public'), {
 		prefix: '/public'
@@ -57,17 +57,11 @@ async function bootstrap() {
 			saveUninitialized: true
 		})
 	)
-	const config = new DocumentBuilder()
-		.setTitle('大白后台管理系统')
-		.setDescription('供后台管理界面调用的Api')
-		.setVersion('1.0')
-		.addBearerAuth()
-		.build()
+	const PORT = configService.get<string>('server.apiPort')
+	const config = new DocumentBuilder().setTitle('前端API').setDescription('前端API').setVersion('1.0').addBearerAuth().build()
 	const document = SwaggerModule.createDocument(app, config)
 	SwaggerModule.setup('admin-api-docs', app, document)
-	// const PORT = process.env.ADMIN_PORT || 3008
-	const PORT = configService.get<string>('server.adminPort')
 	await app.listen(PORT)
-	Logger.log(`API文档已生成,请访问: http://localhost:${PORT}/admin-api-docs`)
+	Logger.log(`API文档已生成,请访问: http://localhost:${PORT}/api-docs`)
 }
 bootstrap()

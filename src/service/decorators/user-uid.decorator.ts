@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { Request } from 'express'
-import { ADMIN_USER } from '../../admin.constant'
+import { API_USER } from '../../admin.constant'
 import { AdminUser } from '../../models/system/system.interface'
 /**
  * @description auth.guard守卫已经在用户登录的时候将用户的信息存放于请求头上面
@@ -11,7 +11,7 @@ import { AdminUser } from '../../models/system/system.interface'
 export const UserInfo = createParamDecorator((data: string, ctx: ExecutionContext) => {
 	const request = ctx.switchToHttp().getRequest<Request>()
 	// auth guard will mount this
-	const user = request.user || (request[ADMIN_USER] as AdminUser)
+	const user = request.user || (request[API_USER] as AdminUser)
 	if (data) {
 		return user?.[data]
 	} else {

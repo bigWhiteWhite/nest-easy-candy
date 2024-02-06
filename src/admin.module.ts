@@ -1,12 +1,11 @@
 import dayjs = require('dayjs')
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
-import { CommonModule } from '@app/common/index' // 模块的导入顺序会影响执行顺序,例如commonModule写在后面，前面的模块获取process.env会缺失
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common' // 模块的导入顺序会影响执行顺序
 import { MulterModule } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { InitMiddleware } from './middleware/init.middleware'
 import { AuthMiddleware } from './middleware/auth.middleware'
-import { AuthGuard } from './guards/auth.guard'
-import { APP_GUARD, APP_PIPE } from '@nestjs/core'
+// import { AuthGuard } from './guards/auth.guard'
+import { APP_PIPE } from '@nestjs/core' // APP_GUARD
 import { indexModule } from './models/index.module'
 import { SharedModule } from './shared/shared.module'
 import { ValidationPipe } from './service/pipes/validation.pipe'
@@ -24,16 +23,15 @@ import { AdminController } from './admin.controller'
 				}
 			})
 		}),
-		CommonModule,
 		indexModule,
 		SharedModule
 	], // 引入操作数据库模块, 这里的顺序也是swigger的顺序
 	controllers: [AdminController],
 	providers: [
-		{
-			provide: APP_GUARD,
-			useClass: AuthGuard
-		},
+		// {
+		// 	provide: APP_GUARD,
+		// 	useClass: AuthGuard
+		// },
 		{
 			// 模块中使用@UsePipes(new ValidationPipe())
 			provide: APP_PIPE,
@@ -47,13 +45,11 @@ export class AdminModule implements NestModule {
 		consumer
 			.apply(AuthMiddleware)
 			.exclude(
-				'admin/user/register',
-				'admin/user/generate',
-				'admin/role/wsTest',
-				{ path: 'admin/user/login', method: RequestMethod.POST },
-				{ path: 'admin/user/captcha', method: RequestMethod.GET }
-				// 'admin/code'
+				'api/user/register',
+				'api/user/generate',
+				{ path: 'api/user/login', method: RequestMethod.POST },
+				{ path: 'api/user/captcha', method: RequestMethod.GET }
 			)
-			.forRoutes('admin/*')
+			.forRoutes('api/*')
 	}
 }

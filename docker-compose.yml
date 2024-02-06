@@ -142,7 +142,7 @@ services:
       - .env
       - .env.${NODE_ENV}
     ports:
-      - '${ADMIN_PORT}:7001'  # 本机端口:容器端口 - '${ADMIN_PORT}:7001'
+      - '${API_PORT}:7001'  # 本机端口:容器端口 - '${API_PORT}:7001'
       - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
     # 当前服务启动之前先要把depends_on指定的服务启动起来才行
     depends_on:

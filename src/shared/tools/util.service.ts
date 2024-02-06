@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { customAlphabet, nanoid } from 'nanoid'
 import { Request } from 'express'
 import * as CryptoJS from 'crypto-js'
-import { PopulateOptions, Types } from 'mongoose'
 import { ApiException } from '../../service/exceptions/api.exception'
 import { isEqual } from 'lodash'
 @Injectable()
@@ -14,19 +13,6 @@ export class UtilService {
 	 */
 	compareData(oldData: any, updateData: any): boolean {
 		return isEqual(oldData, updateData)
-	}
-
-	/**
-	 * @description 生成多嵌套的Menus填充
-	 */
-	generatePopulateConfig(path: string, depth: number, params?: Partial<PopulateOptions>): PopulateOptions {
-		if (depth > 0) {
-			return {
-				...params,
-				path,
-				populate: this.generatePopulateConfig(path, depth - 1, params) as any
-			}
-		}
 	}
 	/**
 	 * 获取请求IP
@@ -47,21 +33,6 @@ export class UtilService {
 	 */
 	public aesEncrypt(msg: string, secret: string): string {
 		return CryptoJS.AES.encrypt(msg, secret).toString()
-	}
-
-	/**
-	 * @description 将字符串转换成ObjectId
-	 * @param {string} id
-	 * @returns {Types.ObjectId}
-	 * @memberof AdminService
-	 */
-	public toObjectId(id: string | Types.ObjectId): Types.ObjectId {
-		try {
-			if (id instanceof Types.ObjectId) return id as Types.ObjectId
-			return new Types.ObjectId(id as string)
-		} catch (e) {
-			throw new ApiException(10004)
-		}
 	}
 
 	/**

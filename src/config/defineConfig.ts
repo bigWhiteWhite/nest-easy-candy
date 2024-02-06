@@ -12,7 +12,7 @@ export interface IConfig {
 		DBPath: string
 	}
 	server: {
-		adminPort: string
+		apiPort: string
 	}
 	// jwt sign secret
 	jwt: {

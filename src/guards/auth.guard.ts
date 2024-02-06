@@ -3,15 +3,13 @@ import { isEmpty } from 'lodash'
 import { Request } from 'express'
 import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
-import { ADMIN_USER, AUTHORIZE_KEY_METADATA } from '../admin.constant'
+import { API_USER, AUTHORIZE_KEY_METADATA } from '../admin.constant'
 import { ApiException } from '../service/exceptions/api.exception'
-import { UserService } from '../models/system/user/user.service'
-import { AdminUser } from '../models/system/system.interface'
 
 // 注册身份验证守卫
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private reflector: Reflector, private jwtService: JwtService, private userService: UserService) {}
+	constructor(private reflector: Reflector, private jwtService: JwtService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		// 检测是否是开放类型的，例如获取验证码类型的接口不需要校验，可以加入@Authorize可自动放过
@@ -26,8 +24,8 @@ export class AuthGuard implements CanActivate {
 			throw new ApiException(11001)
 		}
 		// 校验用户密码版本
-		const pv = await this.userService.getRedisPasswordVersionById(request[ADMIN_USER]._id)
-		if (pv && pv !== `${request[ADMIN_USER].pv}`) {
+		const pv = '1'
+		if (pv && pv !== `${request[API_USER].pv}`) {
 			// 密码版本不一致，登录期间已更改过密码
 			throw new ApiException(11004)
 		}
@@ -41,9 +39,9 @@ export class AuthGuard implements CanActivate {
 	// 在请求头上面挂载用户信息
 	private validateAndSetUser(token: string, request: Request): boolean {
 		try {
-			const user: AdminUser = this.jwtService.verify(token)
+			const user = this.jwtService.verify(token)
 			if (!isEmpty(user)) {
-				request[ADMIN_USER] = user
+				request[API_USER] = user
 				return true
 			}
 		} catch (e) {

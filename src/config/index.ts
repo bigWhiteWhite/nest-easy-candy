@@ -9,7 +9,7 @@ export default () => {
 	let envConfig: Partial<IConfig> = {}
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		envConfig = require(`./config.${process.env.NODE_ENV}`).default
+		envConfig = require(`./file/config.${process.env.NODE_ENV}`).default
 	} catch (e) {
 		// 无效配置则自动忽略
 	}

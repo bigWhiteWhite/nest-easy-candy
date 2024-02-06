@@ -1,8 +1,8 @@
 export default {
-	rootRoleId: '637f58f1e91b7562808e33d0',
+	rootRoleId: '',
 	// 启动服务
 	server: {
-		adminPort: process.env.ADMIN_PORT
+		apiPort: process.env.API_PORT
 	},
 	// jwt sign secret
 	jwt: {

@@ -43,11 +43,6 @@ export class AuthGuard implements CanActivate {
 			// 与redis保存不一致
 			throw new ApiException(11002)
 		}
-		const perms: string = await this.userService.getRedisPermsById(request[API_USER].uid)
-		// 安全判空
-		if (isEmpty(perms)) {
-			throw new ApiException(11001)
-		}
 		// pass
 		return true
 	}

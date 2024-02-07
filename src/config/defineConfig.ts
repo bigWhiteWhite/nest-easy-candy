@@ -8,9 +8,6 @@ export function defineConfig(config: Partial<IConfig>): Partial<IConfig> {
 export interface IConfig {
 	rootRoleId: string | number
 	jwtExpires: number // jwt和redis的token过期时间
-	mongo: {
-		DBPath: string
-	}
 	server: {
 		apiPort: string
 	}

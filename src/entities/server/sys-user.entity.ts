@@ -8,11 +8,11 @@ export default class SysUser extends BaseEntity {
 	@ApiProperty()
 	id: number
 
-	@Column()
+	@Column({ nullable: true, default: 'user' })
 	@ApiProperty()
 	username: string
 
-	@Column({ nullable: true, unique: true })
+	@Column({ unique: true })
 	@ApiProperty()
 	phone: string
 

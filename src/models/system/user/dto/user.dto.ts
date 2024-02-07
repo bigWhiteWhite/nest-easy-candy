@@ -7,7 +7,7 @@ export class CreateUserDto {
 		description: '用户姓名'
 	})
 	@IsString()
-	@MinLength(2)
+	@IsOptional()
 	username: string
 
 	@ApiProperty({
@@ -53,6 +53,7 @@ export class CreateUserDto {
 	@ApiProperty({
 		description: '状态'
 	})
+	@IsOptional()
 	@IsIn([0, 1])
 	status: number
 }

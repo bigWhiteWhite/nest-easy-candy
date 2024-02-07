@@ -35,8 +35,8 @@ import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service'
 				password: configService.get<string>('database.password'),
 				database: configService.get<string>('database.database'),
 				synchronize: configService.get<boolean>('database.synchronize'),
-				logging: configService.get('database.logging'),
 				timezone: configService.get('database.timezone'), // 时区
+				logging: configService.get('database.logging'),
 				// 自定义日志
 				logger: new TypeORMLoggerService(configService.get('database.logging'), loggerOptions)
 			}),

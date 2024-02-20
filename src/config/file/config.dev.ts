@@ -23,7 +23,7 @@ export default {
 		username: process.env.MYSQL_USERNAME,
 		password: process.env.MYSQL_PASSWORD,
 		database: process.env.MYSQL_DATABASE,
-		synchronize: false,
+		synchronize: true,
 		logging: false,
 		timezone: '+08:00' // 东八区
 	} as DataSourceOptions

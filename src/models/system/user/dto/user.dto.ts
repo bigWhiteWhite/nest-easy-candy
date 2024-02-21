@@ -2,7 +2,22 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsString, MinLength, Matches, MaxLength, IsOptional, IsEmail, ValidateIf, IsIn, IsMobilePhone } from 'class-validator'
 import { isEmpty } from 'lodash'
 
-export class CreateUserDto {
+export class ValidInfo {
+	@ApiProperty({
+		required: false,
+		description: '备注'
+	})
+	@IsString()
+	validId: string
+
+	@ApiProperty({
+		required: false,
+		description: '备注'
+	})
+	@IsString()
+	validCode: string
+}
+export class CreateUserDto extends ValidInfo {
 	@ApiProperty({
 		description: '用户姓名'
 	})

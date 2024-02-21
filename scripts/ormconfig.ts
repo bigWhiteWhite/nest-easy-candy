@@ -1,12 +1,14 @@
 import { DataSource, DataSourceOptions } from 'typeorm'
 
+/**
+ * ?知识点
+ * 每次迁移都需要create一个迁移文件，命令行会执行最新时间戳的文件
+ * revert会将迁移返回上一个时间戳
+ * 迁移文件需要自己修改
+ */
+
 // 基础配置
 const baseConfig: Partial<DataSourceOptions> = {
-	// host: process.env.DATABASE_HOST,
-	// port: process.env.MYSQL_PORT as unknown as number,
-	// username: process.env.MYSQL_USERNAME,
-	// password: process.env.MYSQL_PASSWORD,
-	// database: process.env.MYSQL_DATABASE
 	type: 'mysql',
 	host: 'localhost',
 	port: 3306,
@@ -27,7 +29,6 @@ const ormConfigForCli: Partial<DataSourceOptions> = {
 
 // 实例化dataSource，用以之后cli使用
 const dataSource = new DataSource(ormConfigForCli as unknown as DataSourceOptions)
-console.log('🚀 ~ baseConfig:', baseConfig)
 
 // 此处的dataSource需要 export default才可以使用
 export default dataSource

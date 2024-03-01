@@ -61,9 +61,9 @@ export class UserService {
 	/**
 	 * 禁用用户, 清除登录状态信息
 	 */
-	async clearLoginStatus(uid: number): Promise<void> {
-		await this.redisService.getRedis().del(`server:passwordVersion:${uid}`)
-		await this.redisService.getRedis().del(`server:token:${uid}`)
+	async clearLoginStatus(id: number): Promise<void> {
+		await this.redisService.getRedis().del(`server:passwordVersion:${id}`)
+		await this.redisService.getRedis().del(`server:token:${id}`)
 	}
 
 	/**
@@ -104,6 +104,20 @@ export class UserService {
 		await this.redisService.getRedis().set(`server:token:${user.id}`, jwtSign, 'EX', 60 * 60 * 24)
 		await this.logService.saveLoginLog(user, ip, ua)
 		return jwtSign
+	}
+
+	/**
+	 * 获取用户信息
+	 * @param id user id
+	 */
+	async info(id: number): Promise<SysUser> {
+		const user: SysUser = await this.userModel.findOne({
+			where: { id }
+		})
+		if (isEmpty(user)) {
+			throw new ApiException(10009)
+		}
+		return user
 	}
 
 	async getRedisPasswordVersionById(id: number): Promise<string> {

@@ -19,7 +19,8 @@ export class AuthGuard implements CanActivate {
 			return true
 		}
 		const request = context.switchToHttp().getRequest<Request>()
-		const token = request.headers['authorization'] as string
+		const token = request.headers['authorization']?.replace('Bearer ', '') as string
+		console.log('🚀 ~ AuthGuard ~ canActivate ~ token:', token)
 		if (isEmpty(token)) {
 			throw new ApiException(11001)
 		}
@@ -33,12 +34,13 @@ export class AuthGuard implements CanActivate {
 		if (isEmpty(request[API_USER])) {
 			throw new ApiException(11001)
 		}
-		const pv = await this.userService.getRedisPasswordVersionById(request[API_USER].uid)
+		console.log(request[API_USER], 'request[API_USER]')
+		const pv = await this.userService.getRedisPasswordVersionById(request[API_USER].id)
 		if (pv !== `${request[API_USER].pv}`) {
 			// 密码版本不一致，登录期间已更改过密码
 			throw new ApiException(11002)
 		}
-		const redisToken = await this.userService.getRedisTokenById(request[API_USER].uid)
+		const redisToken = await this.userService.getRedisTokenById(request[API_USER].id)
 		if (token !== redisToken) {
 			// 与redis保存不一致
 			throw new ApiException(11002)

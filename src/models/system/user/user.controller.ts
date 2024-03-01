@@ -28,10 +28,17 @@ export class AuthController {
 	@Authorize() // 无需认证token
 	@UseGuards(AuthGuard('local')) // nest守卫使用passport，passport指定使用说明策略
 	async login(@UserInfo() user: AdminUser, @Body() body: CreateUserDto, @Req() req: Request, @Headers('user-agent') ua: string) {
-		await this.userService.checkImgCaptcha(body.validId, body.validCode)
+		// await this.userService.checkImgCaptcha(body.validId, body.validCode)
 		// user是一个参数,要先经过local策略（返回了user对象），然后再经过CurrentUser（得到user对象）
 		const ip = this.utilService.getReqIP(req)
 		return this.userService.login(user, ip, ua)
+	}
+
+	@Get('info')
+	@ApiOperation({ summary: '获取登录个人信息' })
+	@UseGuards(AuthGuard('jwt'))
+	async info(@UserInfo() user: AdminUser): Promise<any> {
+		return await this.userService.info(user.id)
 	}
 
 	@Get('captcha')

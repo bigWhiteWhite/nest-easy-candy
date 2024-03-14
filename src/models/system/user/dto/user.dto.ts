@@ -8,6 +8,7 @@ export class ValidInfo {
 		description: '备注'
 	})
 	@IsString()
+	@IsOptional()
 	validId: string
 
 	@ApiProperty({
@@ -15,6 +16,7 @@ export class ValidInfo {
 		description: '备注'
 	})
 	@IsString()
+	@IsOptional()
 	validCode: string
 }
 export class CreateUserDto extends ValidInfo {
@@ -37,7 +39,7 @@ export class CreateUserDto extends ValidInfo {
 	})
 	@IsString()
 	@Matches(/^[a-z0-9A-Z]+$/)
-	@MinLength(6)
+	@MinLength(4)
 	@MaxLength(20)
 	password: string
 

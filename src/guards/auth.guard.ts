@@ -20,7 +20,6 @@ export class AuthGuard implements CanActivate {
 		}
 		const request = context.switchToHttp().getRequest<Request>()
 		const token = request.headers['authorization']?.replace('Bearer ', '') as string
-		console.log('🚀 ~ AuthGuard ~ canActivate ~ token:', token)
 		if (isEmpty(token)) {
 			throw new ApiException(11001)
 		}

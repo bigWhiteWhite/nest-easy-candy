@@ -17,8 +17,10 @@ import { LoggerModule } from './shared/logger/logger.module'
 import { LoggerModuleOptions } from './shared/logger/logger.interface'
 import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants'
 import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service'
+import { HttpModule } from './service/request'
 @Module({
 	imports: [
+		HttpModule,
 		ConfigModule.forRoot({
 			isGlobal: true,
 			load: [Configuration],

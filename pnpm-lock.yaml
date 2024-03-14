@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@nestjs/axios':
-    specifier: ^3.0.0
-    version: 3.0.0(@nestjs/common@8.4.7)(axios@1.5.0)(reflect-metadata@0.1.13)(rxjs@7.5.5)
+    specifier: ^3.0.2
+    version: 3.0.2(@nestjs/common@8.4.7)(axios@1.6.7)(rxjs@7.5.5)
   '@nestjs/common':
     specifier: ^8.0.0
     version: 8.4.7(class-transformer@0.5.1)(class-validator@0.13.2)(reflect-metadata@0.1.13)(rxjs@7.5.5)
@@ -37,6 +37,12 @@ dependencies:
   '@typegoose/typegoose':
     specifier: 12.0.0
     version: 12.0.0(mongoose@8.0.4)
+  '@types/axios':
+    specifier: ^0.14.0
+    version: 0.14.0
+  axios:
+    specifier: ^1.6.7
+    version: 1.6.7
   bcryptjs:
     specifier: ^2.4.3
     version: 2.4.3
@@ -127,8 +133,8 @@ dependencies:
 
 devDependencies:
   '@faker-js/faker':
-    specifier: ^8.0.2
-    version: 8.0.2
+    specifier: ^8.4.1
+    version: 8.4.1
   '@nestjs/cli':
     specifier: ^8.0.0
     version: 8.2.8
@@ -671,8 +677,8 @@ packages:
       - supports-color
     dev: true
 
-  /@faker-js/faker@8.0.2:
-    resolution: {integrity: sha512-Uo3pGspElQW91PCvKSIAXoEgAUlRnH29sX2/p89kg7sP1m2PzCufHINd0FhTXQf6DYGiUlVncdSPa2F9wxed2A==}
+  /@faker-js/faker@8.4.1:
+    resolution: {integrity: sha512-XQ3cU+Q8Uqmrbf2e0cIC/QN43sTBSC8KF12u29Mb47tWrt2hAgBXSgpZMj4Ao8Uk0iJcU99QsOCaIL8934obCg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0, npm: '>=6.14.13'}
     dev: true
 
@@ -992,17 +998,15 @@ packages:
       sparse-bitfield: 3.0.3
     dev: false
 
-  /@nestjs/axios@3.0.0(@nestjs/common@8.4.7)(axios@1.5.0)(reflect-metadata@0.1.13)(rxjs@7.5.5):
-    resolution: {integrity: sha512-ULdH03jDWkS5dy9X69XbUVbhC+0pVnrRcj7bIK/ytTZ76w7CgvTZDJqsIyisg3kNOiljRW/4NIjSf3j6YGvl+g==}
+  /@nestjs/axios@3.0.2(@nestjs/common@8.4.7)(axios@1.6.7)(rxjs@7.5.5):
+    resolution: {integrity: sha512-Z6GuOUdNQjP7FX+OuV2Ybyamse+/e0BFdTWBX5JxpBDKA+YkdLynDgG6HTF04zy6e9zPa19UX0WA2VDoehwhXQ==}
     peerDependencies:
       '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
       axios: ^1.3.1
-      reflect-metadata: ^0.1.12
       rxjs: ^6.0.0 || ^7.0.0
     dependencies:
       '@nestjs/common': 8.4.7(class-transformer@0.5.1)(class-validator@0.13.2)(reflect-metadata@0.1.13)(rxjs@7.5.5)
-      axios: 1.5.0
-      reflect-metadata: 0.1.13
+      axios: 1.6.7
       rxjs: 7.5.5
     dev: false
 
@@ -1374,6 +1378,15 @@ packages:
       reflect-metadata: 0.1.13
       semver: 7.5.4
       tslib: 2.6.2
+    dev: false
+
+  /@types/axios@0.14.0:
+    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
+    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
+    dependencies:
+      axios: 1.6.7
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /@types/babel__core@7.1.19:
@@ -2056,15 +2069,15 @@ packages:
   /axios@0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.1
+      follow-redirects: 1.15.5
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
-  /axios@1.5.0:
-    resolution: {integrity: sha512-D4DdjDo5CY50Qms0qGQTTw6Q44jl7zRwY7bthds06pUGfChBCTcQs+N743eFWGEd6pRTMd6A+I87aWyFV5wiZQ==}
+  /axios@1.6.7:
+    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
     dependencies:
-      follow-redirects: 1.15.1
+      follow-redirects: 1.15.5
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -3314,8 +3327,8 @@ packages:
     resolution: {integrity: sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==}
     dev: false
 
-  /follow-redirects@1.15.1:
-    resolution: {integrity: sha512-yLAMQs+k0b2m7cVxpS1VKJVvoz7SS9Td1zss3XRwXj+ZDH00RJgnuLx7E44wx02kQLrdM3aOOy+FpzS7+8OizA==}
+  /follow-redirects@1.15.5:
+    resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'

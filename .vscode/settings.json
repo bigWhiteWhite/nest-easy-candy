@@ -3,6 +3,12 @@
     "AUTHDATABASE",
     "AUTHMECHANISM",
     "AUTHSOURCE",
-    "Dups"
-  ]
+    "Dups",
+    "Flickr",
+    "typeorm",
+    "websockets"
+  ],
+  "workbench.editor.enablePreviewFromCodeNavigation": true,
+  "gitHistory.hideCommitViewExplorer": false,
+  "maven.showInExplorerContextMenu": false
 }

@@ -17,4 +17,9 @@ export class HomeController {
 	getCommodity(@Query() query: { num: number }) {
 		return this.homeService.getCommodity(query)
 	}
+	// @Get('crawler-images')
+	// @ApiOperation({ summary: '爬取商品图片' })
+	// crawlerImages(@Query() query: { num: number }) {
+	// 	return this.homeService.crawlerImages(query)
+	// }
 }

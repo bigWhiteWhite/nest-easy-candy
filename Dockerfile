@@ -5,7 +5,7 @@ ARG PROJECT_DIR
 # 阶段 1 - 安装依赖
 FROM node:${NODE_VERSION} as builder
 # 环境变量, 设置 PNPM_HOME 环境变量，指定 pnpm 的全局安装目录
-ENV PNPM_HOME="/usr/local/pnpm" \
+ENV PNPM_HOME="/pnpm" \
   PATH="$PNPM_HOME:$PATH" \
   SERVER_PORT=7001 \
   SOKCET_PORT=7002

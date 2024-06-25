@@ -1,6 +1,11 @@
 # compiled output
+dist
 /dist
+node_modules
 /node_modules
+.git
+.gitignore
+*.md
 # package-lock.json
 # pnpm.lock
 

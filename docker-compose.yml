@@ -45,6 +45,8 @@ services:
   nest-easy-candy-server: # nestjs服务
     build:
       context: . # 从当前路径构建镜像,根据Dockerfile构建镜像
+      args:
+        - PROJECT_DIR=${PROJECT_DIR}
       dockerfile: Dockerfile
     image: nest-easy-candy-server
     container_name: nest-easy-candy-server
@@ -55,6 +57,8 @@ services:
     ports:
       - '${API_PORT}:7001'  # 本机端口:容器端口 - '${API_PORT}:7001'
       - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
+    volumes:
+      - ./logs/:${PROJECT_DIR}/logs/ # ./logs 日志文件挂载到容器外部
     # 当前服务启动之前先要把depends_on指定的服务启动起来才行
     depends_on:
       - mysql

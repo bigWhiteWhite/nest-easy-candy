@@ -1,5 +1,5 @@
 export const LOGGER_MODULE_OPTIONS = Symbol('LOGGER_MODULE_OPTIONS')
-export const PROJECT_LOG_DIR_NAME = 'logs/app'
+export const PROJECT_LOG_DIR_NAME = 'logs/nest-easy-candy'
 export const DEFAULT_WEB_LOG_NAME = 'web.log'
 export const DEFAULT_ERROR_LOG_NAME = 'common-error.log'
 export const DEFAULT_ACCESS_LOG_NAME = 'access.log'

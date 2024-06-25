@@ -1,12 +1,12 @@
 # 构建变量
 ARG NODE_VERSION=18-alpine
+ARG PROJECT_DIR
 
 # 阶段 1 - 安装依赖
 FROM node:${NODE_VERSION} as builder
 # 环境变量, 设置 PNPM_HOME 环境变量，指定 pnpm 的全局安装目录
 ENV PNPM_HOME="/usr/local/pnpm" \
   PATH="$PNPM_HOME:$PATH" \
-  PROJECT_DIR="/nest-easy-candy" \
   SERVER_PORT=7001 \
   SOKCET_PORT=7002
 
@@ -23,12 +23,13 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 # cd 到 /nest-admin
 WORKDIR $PROJECT_DIR
 COPY ./ $PROJECT_DIR
+RUN chmod +x ./wait-for-it.sh
 
 # see https://pnpm.io/docker
-FROM base AS prod-deps
+FROM builder AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-FROM base AS build
+FROM builder AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
 
@@ -36,8 +37,7 @@ RUN pnpm run build
 # RUN npm config set registry https://registry.npmmirror.com
 # RUN pnpm config set registry https://registry.npmmirror.com
 # RUN npm config rm proxy && npm config rm https-proxy
-
-FROM base
+FROM builder
 COPY --from=prod-deps $PROJECT_DIR/node_modules $PROJECT_DIR/node_modules
 COPY --from=build $PROJECT_DIR/dist $PROJECT_DIR/dist
 

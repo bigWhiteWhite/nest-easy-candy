@@ -28,6 +28,7 @@ export class AuthController {
 	@Authorize() // 无需认证token
 	@UseGuards(AuthGuard('local')) // nest守卫使用passport，passport指定使用说明策略
 	async login(@UserInfo() user: AdminUser, @Body() body: CreateUserDto, @Req() req: Request, @Headers('user-agent') ua: string) {
+		console.log('🚀 ~ AuthController ~ login ~ user:', user)
 		// await this.userService.checkImgCaptcha(body.validId, body.validCode)
 		// user是一个参数,要先经过local策略（返回了user对象），然后再经过CurrentUser（得到user对象）
 		const ip = this.utilService.getReqIP(req)

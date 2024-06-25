@@ -10,6 +10,7 @@ import { AdminUser } from '../../models/system/system.interface'
  * */
 export const UserInfo = createParamDecorator((data: string, ctx: ExecutionContext) => {
 	const request = ctx.switchToHttp().getRequest<Request>()
+	console.log('🚀 ~ UserInfo ~ request:', request.user)
 	// auth guard will mount this
 	const user = request.user || (request[API_USER] as AdminUser)
 	if (data) {

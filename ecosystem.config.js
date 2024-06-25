@@ -1,3 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { cpus } = require('node:os')
+
+const cpuLen = cpus().length
+
 // PM2 的配置文件
 module.exports = {
 	apps: [
@@ -8,7 +13,7 @@ module.exports = {
 			args: '', // 传递给脚本的参数
 			watch: true, // 开启监听文件变动重启
 			ignore_watch: ['node_modules', 'public', 'logs'], // 不用监听的文件
-			instances: '1', // max表示最大的 应用启动实例个数，仅在 cluster 模式有效 默认为 fork
+			instances: cpuLen, // max表示最大的 应用启动实例个数，仅在 cluster 模式有效 默认为 fork
 			autorestart: true, // 默认为 true, 发生异常的情况下自动重启
 			max_memory_restart: '1G',
 			error_file: './logs/app-err.log', // 错误日志文件
@@ -22,9 +27,6 @@ module.exports = {
 				// 环境参数，当前指定为生产环境
 				NODE_ENV: 'prod'
 			},
-			env_dev: {
-				NODE_ENV: 'dev'
-			},
 			env_test: {
 				// 环境参数,当前为测试环境
 				NODE_ENV: 'test'
@@ -34,13 +36,5 @@ module.exports = {
 				NODE_ENV: 'prod'
 			}
 		}
-	],
-	deploy: {
-		production: {
-			user: 'root',
-			host: '39.108.99.86',
-			ref: 'origin/master',
-			'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env prod' // 这里设置构建环境是测试还是生产
-		}
-	}
+	]
 }

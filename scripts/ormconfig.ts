@@ -6,20 +6,16 @@ import { DataSource, DataSourceOptions } from 'typeorm'
  * revert会将迁移返回上一个时间戳
  * 迁移文件需要自己修改
  */
-
-// 基础配置
-const baseConfig: Partial<DataSourceOptions> = {
+console.log(process.env, 'asdasd')
+// 该对象 typeorm cli 迁移时使用
+const ormConfigForCli: Partial<DataSourceOptions> = {
+	// 基础配置
 	type: 'mysql',
 	host: 'localhost',
 	port: 3306,
 	username: 'root',
 	password: 'root',
-	database: 'candyServer'
-}
-
-// 该对象 typeorm cli 迁移时使用
-const ormConfigForCli: Partial<DataSourceOptions> = {
-	...baseConfig,
+	database: 'candyServer',
 	entities: ['src/**/entities/*.entity{.js,.ts}'],
 	migrations: ['migrations/*{.js,.ts}'], // migration:run时查找的文件夹
 	subscribers: ['subscribers/*{.js,.ts}'],

@@ -1,114 +1,25 @@
 version: "3.0"
-# openssl rand -base64 756 > .docker/mongo/replica.key
-# icacls scripts\mongodb_rs_init.sh /grant Everyone:RX
-# healthcheck:
-#   test: ["CMD", "mongosh", "'rs.status() == 1'"]
-#   interval: 10s
-#   timeout: 5s
-#   retries: 3
 
 services:
-  # mongodb replicaset primary - 主节点
-  mongod1:
-    container_name: mongod1
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
-      MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
-    ports:
-      - 27017:27017
-    volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data1:/data/db
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs1:/data/logs
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
-    depends_on:
-      - mongod2
-      - mongod3
+  mysql:
+    image: mysql:latest
+    container_name: nest-easy-candy-mysql
     restart: always
-    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
-    entrypoint:
-      - bash
-      - -c
-      - |
-        chmod 400 /data/replica.key
-        chown 999:999 /data/replica.key
-        exec docker-entrypoint.sh $$@
-    networks:
-      - nest-candy-net
-
-  # mongodb replicaset secondary - 副节点
-  mongod2:
-    container_name: mongod2
-    image: mongo:latest
+    env_file:
+      - .env
+      - .env.${NODE_ENV}
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
-      MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
+      - MYSQL_HOST=${DATABASE_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     ports:
-      - 27018:27017
+      - '${MYSQL_PORT}:3306'  # 本机端口:容器端口 - '${REDIS_PORT}:3306'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci # 设置utf8字符集
     volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data2:/data/db
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs2:/data/logs
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
-    restart: always
-    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
-    entrypoint:
-      - bash
-      - -c
-      - |
-        chmod 400 /data/replica.key
-        chown 999:999 /data/replica.key
-        exec docker-entrypoint.sh $$@
-    networks:
-      - nest-candy-net
-
-  # mongodb replicaset arbiter - 仲裁节点
-  mongod3:
-    container_name: mongod3
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
-      MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
-    ports:
-      - 27019:27017
-    volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/data3:/data/db
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb/logs3:/data/logs
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/.docker/mongo/replica.key:/data/replica.key
-    restart: always
-    command: mongod --bind_ip_all --replSet ${MONGO_REPLICA_NAME} --keyFile /data/replica.key
-    entrypoint:
-      - bash
-      - -c
-      - |
-        chmod 400 /data/replica.key
-        chown 999:999 /data/replica.key
-        exec docker-entrypoint.sh $$@
-    networks:
-      - nest-candy-net
-
-  # 初始化副本集
-  mongo-setup:
-    container_name: mongo-setup
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_LOGIN}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_AUTHDATABASE: ${MONGO_AUTHDATABASE}
-      MONGO_REPLICA_NAME: ${MONGO_REPLICA_NAME}
-    depends_on:
-      - mongod1
-      - mongod2
-      - mongod3
-    volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/scripts/mongodb_rs_init.sh:/scripts/mongodb_rs_init.sh
-    restart: on-failure
-    entrypoint: ["/bin/bash", "/scripts/mongodb_rs_init.sh"]
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/:/var/lib/mysql/
     networks:
       - nest-candy-net
 
@@ -146,7 +57,7 @@ services:
       - '${WS_PORT}:7002' # 本机端口:容器端口 - '${WS_PORT}:7002'
     # 当前服务启动之前先要把depends_on指定的服务启动起来才行
     depends_on:
-      - mongod1
+      - mysql
       - redis
     networks:
       - nest-candy-net

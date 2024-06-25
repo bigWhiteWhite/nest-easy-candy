@@ -5,6 +5,7 @@
     "AUTHSOURCE",
     "Dups",
     "Flickr",
+    "tinyint",
     "typeorm",
     "websockets"
   ],

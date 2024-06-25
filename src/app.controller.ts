@@ -8,7 +8,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 export class AdminController {
 	@Get('setCookie')
 	setCookie(@Response() res) {
-		res.cookie('nestCookie', '1231231sasdkads', {
+		res.cookie('nestCookie', 'nestCookie', {
 			maxAge: 1000 * 60 * 10,
 			httpOnly: true
 		})

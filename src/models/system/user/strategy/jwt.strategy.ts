@@ -1,6 +1,6 @@
 import { Strategy, StrategyOptions, ExtractJwt } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
-import Configuration from '@/config'
+import { Configuration } from '@/config/env'
 import SysUser from '@/entities/server/sys-user.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'

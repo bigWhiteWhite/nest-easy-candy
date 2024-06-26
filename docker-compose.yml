@@ -12,6 +12,7 @@ services:
       - MYSQL_HOST=${DATABASE_HOST}
       - MYSQL_PORT=${MYSQL_PORT}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USERNAME}
       - MYSQL_USERNAME=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -19,7 +20,7 @@ services:
       - '${MYSQL_PORT}:3306'  # 本机端口:容器端口 - '${REDIS_PORT}:3306'
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci # 设置utf8字符集
     volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/:/var/lib/mysql/
+      - ./__candy/volumes/:/var/lib/mysql/
     networks:
       - nest-candy-net
 

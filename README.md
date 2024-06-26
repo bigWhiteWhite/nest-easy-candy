@@ -134,6 +134,35 @@ db.updateUser(
 )
 ```
 
+### [端口占用](https://www.cnblogs.com/sowler/p/17567703.html)
+
+[windows查看占用端口](https://www.cnblogs.com/sowler/p/17164166.html)
+
+- 查看占用
+  - 执行：netstat -ano 或者 netstat -aon|findstr 3306
+
+- 查看指定**PID**(PID是指占用这个端口的任务Id，一般在最后一列)的进程
+
+  - ```
+    tasklist|findstr PID
+    ```
+
+- 结束进程，3104是对应的占用这个端口的任务Id
+
+  - ```
+    taskkill /T /F /PID 3104
+    ```
+
+### 重启mysql服务
+
+### 查找 MySQL 服务名称
+
+**使用服务管理器查找服务名称**
+
+- 按 `Win + R` 键，输入 `services.msc` 并按 Enter，打开服务管理器。
+- 在服务列表中找到 MySQL 服务。名称可能是 `MySQL`、`MySQL56`、`MySQL57` 或其他名称。
+- 点击重启服务
+
 ## WSL2.0使用任意Linux发行版
 
 **参考博客**

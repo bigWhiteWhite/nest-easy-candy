@@ -7,6 +7,7 @@ FROM node:${NODE_VERSION} as builder
 # 环境变量, 设置 PNPM_HOME 环境变量，指定 pnpm 的全局安装目录
 ENV PNPM_HOME="/pnpm" \
   PATH="$PNPM_HOME:$PATH" \
+  DATABASE_HOST=db \
   SERVER_PORT=7001 \
   SOKCET_PORT=7002
 
@@ -15,7 +16,7 @@ RUN corepack enable \
 
 # set timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-  && echo 'Asia/Shanghai' > /etc/timezone
+  && echo "Asia/Shanghai" > /etc/timezone
 
 # WORKDIR指令用于设置Dockerfile中的RUN、CMD和ENTRYPOINT指令执行命令的工作目录(默认为/目录)，该指令在Dockerfile文件中可以出现多次，
 # 如果使用相对路径则为相对于WORKDIR上一次的值，

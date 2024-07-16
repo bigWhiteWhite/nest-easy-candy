@@ -1,6 +1,6 @@
 # 构建变量
-ARG NODE_VERSION=18-alpine
-ARG PROJECT_DIR
+ARG NODE_VERSION=20-slim
+ARG PROJECT_DIR=/usr/src/app
 
 # 阶段 1 - 安装依赖
 FROM node:${NODE_VERSION} as builder
@@ -24,12 +24,13 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 # cd 到 /nest-admin
 WORKDIR $PROJECT_DIR
 COPY ./ $PROJECT_DIR
-RUN chmod +x ./wait-for-it.sh
+# RUN chmod +x ./wait-for-it.sh
 
-# see https://pnpm.io/docker
+# 安装生产依赖 see https://pnpm.io/docker
 FROM builder AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
+# 构建项目
 FROM builder AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
@@ -50,4 +51,6 @@ EXPOSE $SOKCET_PORT
 # 容器启动时执行的命令，类似npm run start
 # CMD ["pnpm", "start:prod"]
 # CMD ["pm2-runtime", "ecosystem.config.js"]
+# 设置容器启动时执行的命令
+# CMD ["sh", "-c", "$DATABASE_HOST:$MYSQL_PORT -- pnpm migration:run && pm2-runtime ecosystem.config.js"]
 ENTRYPOINT ./wait-for-it.sh $DATABASE_HOST:$MYSQL_PORT -- pnpm migration:run && pm2-runtime ecosystem.config.js

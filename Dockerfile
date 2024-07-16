@@ -1,5 +1,6 @@
 # 构建变量
 ARG NODE_VERSION=20-slim
+# ARG NODE_VERSION=18-alpine
 ARG PROJECT_DIR=/usr/src/app
 
 # 阶段 1 - 安装依赖

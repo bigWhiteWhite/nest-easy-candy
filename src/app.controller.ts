@@ -16,14 +16,15 @@ export class AdminController {
 		res.send('设置曲奇')
 	}
 
-	@Post('uploads')
+	@Post('upload')
 	@UseInterceptors(FileInterceptor('file'))
 	upload(@UploadedFile() file) {
+		console.log('🚀 ~ AdminController ~ upload ~ file:', file)
 		return file
 	}
 
-	@Post('upload')
-	@UseInterceptors(FilesInterceptor('file'))
+	@Post('uploads')
+	@UseInterceptors(FilesInterceptor('files'))
 	uploads(@UploadedFiles() files) {
 		return files
 	}

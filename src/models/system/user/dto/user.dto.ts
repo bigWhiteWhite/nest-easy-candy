@@ -31,7 +31,7 @@ export class CreateUserDto extends ValidInfo {
 		required: false,
 		description: '手机号'
 	})
-	@IsMobilePhone(['zh-CN', 'zh-HK', 'zh-MO', 'zh-TW'])
+	@IsMobilePhone('zh-CN')
 	phone: string
 
 	@ApiProperty({
